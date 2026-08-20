@@ -1,149 +1,704 @@
-:root{
-  --bg: #020617;
-  --panel: #0B1220;
-  --panel-2: #111827;
-  --border: #1E293B;
+/* =========================================
+   RO'LYFE TACTICAL INTELLIGENCE CENTER™
+   CLEAN COMMAND CENTER UI
+========================================= */
 
-  --text: #F8FAFC;
-  --muted: #94A3B8;
+:root {
+  --bg: #08120f;
+  --bg-deep: #050908;
+  --panel: #10211b;
+  --panel-light: #162b23;
+  --panel-hover: #1b3329;
 
-  --primary: #00C896;
-  --success: #22C55E;
-  --warning: #F59E0B;
-  --danger: #EF4444;
+  --green: #35d07f;
+  --green-bright: #62f2a5;
+  --green-dark: #1d8d55;
+
+  --gold: #d7b56d;
+
+  --text: #eef7f1;
+  --muted: #91a69b;
+
+  --border: rgba(98, 242, 165, 0.14);
+  --shadow: 0 10px 35px rgba(0, 0, 0, 0.28);
+
+  --radius: 18px;
+  --radius-small: 12px;
 }
 
-/* =========================
-   RO'LYFE GLOBAL
-========================= */
+/* RESET */
 
-*{
-  box-sizing:border-box;
+* {
+  box-sizing: border-box;
 }
 
-body{
-  margin:0;
-  min-height:100vh;
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+
   background:
-    radial-gradient(circle at top, #0b2a2a 0%, #020617 50%, #020617 100%);
-  color:var(--text);
-  font-family:Arial, sans-serif;
+    radial-gradient(
+      circle at top,
+      #163d2c 0%,
+      #0b1c16 32%,
+      #050908 100%
+    );
+
+  color: var(--text);
+
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  line-height: 1.5;
 }
 
-h1,h2,h3,h4{
-  color:var(--text);
+button,
+input,
+select {
+  font: inherit;
 }
 
-/* =========================
-   PANELS / CARDS
-========================= */
+/* MAIN APP */
+
+#app {
+  max-width: 1500px;
+  margin: auto;
+  padding: 18px;
+}
+
+/* =========================================
+   HEADINGS
+========================================= */
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--text);
+  margin-top: 0;
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  margin-bottom: 8px;
+}
+
+h2 {
+  font-size: clamp(1.35rem, 3vw, 2rem);
+}
+
+h3 {
+  font-size: 1.1rem;
+}
+
+p {
+  color: var(--muted);
+}
+
+/* =========================================
+   HERO
+========================================= */
+
+.hero,
+.header,
+.site-header {
+  position: relative;
+
+  padding: 28px;
+
+  margin-bottom: 20px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(29, 70, 49, 0.95),
+      rgba(9, 20, 16, 0.98)
+    );
+
+  border: 1px solid var(--border);
+
+  border-radius: 24px;
+
+  box-shadow: var(--shadow);
+
+  overflow: hidden;
+}
+
+.hero::after,
+.header::after,
+.site-header::after {
+  content: "";
+
+  position: absolute;
+
+  width: 260px;
+  height: 260px;
+
+  right: -100px;
+  top: -130px;
+
+  background: rgba(53, 208, 127, 0.1);
+
+  border-radius: 50%;
+
+  filter: blur(20px);
+}
+
+.tagline {
+  color: var(--green-bright);
+  font-weight: 600;
+}
+
+/* =========================================
+   MISSION FLOW
+========================================= */
+
+.process-flow,
+.system-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  margin: 20px 0;
+
+  color: var(--green-bright);
+
+  font-size: 0.82rem;
+  font-weight: 800;
+
+  letter-spacing: 0.06em;
+}
+
+.process-flow span,
+.system-flow span {
+  padding: 8px 12px;
+
+  background: rgba(53, 208, 127, 0.08);
+
+  border: 1px solid rgba(98, 242, 165, 0.12);
+
+  border-radius: 999px;
+}
+
+/* =========================================
+   NAVIGATION
+========================================= */
+
+.nav-buttons,
+.command-nav,
+.top-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  margin-top: 20px;
+}
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+button,
+.btn {
+  appearance: none;
+
+  border: 1px solid rgba(98, 242, 165, 0.18);
+
+  border-radius: 12px;
+
+  padding: 11px 16px;
+
+  color: #062014;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--green-bright),
+      var(--green)
+    );
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 5px 18px rgba(53, 208, 127, 0.14);
+
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease;
+}
+
+button:hover,
+.btn:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 10px 25px rgba(53, 208, 127, 0.22);
+}
+
+button:active,
+.btn:active {
+  transform: translateY(0);
+}
+
+/* SECONDARY BUTTON */
+
+.btn-secondary,
+.secondary-btn {
+  color: var(--green-bright);
+
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* DANGER */
+
+.btn-danger,
+.danger {
+  color: #ffdede;
+
+  background: rgba(170, 55, 55, 0.16);
+
+  border-color: rgba(255, 100, 100, 0.2);
+}
+
+/* =========================================
+   SECTIONS / PANELS
+========================================= */
 
 .section,
 .card,
 .panel,
-.trade-card,
-.risk-card,
-.ladder-card{
-  background:rgba(11,18,32,.96);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:16px;
-  margin-bottom:15px;
+.module,
+.command-card {
+  margin-bottom: 18px;
+
+  padding: 20px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(19, 38, 30, 0.96),
+      rgba(9, 19, 15, 0.98)
+    );
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius);
+
+  box-shadow: var(--shadow);
 }
 
-/* =========================
-   BUTTONS
-========================= */
+/* =========================================
+   FORM LAYOUT
+========================================= */
 
-button{
-  background:var(--panel-2);
-  color:var(--text);
-  border:1px solid #334155;
-  border-radius:8px;
-  padding:10px 14px;
-  font-weight:bold;
-  cursor:pointer;
-  transition:.2s ease;
+.form-grid,
+.trade-grid,
+.input-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(210px, 1fr));
+
+  gap: 14px;
+
+  margin: 18px 0;
 }
 
-button:hover{
-  border-color:var(--primary);
-  box-shadow:0 0 12px rgba(0,200,150,.25);
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 
-button.active,
-button.primary{
-  background:var(--primary);
-  color:#02120d;
-  border-color:var(--primary);
+label {
+  color: var(--green-bright);
+
+  font-size: 0.82rem;
+
+  font-weight: 800;
+
+  letter-spacing: 0.04em;
 }
 
-/* =========================
-   INPUTS
-========================= */
+/* =========================================
+   INPUTS — NO MORE SQUARE BOXES
+========================================= */
 
 input,
-select,
-textarea{
-  width:100%;
-  background:#111827;
-  color:var(--text);
-  border:1px solid #334155;
-  border-radius:8px;
-  padding:10px;
+select {
+  width: 100%;
+
+  min-height: 48px;
+
+  padding: 12px 15px;
+
+  color: var(--text);
+
+  background:
+    rgba(3, 10, 7, 0.62);
+
+  border:
+    1px solid rgba(145, 166, 155, 0.2);
+
+  border-radius: 14px;
+
+  outline: none;
+
+  transition:
+    border 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+input:hover,
+select:hover {
+  background:
+    rgba(8, 20, 14, 0.9);
 }
 
 input:focus,
-select:focus,
-textarea:focus{
-  outline:none;
-  border-color:var(--primary);
-  box-shadow:0 0 0 3px rgba(0,200,150,.12);
+select:focus {
+  border-color:
+    var(--green);
+
+  box-shadow:
+    0 0 0 4px rgba(53, 208, 127, 0.1);
 }
 
-/* =========================
-   RO'LYFE STATUS COLORS
-========================= */
+/* =========================================
+   STATUS CARDS
+========================================= */
 
-.success,
-.buy,
-.green{
-  color:var(--success);
+.status-grid,
+.market-grid,
+.metrics-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(180px, 1fr));
+
+  gap: 14px;
+
+  margin: 18px 0;
 }
 
-.warning{
-  color:var(--warning);
+.status-card,
+.metric-card {
+  padding: 16px;
+
+  background:
+    rgba(255, 255, 255, 0.035);
+
+  border:
+    1px solid rgba(255, 255, 255, 0.06);
+
+  border-radius: 16px;
 }
 
-.danger,
-.sell,
-.stop,
-.red{
-  color:var(--danger);
+.status-label,
+.metric-label {
+  color: var(--muted);
+
+  font-size: 0.72rem;
+
+  font-weight: 800;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.08em;
 }
 
-.muted{
-  color:var(--muted);
+.status-value,
+.metric-value {
+  margin-top: 7px;
+
+  color: var(--green-bright);
+
+  font-size: 1.05rem;
+
+  font-weight: 800;
 }
 
-/* =========================
+/* =========================================
+   TRADE PLAN
+========================================= */
+
+.trade-plan-output {
+  margin-top: 18px;
+
+  padding: 20px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(53, 208, 127, 0.09),
+      rgba(0, 0, 0, 0.12)
+    );
+
+  border:
+    1px solid rgba(98, 242, 165, 0.18);
+
+  border-radius: 18px;
+}
+
+.trade-plan-output hr {
+  border: 0;
+
+  border-top:
+    1px solid rgba(255, 255, 255, 0.08);
+
+  margin: 18px 0;
+}
+
+/* =========================================
+   RISK ENGINE
+========================================= */
+
+.risk-summary {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(150px, 1fr));
+
+  gap: 12px;
+}
+
+.risk-item {
+  padding: 14px;
+
+  background:
+    rgba(0, 0, 0, 0.18);
+
+  border-radius: 14px;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* =========================================
+   PROFIT LADDER
+========================================= */
+
+.ladder-container {
+  display: grid;
+
+  gap: 12px;
+}
+
+.ladder-step {
+  display: grid;
+
+  grid-template-columns:
+    auto 1fr auto;
+
+  align-items: center;
+
+  gap: 14px;
+
+  padding: 16px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(53, 208, 127, 0.1),
+      rgba(255, 255, 255, 0.025)
+    );
+
+  border:
+    1px solid rgba(98, 242, 165, 0.12);
+
+  border-radius: 16px;
+}
+
+.ladder-icon {
+  font-size: 1.4rem;
+}
+
+.ladder-title {
+  font-weight: 900;
+}
+
+.ladder-value {
+  color: var(--green-bright);
+
+  font-weight: 800;
+}
+
+.runner {
+  border-color:
+    rgba(215, 181, 109, 0.25);
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(215, 181, 109, 0.1),
+      rgba(255, 255, 255, 0.025)
+    );
+}
+
+/* =========================================
+   JOURNAL
+========================================= */
+
+.journal-entry {
+  padding: 14px;
+
+  margin-top: 10px;
+
+  background:
+    rgba(255, 255, 255, 0.035);
+
+  border-left:
+    3px solid var(--green);
+
+  border-radius: 0 12px 12px 0;
+}
+
+/* =========================================
+   CHART
+========================================= */
+
+.chart-container {
+  overflow: hidden;
+
+  min-height: 500px;
+
+  border-radius: 18px;
+
+  border:
+    1px solid rgba(98, 242, 165, 0.12);
+
+  background:
+    #07100c;
+}
+
+#tradingview-chart,
+#chart,
+.tv-chart {
+  width: 100%;
+  height: 520px;
+}
+
+/* =========================================
+   EXPIRATION PLANNER
+========================================= */
+
+.expiration-options {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(130px, 1fr));
+
+  gap: 10px;
+
+  margin-top: 10px;
+}
+
+.expiration-option {
+  padding: 14px;
+
+  text-align: center;
+
+  color: var(--text);
+
+  background:
+    rgba(255, 255, 255, 0.04);
+
+  border:
+    1px solid rgba(255, 255, 255, 0.08);
+
+  border-radius: 14px;
+
+  cursor: pointer;
+}
+
+.expiration-option.active {
+  color: #052014;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--green-bright),
+      var(--green)
+    );
+}
+
+/* =========================================
+   FOOTER
+========================================= */
+
+footer {
+  padding: 28px 12px;
+
+  text-align: center;
+
+  color: var(--muted);
+
+  font-size: 0.85rem;
+}
+
+/* =========================================
    MOBILE
-========================= */
+========================================= */
 
-@media(max-width:600px){
+@media (max-width: 600px) {
 
-  body{
-    font-size:16px;
+  #app {
+    padding: 12px;
   }
 
+  .hero,
+  .header,
+  .site-header,
   .section,
   .card,
-  .panel{
-    border-radius:10px;
-    padding:14px;
+  .panel,
+  .module,
+  .command-card {
+    padding: 16px;
+
+    border-radius: 16px;
   }
 
-  button{
-    min-height:44px;
+  .nav-buttons,
+  .command-nav,
+  .top-nav {
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, 1fr);
   }
-   }
+
+  .nav-buttons button,
+  .command-nav button,
+  .top-nav button {
+    width: 100%;
+  }
+
+  .ladder-step {
+    grid-template-columns:
+      auto 1fr;
+  }
+
+  .ladder-value {
+    grid-column: 2;
+  }
+
+  #tradingview-chart,
+  #chart,
+  .tv-chart {
+    height: 420px;
+  }
+    }
