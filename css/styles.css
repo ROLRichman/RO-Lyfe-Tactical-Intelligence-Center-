@@ -1,704 +1,1194 @@
 /* =========================================
    RO'LYFE TACTICAL INTELLIGENCE CENTER™
-   CLEAN COMMAND CENTER UI
+   MASTER STYLESHEET
+   Built specifically for current index.html
+========================================= */
+
+
+/* =========================================
+   1. ROOT COLORS
 ========================================= */
 
 :root {
-  --bg: #08120f;
-  --bg-deep: #050908;
-  --panel: #10211b;
-  --panel-light: #162b23;
-  --panel-hover: #1b3329;
 
-  --green: #35d07f;
-  --green-bright: #62f2a5;
-  --green-dark: #1d8d55;
+    --bg-main: #08100d;
+    --bg-deep: #030706;
 
-  --gold: #d7b56d;
+    --panel: #0d1b16;
+    --panel-light: #12251e;
 
-  --text: #eef7f1;
-  --muted: #91a69b;
+    --green: #39d98a;
+    --green-bright: #73f7b3;
+    --green-dark: #15945a;
 
-  --border: rgba(98, 242, 165, 0.14);
-  --shadow: 0 10px 35px rgba(0, 0, 0, 0.28);
+    --gold: #d8b45c;
 
-  --radius: 18px;
-  --radius-small: 12px;
+    --text: #eef8f2;
+    --muted: #91a89d;
+
+    --border: rgba(115, 247, 179, 0.14);
+
+    --shadow:
+        0 12px 35px
+        rgba(0, 0, 0, 0.35);
+
+    --radius: 20px;
+    --radius-small: 14px;
+
 }
 
-/* RESET */
+
+/* =========================================
+   2. RESET
+========================================= */
 
 * {
-  box-sizing: border-box;
+
+    box-sizing: border-box;
+
 }
+
 
 html {
-  scroll-behavior: smooth;
+
+    scroll-behavior: smooth;
+
 }
+
 
 body {
-  margin: 0;
-  min-width: 320px;
 
-  background:
-    radial-gradient(
-      circle at top,
-      #163d2c 0%,
-      #0b1c16 32%,
-      #050908 100%
-    );
+    margin: 0;
 
-  color: var(--text);
+    min-width: 320px;
 
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+    color: var(--text);
 
-  line-height: 1.5;
+    background:
+
+        radial-gradient(
+            circle at top,
+            #173d2c 0%,
+            #0b1b15 30%,
+            var(--bg-main) 60%,
+            var(--bg-deep) 100%
+        );
+
+    font-family:
+
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    line-height: 1.5;
+
 }
+
 
 button,
 input,
 select {
-  font: inherit;
+
+    font: inherit;
+
 }
 
-/* MAIN APP */
+
+/* =========================================
+   3. MAIN APPLICATION
+========================================= */
 
 #app {
-  max-width: 1500px;
-  margin: auto;
-  padding: 18px;
+
+    width: 100%;
+
+    max-width: 1450px;
+
+    margin: 0 auto;
+
+    padding: 20px;
+
 }
+
 
 /* =========================================
-   HEADINGS
+   4. HEADER
 ========================================= */
 
-h1,
-h2,
-h3,
-h4 {
-  color: var(--text);
-  margin-top: 0;
+.main-header {
+
+    position: relative;
+
+    overflow: hidden;
+
+    margin-bottom: 18px;
+
+    padding: 30px;
+
+    background:
+
+        linear-gradient(
+            135deg,
+            rgba(24, 67, 47, 0.97),
+            rgba(7, 17, 13, 0.98)
+        );
+
+    border:
+
+        1px solid
+        rgba(115, 247, 179, 0.18);
+
+    border-radius: 24px;
+
+    box-shadow:
+        var(--shadow);
+
 }
 
-h1 {
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  margin-bottom: 8px;
+
+.main-header::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 300px;
+    height: 300px;
+
+    top: -170px;
+    right: -100px;
+
+    border-radius: 50%;
+
+    background:
+
+        radial-gradient(
+            circle,
+            rgba(57, 217, 138, 0.18),
+            transparent 70%
+        );
+
+    pointer-events: none;
+
 }
 
-h2 {
-  font-size: clamp(1.35rem, 3vw, 2rem);
+
+.brand {
+
+    position: relative;
+
+    z-index: 1;
+
 }
 
-h3 {
-  font-size: 1.1rem;
+
+.brand h1 {
+
+    margin: 0;
+
+    color:
+        var(--green-bright);
+
+    font-size:
+        clamp(2rem, 6vw, 3.8rem);
+
+    line-height: 1;
+
+    letter-spacing: -1px;
+
 }
 
-p {
-  color: var(--muted);
+
+.brand h2 {
+
+    margin:
+
+        10px 0 0;
+
+    color:
+        var(--text);
+
+    font-size:
+        clamp(1.2rem, 3vw, 1.9rem);
+
 }
 
-/* =========================================
-   HERO
-========================================= */
 
-.hero,
-.header,
-.site-header {
-  position: relative;
+.creed {
 
-  padding: 28px;
+    position: relative;
 
-  margin-bottom: 20px;
+    z-index: 1;
 
-  background:
-    linear-gradient(
-      135deg,
-      rgba(29, 70, 49, 0.95),
-      rgba(9, 20, 16, 0.98)
-    );
+    margin-top: 14px;
 
-  border: 1px solid var(--border);
+    color:
+        var(--muted);
 
-  border-radius: 24px;
+    font-size:
+        1rem;
 
-  box-shadow: var(--shadow);
-
-  overflow: hidden;
 }
 
-.hero::after,
-.header::after,
-.site-header::after {
-  content: "";
 
-  position: absolute;
-
-  width: 260px;
-  height: 260px;
-
-  right: -100px;
-  top: -130px;
-
-  background: rgba(53, 208, 127, 0.1);
-
-  border-radius: 50%;
-
-  filter: blur(20px);
-}
-
-.tagline {
-  color: var(--green-bright);
-  font-weight: 600;
-}
-
-/* =========================================
-   MISSION FLOW
-========================================= */
-
-.process-flow,
 .system-flow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
 
-  margin: 20px 0;
+    position: relative;
 
-  color: var(--green-bright);
+    z-index: 1;
 
-  font-size: 0.82rem;
-  font-weight: 800;
+    margin-top: 22px;
 
-  letter-spacing: 0.06em;
+    padding: 14px 16px;
+
+    color:
+        var(--green-bright);
+
+    background:
+        rgba(0, 0, 0, 0.18);
+
+    border:
+        1px solid
+        rgba(115, 247, 179, 0.10);
+
+    border-radius:
+        var(--radius-small);
+
+    font-size: 0.82rem;
+
+    font-weight: bold;
+
+    letter-spacing: 0.04em;
+
+    line-height: 1.8;
+
 }
 
-.process-flow span,
-.system-flow span {
-  padding: 8px 12px;
-
-  background: rgba(53, 208, 127, 0.08);
-
-  border: 1px solid rgba(98, 242, 165, 0.12);
-
-  border-radius: 999px;
-}
 
 /* =========================================
-   NAVIGATION
+   5. NAVIGATION
 ========================================= */
 
-.nav-buttons,
-.command-nav,
-.top-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+.main-nav {
 
-  margin-top: 20px;
-}
-
-/* =========================================
-   BUTTONS
-========================================= */
-
-button,
-.btn {
-  appearance: none;
-
-  border: 1px solid rgba(98, 242, 165, 0.18);
-
-  border-radius: 12px;
-
-  padding: 11px 16px;
-
-  color: #062014;
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--green-bright),
-      var(--green)
-    );
-
-  font-weight: 800;
-
-  cursor: pointer;
-
-  box-shadow:
-    0 5px 18px rgba(53, 208, 127, 0.14);
-
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    opacity 0.18s ease;
-}
-
-button:hover,
-.btn:hover {
-  transform: translateY(-2px);
-
-  box-shadow:
-    0 10px 25px rgba(53, 208, 127, 0.22);
-}
-
-button:active,
-.btn:active {
-  transform: translateY(0);
-}
-
-/* SECONDARY BUTTON */
-
-.btn-secondary,
-.secondary-btn {
-  color: var(--green-bright);
-
-  background: rgba(255, 255, 255, 0.04);
-}
-
-/* DANGER */
-
-.btn-danger,
-.danger {
-  color: #ffdede;
-
-  background: rgba(170, 55, 55, 0.16);
-
-  border-color: rgba(255, 100, 100, 0.2);
-}
-
-/* =========================================
-   SECTIONS / PANELS
-========================================= */
-
-.section,
-.card,
-.panel,
-.module,
-.command-card {
-  margin-bottom: 18px;
-
-  padding: 20px;
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(19, 38, 30, 0.96),
-      rgba(9, 19, 15, 0.98)
-    );
-
-  border: 1px solid var(--border);
-
-  border-radius: var(--radius);
-
-  box-shadow: var(--shadow);
-}
-
-/* =========================================
-   FORM LAYOUT
-========================================= */
-
-.form-grid,
-.trade-grid,
-.input-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(auto-fit, minmax(210px, 1fr));
-
-  gap: 14px;
-
-  margin: 18px 0;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-label {
-  color: var(--green-bright);
-
-  font-size: 0.82rem;
-
-  font-weight: 800;
-
-  letter-spacing: 0.04em;
-}
-
-/* =========================================
-   INPUTS — NO MORE SQUARE BOXES
-========================================= */
-
-input,
-select {
-  width: 100%;
-
-  min-height: 48px;
-
-  padding: 12px 15px;
-
-  color: var(--text);
-
-  background:
-    rgba(3, 10, 7, 0.62);
-
-  border:
-    1px solid rgba(145, 166, 155, 0.2);
-
-  border-radius: 14px;
-
-  outline: none;
-
-  transition:
-    border 0.2s ease,
-    box-shadow 0.2s ease,
-    background 0.2s ease;
-}
-
-input:hover,
-select:hover {
-  background:
-    rgba(8, 20, 14, 0.9);
-}
-
-input:focus,
-select:focus {
-  border-color:
-    var(--green);
-
-  box-shadow:
-    0 0 0 4px rgba(53, 208, 127, 0.1);
-}
-
-/* =========================================
-   STATUS CARDS
-========================================= */
-
-.status-grid,
-.market-grid,
-.metrics-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(auto-fit, minmax(180px, 1fr));
-
-  gap: 14px;
-
-  margin: 18px 0;
-}
-
-.status-card,
-.metric-card {
-  padding: 16px;
-
-  background:
-    rgba(255, 255, 255, 0.035);
-
-  border:
-    1px solid rgba(255, 255, 255, 0.06);
-
-  border-radius: 16px;
-}
-
-.status-label,
-.metric-label {
-  color: var(--muted);
-
-  font-size: 0.72rem;
-
-  font-weight: 800;
-
-  text-transform: uppercase;
-
-  letter-spacing: 0.08em;
-}
-
-.status-value,
-.metric-value {
-  margin-top: 7px;
-
-  color: var(--green-bright);
-
-  font-size: 1.05rem;
-
-  font-weight: 800;
-}
-
-/* =========================================
-   TRADE PLAN
-========================================= */
-
-.trade-plan-output {
-  margin-top: 18px;
-
-  padding: 20px;
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(53, 208, 127, 0.09),
-      rgba(0, 0, 0, 0.12)
-    );
-
-  border:
-    1px solid rgba(98, 242, 165, 0.18);
-
-  border-radius: 18px;
-}
-
-.trade-plan-output hr {
-  border: 0;
-
-  border-top:
-    1px solid rgba(255, 255, 255, 0.08);
-
-  margin: 18px 0;
-}
-
-/* =========================================
-   RISK ENGINE
-========================================= */
-
-.risk-summary {
-  display: grid;
-
-  grid-template-columns:
-    repeat(auto-fit, minmax(150px, 1fr));
-
-  gap: 12px;
-}
-
-.risk-item {
-  padding: 14px;
-
-  background:
-    rgba(0, 0, 0, 0.18);
-
-  border-radius: 14px;
-
-  border:
-    1px solid rgba(255, 255, 255, 0.05);
-}
-
-/* =========================================
-   PROFIT LADDER
-========================================= */
-
-.ladder-container {
-  display: grid;
-
-  gap: 12px;
-}
-
-.ladder-step {
-  display: grid;
-
-  grid-template-columns:
-    auto 1fr auto;
-
-  align-items: center;
-
-  gap: 14px;
-
-  padding: 16px;
-
-  background:
-    linear-gradient(
-      90deg,
-      rgba(53, 208, 127, 0.1),
-      rgba(255, 255, 255, 0.025)
-    );
-
-  border:
-    1px solid rgba(98, 242, 165, 0.12);
-
-  border-radius: 16px;
-}
-
-.ladder-icon {
-  font-size: 1.4rem;
-}
-
-.ladder-title {
-  font-weight: 900;
-}
-
-.ladder-value {
-  color: var(--green-bright);
-
-  font-weight: 800;
-}
-
-.runner {
-  border-color:
-    rgba(215, 181, 109, 0.25);
-
-  background:
-    linear-gradient(
-      90deg,
-      rgba(215, 181, 109, 0.1),
-      rgba(255, 255, 255, 0.025)
-    );
-}
-
-/* =========================================
-   JOURNAL
-========================================= */
-
-.journal-entry {
-  padding: 14px;
-
-  margin-top: 10px;
-
-  background:
-    rgba(255, 255, 255, 0.035);
-
-  border-left:
-    3px solid var(--green);
-
-  border-radius: 0 12px 12px 0;
-}
-
-/* =========================================
-   CHART
-========================================= */
-
-.chart-container {
-  overflow: hidden;
-
-  min-height: 500px;
-
-  border-radius: 18px;
-
-  border:
-    1px solid rgba(98, 242, 165, 0.12);
-
-  background:
-    #07100c;
-}
-
-#tradingview-chart,
-#chart,
-.tv-chart {
-  width: 100%;
-  height: 520px;
-}
-
-/* =========================================
-   EXPIRATION PLANNER
-========================================= */
-
-.expiration-options {
-  display: grid;
-
-  grid-template-columns:
-    repeat(auto-fit, minmax(130px, 1fr));
-
-  gap: 10px;
-
-  margin-top: 10px;
-}
-
-.expiration-option {
-  padding: 14px;
-
-  text-align: center;
-
-  color: var(--text);
-
-  background:
-    rgba(255, 255, 255, 0.04);
-
-  border:
-    1px solid rgba(255, 255, 255, 0.08);
-
-  border-radius: 14px;
-
-  cursor: pointer;
-}
-
-.expiration-option.active {
-  color: #052014;
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--green-bright),
-      var(--green)
-    );
-}
-
-/* =========================================
-   FOOTER
-========================================= */
-
-footer {
-  padding: 28px 12px;
-
-  text-align: center;
-
-  color: var(--muted);
-
-  font-size: 0.85rem;
-}
-
-/* =========================================
-   MOBILE
-========================================= */
-
-@media (max-width: 600px) {
-
-  #app {
-    padding: 12px;
-  }
-
-  .hero,
-  .header,
-  .site-header,
-  .section,
-  .card,
-  .panel,
-  .module,
-  .command-card {
-    padding: 16px;
-
-    border-radius: 16px;
-  }
-
-  .nav-buttons,
-  .command-nav,
-  .top-nav {
     display: grid;
 
     grid-template-columns:
-      repeat(2, 1fr);
-  }
+        repeat(5, minmax(0, 1fr));
 
-  .nav-buttons button,
-  .command-nav button,
-  .top-nav button {
-    width: 100%;
-  }
+    gap: 10px;
 
-  .ladder-step {
-    grid-template-columns:
-      auto 1fr;
-  }
+    margin-bottom: 18px;
 
-  .ladder-value {
-    grid-column: 2;
-  }
-
-  #tradingview-chart,
-  #chart,
-  .tv-chart {
-    height: 420px;
-  }
 }
+
+
+.main-nav button {
+
+    min-height: 50px;
+
+    padding: 10px;
+
+    color:
+        var(--green-bright);
+
+    background:
+
+        linear-gradient(
+            145deg,
+            #10251c,
+            #09130f
+        );
+
+    border:
+        1px solid
+        rgba(115, 247, 179, 0.15);
+
+    border-radius:
+        var(--radius-small);
+
+    font-size: 0.85rem;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        border-color 0.2s ease;
+
+}
+
+
+.main-nav button:hover {
+
+    transform:
+        translateY(-2px);
+
+    background:
+        #163326;
+
+    border-color:
+        rgba(115, 247, 179, 0.4);
+
+}
+
+
+/* =========================================
+   6. SECTIONS
+========================================= */
+
+.dashboard-section {
+
+    display: none;
+
+    margin-bottom: 20px;
+
+    padding: 24px;
+
+    background:
+
+        linear-gradient(
+            145deg,
+            rgba(16, 34, 26, 0.97),
+            rgba(6, 14, 10, 0.98)
+        );
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        var(--radius);
+
+    box-shadow:
+        var(--shadow);
+
+}
+
+
+.dashboard-section.active-section {
+
+    display: block;
+
+}
+
+
+.dashboard-section h2 {
+
+    margin-top: 0;
+
+    margin-bottom: 20px;
+
+    color:
+        var(--green-bright);
+
+    font-size:
+        clamp(1.3rem, 3vw, 2rem);
+
+}
+
+
+/* =========================================
+   7. BUTTONS
+========================================= */
+
+button {
+
+    border: none;
+
+    border-radius:
+        var(--radius-small);
+
+    cursor: pointer;
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        opacity 0.18s ease;
+
+}
+
+
+button:hover {
+
+    transform:
+        translateY(-2px);
+
+}
+
+
+button:active {
+
+    transform:
+        translateY(0);
+
+}
+
+
+.primary-button {
+
+    width: 100%;
+
+    min-height: 54px;
+
+    margin-top: 18px;
+
+    padding: 14px 20px;
+
+    color:
+        #052014;
+
+    background:
+
+        linear-gradient(
+            135deg,
+            var(--green-bright),
+            var(--green)
+        );
+
+    font-weight: 900;
+
+    box-shadow:
+
+        0 8px 22px
+        rgba(57, 217, 138, 0.18);
+
+}
+
+
+.secondary-button {
+
+    width: 100%;
+
+    min-height: 50px;
+
+    margin-top: 12px;
+
+    padding: 12px;
+
+    color:
+        var(--green-bright);
+
+    background:
+        rgba(255, 255, 255, 0.05);
+
+    border:
+        1px solid
+        rgba(115, 247, 179, 0.18);
+
+    font-weight: bold;
+
+}
+
+
+.danger-button {
+
+    width: 100%;
+
+    min-height: 50px;
+
+    margin: 16px 0;
+
+    padding: 12px;
+
+    color:
+        #ffdede;
+
+    background:
+        rgba(160, 50, 50, 0.18);
+
+    border:
+        1px solid
+        rgba(255, 110, 110, 0.20);
+
+    font-weight: bold;
+
+}
+
+
+/* =========================================
+   8. FORM CONTROLS
+========================================= */
+
+.trade-form {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 16px;
+
+}
+
+
+.trade-form label {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+
+    min-width: 0;
+
+    color:
+        var(--green-bright);
+
+    font-size: 0.78rem;
+
+    font-weight: bold;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.05em;
+
+}
+
+
+input,
+select {
+
+    width: 100%;
+
+    min-height: 52px;
+
+    padding:
+        12px 16px;
+
+    color:
+        var(--text);
+
+    background:
+        rgba(3, 11, 8, 0.78);
+
+    border:
+        1px solid
+        rgba(145, 168, 157, 0.22);
+
+    border-radius:
+        14px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+
+}
+
+
+input:hover,
+select:hover {
+
+    background:
+        rgba(9, 23, 16, 0.95);
+
+}
+
+
+input:focus,
+select:focus {
+
+    border-color:
+        var(--green);
+
+    box-shadow:
+
+        0 0 0 4px
+        rgba(57, 217, 138, 0.10);
+
+}
+
+
+/* =========================================
+   9. COMMAND CENTER CONTROLS
+========================================= */
+
+.market-controls {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr 1fr;
+
+    gap: 14px;
+
+    align-items: end;
+
+    margin-bottom: 18px;
+
+}
+
+
+.market-controls label {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+
+    color:
+        var(--green-bright);
+
+    font-size: 0.78rem;
+
+    font-weight: bold;
+
+    text-transform: uppercase;
+
+}
+
+
+.market-controls button {
+
+    min-height: 52px;
+
+    padding: 12px;
+
+    color:
+        #052014;
+
+    background:
+
+        linear-gradient(
+            135deg,
+            var(--green-bright),
+            var(--green)
+        );
+
+    font-weight: 900;
+
+}
+
+
+/* =========================================
+   10. TRADINGVIEW CHART
+========================================= */
+
+.chart-card {
+
+    overflow: hidden;
+
+    min-height: 550px;
+
+    margin-bottom: 18px;
+
+    background:
+        #07100c;
+
+    border:
+        1px solid
+        rgba(115, 247, 179, 0.12);
+
+    border-radius:
+        var(--radius);
+
+}
+
+
+#tradingview_chart {
+
+    width: 100%;
+
+    height: 550px;
+
+}
+
+
+/* =========================================
+   11. MARKET STATUS CARDS
+========================================= */
+
+.market-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 14px;
+
+}
+
+
+.market-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+
+    min-height: 135px;
+
+    padding: 18px;
+
+    background:
+
+        linear-gradient(
+            145deg,
+            rgba(20, 43, 33, 0.9),
+            rgba(7, 17, 12, 0.95)
+        );
+
+    border:
+        1px solid
+        rgba(115, 247, 179, 0.12);
+
+    border-radius:
+        18px;
+
+}
+
+
+.market-card span {
+
+    color:
+        var(--green-bright);
+
+    font-size: 1.2rem;
+
+    font-weight: 900;
+
+}
+
+
+.market-card strong {
+
+    color:
+        var(--muted);
+
+    font-size: 0.72rem;
+
+    letter-spacing: 0.06em;
+
+}
+
+
+.market-card div {
+
+    margin-top: auto;
+
+    color:
+        var(--text);
+
+    font-weight: bold;
+
+}
+
+
+/* =========================================
+   12. OUTPUT CARDS
+========================================= */
+
+.output-card {
+
+    margin-top: 20px;
+
+    padding: 22px;
+
+    color:
+        var(--text);
+
+    background:
+
+        linear-gradient(
+            145deg,
+            rgba(57, 217, 138, 0.08),
+            rgba(0, 0, 0, 0.16)
+        );
+
+    border:
+        1px solid
+        rgba(115, 247, 179, 0.16);
+
+    border-radius:
+        var(--radius);
+
+}
+
+
+.output-card h3 {
+
+    margin-top: 0;
+
+    color:
+        var(--green-bright);
+
+}
+
+
+.output-card p {
+
+    padding-bottom: 10px;
+
+    color:
+        var(--text);
+
+    border-bottom:
+        1px solid
+        rgba(255, 255, 255, 0.06);
+
+}
+
+
+/* =========================================
+   13. LADDER LEVELS
+========================================= */
+
+.ladder-level {
+
+    margin-top: 12px;
+
+    padding: 16px;
+
+    color:
+        var(--text);
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    border:
+        1px solid
+        rgba(115, 247, 179, 0.12);
+
+    border-radius:
+        16px;
+
+    line-height: 1.8;
+
+}
+
+
+.ladder-level strong {
+
+    color:
+        var(--green-bright);
+
+}
+
+
+.ladder-level.runner {
+
+    border-color:
+        rgba(216, 180, 92, 0.30);
+
+    background:
+        rgba(216, 180, 92, 0.07);
+
+}
+
+
+.ladder-level.runner strong {
+
+    color:
+        var(--gold);
+
+}
+
+
+/* =========================================
+   14. JOURNAL
+========================================= */
+
+#journalStats {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(140px, 1fr));
+
+    gap: 12px;
+
+    margin-bottom: 14px;
+
+}
+
+
+.journal-stat {
+
+    padding: 16px;
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.06);
+
+    border-radius:
+        16px;
+
+}
+
+
+#tradeJournal {
+
+    margin-top: 16px;
+
+}
+
+
+.journal-entry {
+
+    margin-top: 10px;
+
+    padding: 16px;
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    border-left:
+        3px solid
+        var(--green);
+
+    border-radius:
+        0 14px 14px 0;
+
+}
+
+
+/* =========================================
+   15. FOOTER
+========================================= */
+
+footer {
+
+    margin-top: 10px;
+
+    padding: 32px 16px;
+
+    text-align: center;
+
+    background:
+        rgba(0, 0, 0, 0.18);
+
+    border:
+        1px solid
+        rgba(115, 247, 179, 0.08);
+
+    border-radius:
+        var(--radius);
+
+}
+
+
+footer h3 {
+
+    margin-top: 0;
+
+    color:
+        var(--green-bright);
+
+}
+
+
+footer p {
+
+    color:
+        var(--muted);
+
+}
+
+
+.footer-creed {
+
+    color:
+        var(--green-bright);
+
+    font-size: 0.85rem;
+
+    font-weight: bold;
+
+}
+
+
+footer small {
+
+    color:
+        #71877b;
+
+}
+
+
+/* =========================================
+   16. TABLET
+========================================= */
+
+@media (max-width: 950px) {
+
+    .main-nav {
+
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+
+    }
+
+
+    .market-grid {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+    }
+
+}
+
+
+/* =========================================
+   17. MOBILE
+========================================= */
+
+@media (max-width: 700px) {
+
+    #app {
+
+        padding: 12px;
+
+    }
+
+
+    .main-header {
+
+        padding: 22px 18px;
+
+        border-radius:
+            18px;
+
+    }
+
+
+    .dashboard-section {
+
+        padding: 18px;
+
+        border-radius:
+            18px;
+
+    }
+
+
+    .main-nav {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+    }
+
+
+    .main-nav button {
+
+        font-size:
+            0.78rem;
+
+    }
+
+
+    .trade-form {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .market-controls {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .market-grid {
+
+        grid-template-columns:
+            1fr 1fr;
+
+    }
+
+
+    .chart-card {
+
+        min-height:
+            420px;
+
+    }
+
+
+    #tradingview_chart {
+
+        height:
+            420px;
+
+    }
+
+
+    .system-flow {
+
+        font-size:
+            0.72rem;
+
+    }
+
+}
+
+
+/* =========================================
+   18. SMALL PHONES
+========================================= */
+
+@media (max-width: 420px) {
+
+    #app {
+
+        padding: 8px;
+
+    }
+
+
+    .main-nav {
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 8px;
+
+    }
+
+
+    .main-nav button {
+
+        min-height:
+            58px;
+
+        padding:
+            8px 5px;
+
+        font-size:
+            0.70rem;
+
+    }
+
+
+    .market-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .brand h1 {
+
+        font-size:
+            2rem;
+
+    }
+
+   }
