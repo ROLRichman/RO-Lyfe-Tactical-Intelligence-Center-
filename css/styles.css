@@ -738,3 +738,35 @@ footer small {
     }
 
        }
+
+/* =========================================
+   RO'LYFE QUICK EXPIRATION SELECTOR
+========================================= */
+
+.expiration-quick-select {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(130px, 1fr)
+        );
+
+    gap: 10px;
+
+    margin-top: 12px;
+
+}
+
+
+.expiration-quick-select button {
+
+    min-height: 48px;
+
+    padding: 10px;
+
+    font-size: 0.8rem;
+
+       }
+
