@@ -1,6 +1,7 @@
 /* =========================================================
    RO'LYFE TACTICAL INTELLIGENCE CENTER™
-   TRADE PLANNER ENGINE v2
+   TRADE PLANNER ENGINE
+
    STOCK MAP + OPTION EXECUTION
 ========================================================= */
 
@@ -8,158 +9,135 @@ const TradePlanner = {
 
     createPlan() {
 
-        /* =====================================
-           BASIC INFORMATION
-        ===================================== */
+        const getNumber = (id) => {
+
+            const element =
+                document.getElementById(id);
+
+            if (!element) return null;
+
+            const value =
+                parseFloat(element.value);
+
+            return isNaN(value)
+                ? null
+                : value;
+
+        };
+
 
         const symbol =
-            document.getElementById("symbol")
+            document
+                .getElementById("symbol")
                 ?.value
                 ?.toUpperCase()
                 .trim() || "";
 
+
         const instrument =
-            document.getElementById("instrument")
-                ?.value || "Stock";
+            document
+                .getElementById("instrument")
+                ?.value || "Option";
+
 
         const direction =
-            document.getElementById("direction")
+            document
+                .getElementById("direction")
                 ?.value || "Long";
 
 
-        /* =====================================
-           OPTIONAL MARKET DATA
-        ===================================== */
-
-        const probability =
-            parseFloat(
-                document.getElementById(
-                    "probability"
-                )?.value
-            ) || null;
-
-
-        const impliedVolatility =
-            parseFloat(
-                document.getElementById(
-                    "impliedVolatility"
-                )?.value
-            ) || null;
-
-
-        /* =====================================
-           STOCK MAP
-        ===================================== */
-
-        const entry =
-            parseFloat(
-                document.getElementById("entry")?.value
-            );
-
-        const stop =
-            parseFloat(
-                document.getElementById("stop")?.value
-            );
-
-        const stockTarget1 =
-            parseFloat(
-                document.getElementById(
-                    "stockTarget1"
-                )?.value
-            );
-
-        const stockTarget2 =
-            parseFloat(
-                document.getElementById(
-                    "stockTarget2"
-                )?.value
-            );
-
-        const stockTarget3 =
-            parseFloat(
-                document.getElementById(
-                    "stockTarget3"
-                )?.value
-            );
-
-
-        /* =====================================
-           ACCOUNT RISK
-        ===================================== */
-
-        const accountSize =
-            parseFloat(
-                document.getElementById(
-                    "accountSize"
-                )?.value
-            ) || 0;
-
-
-        const riskPercent =
-            parseFloat(
-                document.getElementById(
-                    "riskPercent"
-                )?.value
-            ) || 0;
-
-
-        /* =====================================
-           OPTION EXECUTION
-        ===================================== */
-
         const optionType =
-            document.getElementById(
-                "optionType"
-            )?.value || "CALL";
-
-
-        const strike =
-            document.getElementById(
-                "strike"
-            )?.value || "N/A";
+            document
+                .getElementById("optionType")
+                ?.value || "Call";
 
 
         const expiration =
-            document.getElementById(
-                "expiration"
-            )?.value || "N/A";
+            document
+                .getElementById("expiration")
+                ?.value || "";
+
+
+        /* ================================
+           ACCOUNT / RISK
+        ================================= */
+
+        const accountSize =
+            getNumber("accountSize") || 0;
+
+
+        const riskPercent =
+            getNumber("riskPercent") || 0;
+
+
+        const riskAmount =
+            accountSize *
+            (riskPercent / 100);
+
+
+        /* ================================
+           PROBABILITY
+        ================================= */
+
+        const probability =
+            getNumber("probability");
+
+
+        const impliedVolatility =
+            getNumber("impliedVolatility");
+
+
+        /* ================================
+           STOCK MAP
+        ================================= */
+
+        const entry =
+            getNumber("entry");
+
+
+        const stop =
+            getNumber("stop");
+
+
+        const target1 =
+            getNumber("target1");
+
+
+        const target2 =
+            getNumber("target2");
+
+
+        const target3 =
+            getNumber("target3");
+
+
+        /* ================================
+           OPTION EXECUTION
+        ================================= */
+
+        const strike =
+            getNumber("strike");
 
 
         const optionEntry =
-            parseFloat(
-                document.getElementById(
-                    "optionEntry"
-                )?.value
-            );
+            getNumber("optionEntry");
 
 
         const optionTarget1 =
-            parseFloat(
-                document.getElementById(
-                    "optionTarget1"
-                )?.value
-            );
+            getNumber("optionTarget1");
 
 
         const optionTarget2 =
-            parseFloat(
-                document.getElementById(
-                    "optionTarget2"
-                )?.value
-            );
+            getNumber("optionTarget2");
 
 
         const optionTarget3 =
-            parseFloat(
-                document.getElementById(
-                    "optionTarget3"
-                )?.value
-            );
+            getNumber("optionTarget3");
 
 
-        /* =====================================
+        /* ================================
            VALIDATION
-        ===================================== */
+        ================================= */
 
         if (!symbol) {
 
@@ -172,13 +150,10 @@ const TradePlanner = {
         }
 
 
-        if (
-            isNaN(entry) ||
-            isNaN(stop)
-        ) {
+        if (entry === null) {
 
             alert(
-                "Please enter Stock Entry and Stock Stop."
+                "Please enter a Stock Entry."
             );
 
             return;
@@ -186,246 +161,153 @@ const TradePlanner = {
         }
 
 
-        /* =====================================
+        /* ================================
            STOCK RISK
-        ===================================== */
+        ================================= */
 
-        const riskPerUnit =
-            Math.abs(
-                entry - stop
-            );
+        let riskPerUnit = 0;
 
 
-        const riskAmount =
-            accountSize *
-            (
-                riskPercent / 100
-            );
+        if (
+            stop !== null
+        ) {
+
+            riskPerUnit =
+                Math.abs(
+                    entry - stop
+                );
+
+        }
 
 
-        /* =====================================
-           STOCK RESULT / ROI
-        ===================================== */
+        /* ================================
+           STOCK RESULTS
+        ================================= */
 
         const stockROI1 =
-            !isNaN(stockTarget1)
+            target1 !== null
                 ? (
-                    (
-                        stockTarget1 - entry
-                    ) /
+                    (target1 - entry) /
                     entry
                 ) * 100
                 : null;
 
 
         const stockROI2 =
-            !isNaN(stockTarget2)
+            target2 !== null
                 ? (
-                    (
-                        stockTarget2 - entry
-                    ) /
+                    (target2 - entry) /
                     entry
                 ) * 100
                 : null;
 
 
         const stockROI3 =
-            !isNaN(stockTarget3)
+            target3 !== null
                 ? (
-                    (
-                        stockTarget3 - entry
-                    ) /
+                    (target3 - entry) /
                     entry
                 ) * 100
                 : null;
 
 
-        /* =====================================
-           STOCK RISK / REWARD
-        ===================================== */
-
-        const stockRR1 =
-            !isNaN(stockTarget1) &&
-            riskPerUnit > 0
-                ? Math.abs(
-                    stockTarget1 - entry
-                ) / riskPerUnit
-                : null;
-
-
-        const stockRR2 =
-            !isNaN(stockTarget2) &&
-            riskPerUnit > 0
-                ? Math.abs(
-                    stockTarget2 - entry
-                ) / riskPerUnit
-                : null;
-
-
-        const stockRR3 =
-            !isNaN(stockTarget3) &&
-            riskPerUnit > 0
-                ? Math.abs(
-                    stockTarget3 - entry
-                ) / riskPerUnit
-                : null;
-
-
-        /* =====================================
-           OPTION ROI
-        ===================================== */
+        /* ================================
+           OPTION RESULTS
+        ================================= */
 
         const optionROI1 =
-            !isNaN(optionEntry) &&
-            optionEntry > 0 &&
-            !isNaN(optionTarget1)
+            optionEntry &&
+            optionTarget1 !== null
                 ? (
-                    (
-                        optionTarget1 -
-                        optionEntry
-                    ) /
+                    (optionTarget1 -
+                    optionEntry) /
                     optionEntry
                 ) * 100
                 : null;
 
 
         const optionROI2 =
-            !isNaN(optionEntry) &&
-            optionEntry > 0 &&
-            !isNaN(optionTarget2)
+            optionEntry &&
+            optionTarget2 !== null
                 ? (
-                    (
-                        optionTarget2 -
-                        optionEntry
-                    ) /
+                    (optionTarget2 -
+                    optionEntry) /
                     optionEntry
                 ) * 100
                 : null;
 
 
         const optionROI3 =
-            !isNaN(optionEntry) &&
-            optionEntry > 0 &&
-            !isNaN(optionTarget3)
+            optionEntry &&
+            optionTarget3 !== null
                 ? (
-                    (
-                        optionTarget3 -
-                        optionEntry
-                    ) /
+                    (optionTarget3 -
+                    optionEntry) /
                     optionEntry
                 ) * 100
                 : null;
 
 
-        /* =====================================
-           OPTION CONTRACT RESULTS
+        /* ================================
+           POSITION SIZE
 
-           Each standard option contract
-           controls 100 shares.
-        ===================================== */
+           Options are usually quoted
+           per share. One standard
+           contract represents 100 shares.
+        ================================= */
 
-        const optionProfit1 =
-            !isNaN(optionEntry) &&
-            !isNaN(optionTarget1)
-                ? (
-                    optionTarget1 -
-                    optionEntry
-                ) * 100
-                : null;
-
-
-        const optionProfit2 =
-            !isNaN(optionEntry) &&
-            !isNaN(optionTarget2)
-                ? (
-                    optionTarget2 -
-                    optionEntry
-                ) * 100
-                : null;
-
-
-        const optionProfit3 =
-            !isNaN(optionEntry) &&
-            !isNaN(optionTarget3)
-                ? (
-                    optionTarget3 -
-                    optionEntry
-                ) * 100
-                : null;
-
-
-        /* =====================================
-           LADDER WEIGHTED RESULT
-
-           T1 = 40%
-           T2 = 30%
-           T3 = 20%
-           Runner = 10%
-        ===================================== */
-
-        let weightedOptionProfit =
-            0;
+        let maxContracts = 0;
 
 
         if (
-            optionProfit1 !== null
+            optionEntry &&
+            riskAmount > 0
         ) {
 
-            weightedOptionProfit +=
-                optionProfit1 * 0.40;
+            maxContracts =
+                Math.floor(
+                    riskAmount /
+                    (optionEntry * 100)
+                );
 
         }
 
 
-        if (
-            optionProfit2 !== null
-        ) {
-
-            weightedOptionProfit +=
-                optionProfit2 * 0.30;
-
-        }
-
-
-        if (
-            optionProfit3 !== null
-        ) {
-
-            weightedOptionProfit +=
-                optionProfit3 * 0.20;
-
-        }
-
-
-        /* =====================================
+        /* ================================
            BUILD PLAN
-        ===================================== */
+        ================================= */
 
         const plan = {
 
-            id: Date.now(),
+            id:
+                Date.now(),
 
             date:
                 new Date()
                     .toLocaleString(),
 
 
-            /* BASIC */
+            status:
+                "PLANNED",
+
 
             symbol:
                 symbol,
 
+
             instrument:
                 instrument,
+
 
             direction:
                 direction,
 
 
-            /* MARKET DATA */
+            /* PROBABILITY */
 
             probability:
                 probability,
+
 
             impliedVolatility:
                 impliedVolatility,
@@ -436,59 +318,51 @@ const TradePlanner = {
             entry:
                 entry,
 
+
             stop:
                 stop,
 
-            stockTarget1:
-                isNaN(stockTarget1)
-                    ? null
-                    : stockTarget1,
-
-            stockTarget2:
-                isNaN(stockTarget2)
-                    ? null
-                    : stockTarget2,
-
-            stockTarget3:
-                isNaN(stockTarget3)
-                    ? null
-                    : stockTarget3,
-
-
-            /* STOCK RISK */
 
             riskPerUnit:
                 riskPerUnit,
 
-            accountSize:
-                accountSize,
 
-            riskPercent:
-                riskPercent,
-
-            riskAmount:
-                riskAmount,
+            target1:
+                target1,
 
 
-            /* STOCK RESULTS */
+            target2:
+                target2,
+
+
+            target3:
+                target3,
+
 
             stockROI1:
                 stockROI1,
 
+
             stockROI2:
                 stockROI2,
+
 
             stockROI3:
                 stockROI3,
 
-            stockRR1:
-                stockRR1,
 
-            stockRR2:
-                stockRR2,
+            /* ACCOUNT */
 
-            stockRR3:
-                stockRR3,
+            accountSize:
+                accountSize,
+
+
+            riskPercent:
+                riskPercent,
+
+
+            riskAmount:
+                riskAmount,
 
 
             /* OPTION */
@@ -496,61 +370,63 @@ const TradePlanner = {
             optionType:
                 optionType,
 
+
             strike:
                 strike,
+
 
             expiration:
                 expiration,
 
+
             optionEntry:
-                isNaN(optionEntry)
-                    ? null
-                    : optionEntry,
+                optionEntry,
+
 
             optionTarget1:
-                isNaN(optionTarget1)
-                    ? null
-                    : optionTarget1,
+                optionTarget1,
+
 
             optionTarget2:
-                isNaN(optionTarget2)
-                    ? null
-                    : optionTarget2,
+                optionTarget2,
+
 
             optionTarget3:
-                isNaN(optionTarget3)
-                    ? null
-                    : optionTarget3,
+                optionTarget3,
 
-
-            /* OPTION RESULTS */
 
             optionROI1:
                 optionROI1,
 
+
             optionROI2:
                 optionROI2,
+
 
             optionROI3:
                 optionROI3,
 
-            optionProfit1:
-                optionProfit1,
 
-            optionProfit2:
-                optionProfit2,
-
-            optionProfit3:
-                optionProfit3,
-
-            weightedOptionProfit:
-                weightedOptionProfit,
+            maxContracts:
+                maxContracts,
 
 
-            /* STATUS */
+            /* LADDER */
 
-            status:
-                "PLANNED"
+            sellTarget1:
+                40,
+
+
+            sellTarget2:
+                30,
+
+
+            sellTarget3:
+                20,
+
+
+            runner:
+                10
 
         };
 
@@ -567,9 +443,10 @@ const TradePlanner = {
     },
 
 
+
     /* =====================================
        DISPLAY PLAN
-    ===================================== */
+    ====================================== */
 
     displayPlan(plan) {
 
@@ -582,44 +459,37 @@ const TradePlanner = {
         if (!output) return;
 
 
-        const money = value =>
+        const money = (value) => {
 
-            value === null ||
-            value === undefined
+            return value !== null &&
+                value !== undefined
 
-                ? "Not Set"
+                ? "$" +
+                    Number(value)
+                        .toFixed(2)
 
-                : "$" +
-                  Number(value)
-                    .toFixed(2);
+                : "Not Set";
 
-
-        const percent = value =>
-
-            value === null ||
-            value === undefined
-
-                ? "Not Set"
-
-                : Number(value)
-                    .toFixed(2) + "%";
+        };
 
 
-        const ratio = value =>
+        const percent = (value) => {
 
-            value === null ||
-            value === undefined
+            return value !== null &&
+                value !== undefined
 
-                ? "Not Set"
+                ? Number(value)
+                    .toFixed(2) + "%"
 
-                : "1:" +
-                  Number(value)
-                    .toFixed(2);
+                : "N/A";
+
+        };
 
 
         output.innerHTML = `
 
         <div class="trade-plan-card">
+
 
             <h3>
                 🎯 RO'LYFE TRADE PLAN
@@ -627,9 +497,7 @@ const TradePlanner = {
 
 
             <div class="plan-status">
-
                 ${plan.status}
-
             </div>
 
 
@@ -640,23 +508,9 @@ const TradePlanner = {
 
 
             <p>
-                <strong>Instrument:</strong>
-                ${plan.instrument}
-            </p>
-
-
-            <p>
                 <strong>Direction:</strong>
                 ${plan.direction}
             </p>
-
-
-            <hr>
-
-
-            <h3>
-                🗺️ STOCK MAP
-            </h3>
 
 
             <p>
@@ -669,6 +523,14 @@ const TradePlanner = {
                 <strong>Implied Volatility:</strong>
                 ${percent(plan.impliedVolatility)}
             </p>
+
+
+            <hr>
+
+
+            <h3>
+                📈 STOCK MAP
+            </h3>
 
 
             <p>
@@ -690,77 +552,38 @@ const TradePlanner = {
 
 
             <p>
-                <strong>Risk Budget:</strong>
-                ${money(plan.riskAmount)}
+                <strong>Stock Target 1:</strong>
+                ${money(plan.target1)}
             </p>
 
 
-            <hr>
-
-
-            <h4>
-                🎯 Stock Target 1
-            </h4>
-
             <p>
-                Price:
-                ${money(plan.stockTarget1)}
-            </p>
-
-            <p>
-                Result / ROI:
+                <strong>Stock Target 1 ROI:</strong>
                 ${percent(plan.stockROI1)}
             </p>
 
+
             <p>
-                Risk / Reward:
-                ${ratio(plan.stockRR1)}
+                <strong>Stock Target 2:</strong>
+                ${money(plan.target2)}
             </p>
 
 
-            <hr>
-
-
-            <h4>
-                🎯 Stock Target 2
-            </h4>
-
             <p>
-                Price:
-                ${money(plan.stockTarget2)}
-            </p>
-
-            <p>
-                Result / ROI:
+                <strong>Stock Target 2 ROI:</strong>
                 ${percent(plan.stockROI2)}
             </p>
 
+
             <p>
-                Risk / Reward:
-                ${ratio(plan.stockRR2)}
+                <strong>Stock Target 3:</strong>
+                ${money(plan.target3)}
             </p>
 
 
-            <hr>
-
-
-            <h4>
-                🚀 Stock Target 3
-            </h4>
-
             <p>
-                Price:
-                ${money(plan.stockTarget3)}
-            </p>
-
-            <p>
-                Result / ROI:
+                <strong>Stock Target 3 ROI:</strong>
                 ${percent(plan.stockROI3)}
-            </p>
-
-            <p>
-                Risk / Reward:
-                ${ratio(plan.stockRR3)}
             </p>
 
 
@@ -773,127 +596,56 @@ const TradePlanner = {
 
 
             <p>
-                <strong>Contract:</strong>
-                ${plan.optionType}
-            </p>
-
-
-            <p>
-                <strong>Strike:</strong>
-                ${plan.strike}
+                <strong>${plan.optionType} Strike:</strong>
+                ${money(plan.strike)}
             </p>
 
 
             <p>
                 <strong>Expiration:</strong>
-                ${plan.expiration}
+                ${plan.expiration || "Not Set"}
             </p>
 
 
             <p>
-                <strong>Premium Entry:</strong>
+                <strong>Option Premium Entry:</strong>
                 ${money(plan.optionEntry)}
             </p>
 
 
-            <hr>
-
-
-            <h4>
-                🟢 TAKE PROFIT 1
-            </h4>
-
             <p>
-                Premium:
+                <strong>Take Profit 1:</strong>
                 ${money(plan.optionTarget1)}
             </p>
 
-            <p>
-                Sell:
-                40%
-            </p>
 
             <p>
-                Option ROI:
+                <strong>Option ROI 1:</strong>
                 ${percent(plan.optionROI1)}
             </p>
 
-            <p>
-                Contract Result:
-                ${money(plan.optionProfit1)}
-            </p>
-
-
-            <hr>
-
-
-            <h4>
-                🟢 TAKE PROFIT 2
-            </h4>
 
             <p>
-                Premium:
+                <strong>Take Profit 2:</strong>
                 ${money(plan.optionTarget2)}
             </p>
 
-            <p>
-                Sell:
-                30%
-            </p>
 
             <p>
-                Option ROI:
+                <strong>Option ROI 2:</strong>
                 ${percent(plan.optionROI2)}
             </p>
 
-            <p>
-                Contract Result:
-                ${money(plan.optionProfit2)}
-            </p>
-
-
-            <hr>
-
-
-            <h4>
-                🚀 TAKE PROFIT 3
-            </h4>
 
             <p>
-                Premium:
+                <strong>Take Profit 3:</strong>
                 ${money(plan.optionTarget3)}
             </p>
 
-            <p>
-                Sell:
-                20%
-            </p>
 
             <p>
-                Option ROI:
+                <strong>Option ROI 3:</strong>
                 ${percent(plan.optionROI3)}
-            </p>
-
-            <p>
-                Contract Result:
-                ${money(plan.optionProfit3)}
-            </p>
-
-
-            <hr>
-
-
-            <h4>
-                🏃 RUNNER
-            </h4>
-
-            <p>
-                Keep:
-                10%
-            </p>
-
-            <p>
-                Trail with structure.
             </p>
 
 
@@ -901,16 +653,57 @@ const TradePlanner = {
 
 
             <h3>
-                📊 LADDER RESULT
+                🪜 EXECUTION LADDER
             </h3>
 
+
             <p>
-                <strong>
-                    Weighted Realized Profit:
-                </strong>
+                🟢 Target 1 —
+                Sell 40%
+            </p>
 
-                ${money(plan.weightedOptionProfit)}
 
+            <p>
+                🟢 Target 2 —
+                Sell 30%
+            </p>
+
+
+            <p>
+                🚀 Target 3 —
+                Sell 20%
+            </p>
+
+
+            <p>
+                🏃 Runner —
+                Hold 10%
+            </p>
+
+
+            <hr>
+
+
+            <h3>
+                🛡 RISK
+            </h3>
+
+
+            <p>
+                <strong>Account Size:</strong>
+                ${money(plan.accountSize)}
+            </p>
+
+
+            <p>
+                <strong>Risk Budget:</strong>
+                ${money(plan.riskAmount)}
+            </p>
+
+
+            <p>
+                <strong>Maximum Contracts by Budget:</strong>
+                ${plan.maxContracts}
             </p>
 
 
@@ -930,6 +723,7 @@ const TradePlanner = {
 
             </button>
 
+
         </div>
 
         `;
@@ -937,13 +731,16 @@ const TradePlanner = {
     },
 
 
+
     /* =====================================
        SAVE PLAN
-    ===================================== */
+    ====================================== */
 
     savePlan() {
 
-        if (!window.currentTradePlan) {
+        if (
+            !window.currentTradePlan
+        ) {
 
             alert(
                 "Create a trade plan first."
@@ -987,9 +784,6 @@ const TradePlanner = {
     },
 
 
-    /* =====================================
-       LOAD PLANS
-    ===================================== */
 
     loadPlans() {
 
@@ -1004,9 +798,6 @@ const TradePlanner = {
     },
 
 
-    /* =====================================
-       DELETE PLAN
-    ===================================== */
 
     deletePlan(id) {
 
