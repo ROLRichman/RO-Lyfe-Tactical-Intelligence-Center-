@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
     <meta charset="UTF-8">
@@ -13,17 +14,30 @@
         RO'Lyfe Tactical Intelligence Center™
     </title>
 
-    <link
-    rel="stylesheet"
-    href="css/styles.css"
->
 
-    <script src="https://s3.tradingview.com/tv.js"></script>
+    <!-- =====================================
+         MAIN STYLESHEET
+    ====================================== -->
+
+    <link
+        rel="stylesheet"
+        href="css/styles.css"
+    >
+
+
+    <!-- =====================================
+         TRADINGVIEW
+    ====================================== -->
+
+    <script
+        src="https://s3.tradingview.com/tv.js"
+    ></script>
 
 </head>
 
 
 <body>
+
 
 <div id="app">
 
@@ -75,32 +89,53 @@
 
     <nav class="main-nav">
 
-        <button onclick="showSection('command-center')">
+
+        <button
+            type="button"
+            onclick="showSection('command-center')"
+        >
             🎯 Command Center
         </button>
 
-        <button onclick="showSection('trade-planner-section')">
+
+        <button
+            type="button"
+            onclick="showSection('trade-planner-section')"
+        >
             📝 Trade Planner
         </button>
 
-        <button onclick="showSection('risk-section')">
+
+        <button
+            type="button"
+            onclick="showSection('risk-section')"
+        >
             🛡 Risk Engine
         </button>
 
-        <button onclick="showSection('ladder-section')">
+
+        <button
+            type="button"
+            onclick="showSection('ladder-section')"
+        >
             🪜 RO'Lyfe Ladder
         </button>
 
-        <button onclick="showSection('journal-section')">
+
+        <button
+            type="button"
+            onclick="showSection('journal-section')"
+        >
             📓 Trade Journal
         </button>
+
 
     </nav>
 
 
 
     <!-- =====================================
-         COMMAND CENTER
+         MARKET COMMAND CENTER
     ====================================== -->
 
     <section
@@ -108,12 +143,19 @@
         class="dashboard-section active-section"
     >
 
+
         <h2>
             🎯 MARKET COMMAND CENTER
         </h2>
 
 
+
+        <!-- =====================================
+             MARKET CONTROLS
+        ====================================== -->
+
         <div class="market-controls">
+
 
             <label>
 
@@ -158,6 +200,7 @@
             </label>
 
 
+
             <label>
 
                 Timeframe
@@ -168,7 +211,10 @@
                         5 Minute
                     </option>
 
-                    <option value="15" selected>
+                    <option
+                        value="15"
+                        selected
+                    >
                         15 Minute
                     </option>
 
@@ -189,17 +235,22 @@
             </label>
 
 
-            <button onclick="loadMainChart()">
 
+            <button
+                type="button"
+                onclick="loadMainChart()"
+            >
                 📈 LOAD CHART
-
             </button>
+
 
         </div>
 
 
 
-        <!-- TRADINGVIEW -->
+        <!-- =====================================
+             TRADINGVIEW CHART
+        ====================================== -->
 
         <div class="chart-card">
 
@@ -211,9 +262,14 @@
 
 
 
-        <!-- MARKET STATUS -->
+        <!-- =====================================
+             MARKET STATUS
+        ====================================== -->
 
         <div class="market-grid">
+
+
+            <!-- SPY -->
 
             <div class="market-card">
 
@@ -234,6 +290,9 @@
             </div>
 
 
+
+            <!-- QQQ -->
+
             <div class="market-card">
 
                 <span>
@@ -252,6 +311,9 @@
 
             </div>
 
+
+
+            <!-- VIX -->
 
             <div class="market-card">
 
@@ -272,6 +334,9 @@
             </div>
 
 
+
+            <!-- SYSTEM -->
+
             <div class="market-card">
 
                 <span>
@@ -282,13 +347,14 @@
                     SYSTEM STATUS
                 </strong>
 
-                <div>
+                <div id="systemStatus">
 
                     ONLINE 🟢
 
                 </div>
 
             </div>
+
 
         </div>
 
@@ -306,346 +372,499 @@
         class="dashboard-section"
     >
 
+
         <h2>
             📝 RO'LYFE TRADE PLANNER™
         </h2>
 
 
+
+        <!-- =====================================
+             BASIC TRADE INFORMATION
+        ====================================== -->
+
+        <h3 class="planner-title">
+
+            🎯 TRADE SETUP
+
+        </h3>
+
+
         <div class="trade-form">
 
-    <label>
-        Symbol
-        <input
-            id="symbol"
-            value="SPY"
+
+            <!-- SYMBOL -->
+
+            <label>
+
+                Symbol
+
+                <input
+                    id="symbol"
+                    type="text"
+                    value="SPY"
+                    placeholder="Example: AAPL"
+                >
+
+            </label>
+
+
+
+            <!-- INSTRUMENT -->
+
+            <label>
+
+                Instrument
+
+                <select id="instrument">
+
+                    <option value="Stock">
+                        Stock
+                    </option>
+
+                    <option
+                        value="Option"
+                        selected
+                    >
+                        Option
+                    </option>
+
+                    <option value="Crypto">
+                        Crypto
+                    </option>
+
+                    <option value="Futures">
+                        Futures
+                    </option>
+
+                </select>
+
+            </label>
+
+
+
+            <!-- DIRECTION -->
+
+            <label>
+
+                Direction
+
+                <select id="direction">
+
+                    <option value="Long">
+                        Long
+                    </option>
+
+                    <option value="Short">
+                        Short
+                    </option>
+
+                </select>
+
+            </label>
+
+
+
+            <!-- ACCOUNT SIZE -->
+
+            <label>
+
+                Account Size
+
+                <input
+                    id="accountSize"
+                    type="number"
+                    step="0.01"
+                    value="1000"
+                >
+
+            </label>
+
+
+
+            <!-- RISK -->
+
+            <label>
+
+                Risk %
+
+                <input
+                    id="riskPercent"
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value="1"
+                >
+
+            </label>
+
+
+        </div>
+
+
+
+        <!-- =====================================
+             TRADE PROBABILITY
+        ====================================== -->
+
+        <h3 class="planner-title">
+
+            🧠 TRADE PROBABILITY
+
+        </h3>
+
+
+        <div class="trade-form">
+
+
+            <!-- PROBABILITY -->
+
+            <label>
+
+                Probability % (Optional)
+
+                <input
+                    id="probability"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    placeholder="Example: 65"
+                >
+
+            </label>
+
+
+
+            <!-- IMPLIED VOLATILITY -->
+
+            <label>
+
+                Implied Volatility % (Optional)
+
+                <input
+                    id="impliedVolatility"
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    placeholder="Example: 32.5"
+                >
+
+            </label>
+
+
+        </div>
+
+
+
+        <!-- =====================================
+             STOCK MAP
+        ====================================== -->
+
+        <h3 class="planner-title">
+
+            📈 STOCK MAP
+
+        </h3>
+
+
+        <div
+            class="trade-form stock-map"
         >
-    </label>
 
 
-    <label>
-        Instrument
-        <select id="instrument">
+            <!-- STOCK ENTRY -->
 
-            <option value="Stock">
-                Stock
-            </option>
+            <label>
 
-            <option value="Option" selected>
-                Option
-            </option>
+                Stock Entry
 
-            <option value="Crypto">
-                Crypto
-            </option>
+                <input
+                    id="entry"
+                    type="number"
+                    step="0.01"
+                    value="100"
+                >
 
-            <option value="Futures">
-                Futures
-            </option>
-
-        </select>
-    </label>
+            </label>
 
 
-    <label>
-        Direction
-        <select id="direction">
 
-            <option value="Long">
-                Long
-            </option>
+            <!-- STOCK STOP -->
 
-            <option value="Short">
-                Short
-            </option>
+            <label>
 
-        </select>
-    </label>
+                Stock Stop
+
+                <input
+                    id="stop"
+                    type="number"
+                    step="0.01"
+                    value="98"
+                >
+
+            </label>
 
 
-    <label>
-        Account Size
-        <input
-            id="accountSize"
-            type="number"
-            value="1000"
+
+            <!-- STOCK TARGET 1 -->
+
+            <label>
+
+                Stock Target 1
+
+                <input
+                    id="target1"
+                    type="number"
+                    step="0.01"
+                    placeholder="Example: 102"
+                >
+
+            </label>
+
+
+
+            <!-- STOCK TARGET 2 -->
+
+            <label>
+
+                Stock Target 2
+
+                <input
+                    id="target2"
+                    type="number"
+                    step="0.01"
+                    placeholder="Example: 104"
+                >
+
+            </label>
+
+
+
+            <!-- STOCK TARGET 3 -->
+
+            <label>
+
+                Stock Target 3
+
+                <input
+                    id="target3"
+                    type="number"
+                    step="0.01"
+                    placeholder="Example: 106"
+                >
+
+            </label>
+
+
+        </div>
+
+
+
+        <!-- =====================================
+             OPTION EXECUTION
+        ====================================== -->
+
+        <h3 class="planner-title">
+
+            🎯 OPTION EXECUTION
+
+        </h3>
+
+
+        <div
+            class="trade-form option-execution"
         >
-    </label>
 
 
-    <label>
-        Risk %
-        <input
-            id="riskPercent"
-            type="number"
-            step="0.1"
-            value="1"
-        >
-    </label>
+            <!-- CALL / PUT -->
 
-</div>
+            <label>
 
+                Call / Put
 
-<!-- =====================================
-     PROBABILITY / VOLATILITY
-===================================== -->
+                <select id="optionType">
 
-<h3 class="planner-title">
-    🧠 TRADE PROBABILITY
-</h3>
+                    <option value="Call">
+                        📈 Call
+                    </option>
 
+                    <option value="Put">
+                        📉 Put
+                    </option>
 
-<div class="trade-form">
+                </select>
 
-    <label>
-        Probability % (Optional)
+            </label>
 
-        <input
-            id="probability"
-            type="number"
-            min="0"
-            max="100"
-            step="0.1"
-            placeholder="Example: 65"
-        >
-    </label>
 
 
-    <label>
-        Implied Volatility % (Optional)
+            <!-- STRIKE -->
 
-        <input
-            id="impliedVolatility"
-            type="number"
-            min="0"
-            step="0.1"
-            placeholder="Example: 32.5"
-        >
-    </label>
+            <label>
 
-</div>
+                Option Strike
 
+                <input
+                    id="strike"
+                    type="number"
+                    step="0.01"
+                    placeholder="Example: 100"
+                >
 
+            </label>
 
-<!-- =====================================
-     STOCK MAP
-===================================== -->
 
-<h3 class="planner-title">
-    📈 STOCK MAP
-</h3>
 
+            <!-- EXPIRATION -->
 
-<div class="trade-form stock-map">
+            <label>
 
-    <label>
-        Stock Entry
+                Expiration Date
 
-        <input
-            id="entry"
-            type="number"
-            step="0.01"
-            value="100"
-        >
-    </label>
+                <input
+                    id="expiration"
+                    type="date"
+                >
 
+            </label>
 
-    <label>
-        Stock Stop
 
-        <input
-            id="stop"
-            type="number"
-            step="0.01"
-            value="98"
-        >
-    </label>
 
+            <!-- OPTION PREMIUM -->
 
-    <label>
-        Stock Target 1
+            <label>
 
-        <input
-            id="target1"
-            type="number"
-            step="0.01"
-            placeholder="Example: 102"
-        >
-    </label>
+                Option Premium Entry
 
+                <input
+                    id="optionEntry"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Example: 0.50"
+                >
 
-    <label>
-        Stock Target 2
+            </label>
 
-        <input
-            id="target2"
-            type="number"
-            step="0.01"
-            placeholder="Example: 104"
-        >
-    </label>
 
 
-    <label>
-        Stock Target 3
+            <!-- OPTION TARGET 1 -->
 
-        <input
-            id="target3"
-            type="number"
-            step="0.01"
-            placeholder="Example: 106"
-        >
-    </label>
+            <label>
 
-</div>
+                Take Profit 1
 
+                <input
+                    id="optionTarget1"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Example: 0.80"
+                >
 
+            </label>
 
-<!-- =====================================
-     OPTION EXECUTION
-===================================== -->
 
-<h3 class="planner-title">
-    🎯 OPTION EXECUTION
-</h3>
 
+            <!-- OPTION TARGET 2 -->
 
-<div class="trade-form option-execution">
+            <label>
 
-    <label>
-        Call / Put
+                Take Profit 2
 
-        <select id="optionType">
+                <input
+                    id="optionTarget2"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Example: 1.60"
+                >
 
-            <option value="Call">
-                📈 Call
-            </option>
+            </label>
 
-            <option value="Put">
-                📉 Put
-            </option>
 
-        </select>
-    </label>
 
+            <!-- OPTION TARGET 3 -->
 
-    <label>
-        Option Strike
+            <label>
 
-        <input
-            id="strike"
-            type="number"
-            step="0.01"
-            placeholder="Example: 100"
-        >
-    </label>
+                Take Profit 3
 
+                <input
+                    id="optionTarget3"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Example: 2.00"
+                >
 
-    <label>
-        Expiration Date
+            </label>
 
-        <input
-            id="expiration"
-            type="date"
-        >
-    </label>
 
+        </div>
 
-    <label>
-        Option Premium Entry
 
-        <input
-            id="optionEntry"
-            type="number"
-            step="0.01"
-            placeholder="Example: 0.50"
-        >
-    </label>
 
+        <!-- =====================================
+             EXPIRATION SHORTCUTS
+        ====================================== -->
 
-    <label>
-        Take Profit 1
+        <h3 class="planner-title">
 
-        <input
-            id="optionTarget1"
-            type="number"
-            step="0.01"
-            placeholder="Example: 0.80"
-        >
-    </label>
+            ⚡ EXPIRATION SHORTCUTS
 
+        </h3>
 
-    <label>
-        Take Profit 2
 
-        <input
-            id="optionTarget2"
-            type="number"
-            step="0.01"
-            placeholder="Example: 1.60"
-        >
-    </label>
+        <div class="expiration-buttons">
 
 
-    <label>
-        Take Profit 3
+            <button
+                type="button"
+                onclick="setExpiration('0dte')"
+            >
+                ⚡ 0DTE
+            </button>
 
-        <input
-            id="optionTarget3"
-            type="number"
-            step="0.01"
-            placeholder="Example: 2.00"
-        >
-    </label>
 
-</div>
 
+            <button
+                type="button"
+                onclick="setExpiration('next')"
+            >
+                🔥 TOMORROW
+            </button>
 
 
-<!-- =====================================
-     EXPIRATION SHORTCUTS
-===================================== -->
 
-<h3 class="planner-title">
-    ⚡ EXPIRATION SHORTCUTS
-</h3>
+            <button
+                type="button"
+                onclick="setExpiration('friday')"
+            >
+                📅 THIS FRIDAY
+            </button>
 
 
-<div class="expiration-buttons">
 
-    <button
-        type="button"
-        onclick="setExpiration('0dte')"
-    >
-        ⚡ 0DTE
-    </button>
+            <button
+                type="button"
+                onclick="setExpiration('nextFriday')"
+            >
+                📆 NEXT FRIDAY
+            </button>
 
 
-    <button
-        type="button"
-        onclick="setExpiration('next')"
-    >
-        🔥 NEXT EXPIRATION
-    </button>
+        </div>
 
 
-    <button
-        type="button"
-        onclick="setExpiration('friday')"
-    >
-        📅 THIS FRIDAY
-    </button>
 
-
-    <button
-        type="button"
-        onclick="setExpiration('nextFriday')"
-    >
-        📆 NEXT FRIDAY
-    </button>
-
-</div>
+        <!-- =====================================
+             BUILD PLAN
+        ====================================== -->
 
         <button
+            type="button"
             class="primary-button"
             onclick="buildTradePlan()"
         >
@@ -655,6 +874,11 @@
         </button>
 
 
+
+        <!-- =====================================
+             PLAN OUTPUT
+        ====================================== -->
+
         <div
             id="tradePlanOutput"
             class="output-card"
@@ -663,7 +887,13 @@
         </div>
 
 
+
+        <!-- =====================================
+             JOURNAL BUTTON
+        ====================================== -->
+
         <button
+            type="button"
             class="secondary-button"
             onclick="addPlanToJournal()"
         >
@@ -686,6 +916,7 @@
         class="dashboard-section"
     >
 
+
         <h2>
             🛡 RO'LYFE RISK ENGINE™
         </h2>
@@ -706,13 +937,14 @@
 
 
     <!-- =====================================
-         LADDER ENGINE
+         RO'LYFE LADDER
     ====================================== -->
 
     <section
         id="ladder-section"
         class="dashboard-section"
     >
+
 
         <h2>
             🪜 RO'LYFE TRADE LADDER™
@@ -742,6 +974,7 @@
         class="dashboard-section"
     >
 
+
         <h2>
             📓 RO'LYFE TRADE JOURNAL™
         </h2>
@@ -754,7 +987,9 @@
         </div>
 
 
+
         <button
+            type="button"
             class="danger-button"
             onclick="TradeJournal.clearJournal()"
         >
@@ -762,6 +997,7 @@
             🗑 CLEAR JOURNAL
 
         </button>
+
 
 
         <div
@@ -781,14 +1017,17 @@
 
     <footer>
 
+
         <h3>
             RO'Lyfe Tactical Intelligence Center™
         </h3>
+
 
         <p>
             Trade the Stock.
             Execute with the Option.
         </p>
+
 
         <p class="footer-creed">
 
@@ -797,12 +1036,14 @@
 
         </p>
 
+
         <small>
 
             Educational and informational use only.
             Not financial advice.
 
         </small>
+
 
     </footer>
 
@@ -813,7 +1054,6 @@
 
 <!-- =====================================
      JAVASCRIPT ENGINES
-
      ORDER MATTERS
 ===================================== -->
 
@@ -828,7 +1068,9 @@
 <script src="js/journal.js"></script>
 
 
+
 <script>
+
 
 /* =====================================
    PAGE NAVIGATION
@@ -857,6 +1099,7 @@ function showSection(sectionId) {
             "active-section"
         );
 
+
         window.scrollTo({
 
             top: 0,
@@ -877,6 +1120,7 @@ function showSection(sectionId) {
 
 function buildTradePlan() {
 
+
     /*
        1. CREATE PLAN
     */
@@ -891,9 +1135,6 @@ function buildTradePlan() {
 
     /*
        2. RUN RISK ENGINE
-
-       Your risk-engine.js can now
-       connect here.
     */
 
     if (
@@ -927,7 +1168,7 @@ function buildTradePlan() {
 
 
     /*
-       4. SHOW RESULTS
+       4. UPDATE DISPLAYS
     */
 
     updateRiskDisplay(plan);
@@ -936,9 +1177,7 @@ function buildTradePlan() {
 
 
     alert(
-
         "RO'Lyfe Trade Plan Built! 🎯"
-
     );
 
 }
@@ -950,6 +1189,7 @@ function buildTradePlan() {
 ===================================== */
 
 function addPlanToJournal() {
+
 
     if (
         typeof TradeJournal ===
@@ -978,11 +1218,10 @@ function addPlanToJournal() {
 
 /* =====================================
    BASIC RISK DISPLAY
-
-   Will connect to RiskEngine
 ===================================== */
 
 function updateRiskDisplay(plan) {
+
 
     const output =
         document.getElementById(
@@ -1003,6 +1242,18 @@ function updateRiskDisplay(plan) {
             🛡 Risk Summary
         </h3>
 
+
+        <p>
+
+            <strong>
+                Symbol:
+            </strong>
+
+            ${plan.symbol}
+
+        </p>
+
+
         <p>
 
             <strong>
@@ -1010,10 +1261,11 @@ function updateRiskDisplay(plan) {
             </strong>
 
             $${Number(
-                plan.accountSize
+                plan.accountSize || 0
             ).toFixed(2)}
 
         </p>
+
 
         <p>
 
@@ -1027,10 +1279,19 @@ function updateRiskDisplay(plan) {
 
         </p>
 
+
+        <hr>
+
+
+        <h4>
+            📈 Stock Risk
+        </h4>
+
+
         <p>
 
             <strong>
-                Entry:
+                Stock Entry:
             </strong>
 
             $${Number(
@@ -1039,10 +1300,11 @@ function updateRiskDisplay(plan) {
 
         </p>
 
+
         <p>
 
             <strong>
-                Stop:
+                Stock Stop:
             </strong>
 
             $${Number(
@@ -1051,10 +1313,11 @@ function updateRiskDisplay(plan) {
 
         </p>
 
+
         <p>
 
             <strong>
-                Risk Per Unit:
+                Risk Per Share:
             </strong>
 
             $${Number(
@@ -1070,10 +1333,13 @@ function updateRiskDisplay(plan) {
 
 
 /* =====================================
-   LADDER DISPLAY
+   RO'LYFE LADDER DISPLAY
+
+   Uses OPTION targets when available.
 ===================================== */
 
 function updateLadderDisplay(plan) {
+
 
     const output =
         document.getElementById(
@@ -1084,35 +1350,52 @@ function updateLadderDisplay(plan) {
     if (!output) return;
 
 
-    const risk =
-        Math.abs(
-            plan.entry -
-            plan.stop
-        );
+
+    const optionEntry =
+        Number(plan.optionEntry) || 0;
 
 
-    let t1 =
-        plan.target1 ||
-        (
-            plan.entry +
-            risk
-        );
+
+    const t1 =
+        Number(plan.optionTarget1) ||
+        Number(plan.target1) ||
+        0;
 
 
-    let t2 =
-        plan.target2 ||
-        (
-            plan.entry +
-            risk * 2
-        );
+
+    const t2 =
+        Number(plan.optionTarget2) ||
+        Number(plan.target2) ||
+        0;
 
 
-    let t3 =
-        plan.target3 ||
-        (
-            plan.entry +
-            risk * 3
-        );
+
+    const t3 =
+        Number(plan.optionTarget3) ||
+        Number(plan.target3) ||
+        0;
+
+
+
+    const roi1 =
+        optionEntry > 0 && t1 > 0
+            ? ((t1 - optionEntry) / optionEntry) * 100
+            : 0;
+
+
+
+    const roi2 =
+        optionEntry > 0 && t2 > 0
+            ? ((t2 - optionEntry) / optionEntry) * 100
+            : 0;
+
+
+
+    const roi3 =
+        optionEntry > 0 && t3 > 0
+            ? ((t3 - optionEntry) / optionEntry) * 100
+            : 0;
+
 
 
     output.innerHTML = `
@@ -1124,68 +1407,122 @@ function updateLadderDisplay(plan) {
 
         <div class="ladder-level">
 
+
             <strong>
-                🟢 TARGET 1
+                🟢 TAKE PROFIT 1
             </strong>
 
+
+            <br><br>
+
+
+            $${t1.toFixed(2)}
+
+
             <br>
 
-            ${Number(t1).toFixed(2)}
 
-            <br>
+            ${roi1 > 0
+                ? `ROI: +${roi1.toFixed(2)}%`
+                : ""
+            }
+
+
+            <br><br>
+
 
             Sell 40%
 
+
         </div>
+
 
 
         <div class="ladder-level">
 
+
             <strong>
-                🟢 TARGET 2
+                🟢 TAKE PROFIT 2
             </strong>
 
+
+            <br><br>
+
+
+            $${t2.toFixed(2)}
+
+
             <br>
 
-            ${Number(t2).toFixed(2)}
 
-            <br>
+            ${roi2 > 0
+                ? `ROI: +${roi2.toFixed(2)}%`
+                : ""
+            }
+
+
+            <br><br>
+
 
             Sell 30%
 
+
         </div>
+
 
 
         <div class="ladder-level">
 
+
             <strong>
-                🚀 TARGET 3
+                🚀 TAKE PROFIT 3
             </strong>
 
+
+            <br><br>
+
+
+            $${t3.toFixed(2)}
+
+
             <br>
 
-            ${Number(t3).toFixed(2)}
 
-            <br>
+            ${roi3 > 0
+                ? `ROI: +${roi3.toFixed(2)}%`
+                : ""
+            }
+
+
+            <br><br>
+
 
             Sell 20%
+
 
         </div>
 
 
+
         <div class="ladder-level runner">
+
 
             <strong>
                 🏃 RUNNER
             </strong>
 
-            <br>
+
+            <br><br>
+
 
             Keep 10%
 
+
             <br>
 
+
             Trail With Structure
+
 
         </div>
 
@@ -1201,6 +1538,7 @@ function updateLadderDisplay(plan) {
 
 function loadMainChart() {
 
+
     const symbol =
         document.getElementById(
             "marketSymbol"
@@ -1213,42 +1551,60 @@ function loadMainChart() {
         ).value;
 
 
-    document.getElementById(
-        "tradingview_chart"
-    ).innerHTML = "";
+    const chartContainer =
+        document.getElementById(
+            "tradingview_chart"
+        );
+
+
+    if (!chartContainer) return;
+
+
+    chartContainer.innerHTML = "";
 
 
     new TradingView.widget({
 
+
         container_id:
             "tradingview_chart",
+
 
         width:
             "100%",
 
+
         height:
             550,
+
 
         symbol:
             symbol,
 
+
         interval:
             interval,
+
 
         theme:
             "dark",
 
+
         style:
             "1",
+
 
         locale:
             "en",
 
+
         toolbar_bg:
             "#0b0f1a",
 
+
         allow_symbol_change:
             true,
+
 
         studies: [
 
@@ -1264,6 +1620,7 @@ function loadMainChart() {
 
         ]
 
+
     });
 
 }
@@ -1271,26 +1628,11 @@ function loadMainChart() {
 
 
 /* =====================================
-   AUTO START
-===================================== */
-
-document.addEventListener(
-
-    "DOMContentLoaded",
-
-    function () {
-
-        loadMainChart();
-
-    }
-
-);
-
-/* =====================================
    OPTION EXPIRATION SHORTCUTS
 ===================================== */
 
 function setExpiration(type) {
+
 
     const input =
         document.getElementById(
@@ -1309,13 +1651,21 @@ function setExpiration(type) {
         new Date();
 
 
+    /*
+       ⚡ 0DTE
+    */
+
     if (type === "0dte") {
 
-        date =
-            today;
+        date = new Date(today);
 
     }
 
+
+
+    /*
+       🔥 TOMORROW
+    */
 
     if (type === "next") {
 
@@ -1326,7 +1676,13 @@ function setExpiration(type) {
     }
 
 
+
+    /*
+       📅 THIS FRIDAY
+    */
+
     if (type === "friday") {
+
 
         const day =
             date.getDay();
@@ -1346,7 +1702,13 @@ function setExpiration(type) {
     }
 
 
+
+    /*
+       📆 NEXT FRIDAY
+    */
+
     if (type === "nextFriday") {
+
 
         const day =
             date.getDay();
@@ -1369,6 +1731,12 @@ function setExpiration(type) {
     }
 
 
+
+    /*
+       FORMAT YYYY-MM-DD
+       REQUIRED FOR HTML DATE INPUT
+    */
+
     const year =
         date.getFullYear();
 
@@ -1389,9 +1757,29 @@ function setExpiration(type) {
         `${year}-${month}-${day}`;
 
 }
-    
+
+
+
+/* =====================================
+   AUTO START
+===================================== */
+
+document.addEventListener(
+
+    "DOMContentLoaded",
+
+    function () {
+
+        loadMainChart();
+
+    }
+
+);
+
+
 </script>
 
 
 </body>
-          </html>
+
+    </html>
