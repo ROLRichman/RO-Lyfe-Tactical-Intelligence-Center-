@@ -1114,36 +1114,136 @@ function showSection(sectionId) {
 
 
 
-/* =====================================
+  /* =====================================
    BUILD COMPLETE TRADE
 ===================================== */
 
 function buildTradePlan() {
 
-
     /*
-       1. CREATE PLAN
+       1. CREATE TRADE PLAN
     */
 
     const plan =
         TradePlanner.createPlan();
 
 
-    if (!plan) return;
+    if (!plan) {
 
+        return;
+
+    }
 
 
     /*
-       2. RUN RISK ENGINE
+       2. RUN REAL RISK ENGINE
     */
 
+    let riskResult = null;
+
+
     if (
-        typeof RiskEngine !==
+        typeof ROLyfeRiskEngine !==
         "undefined"
     ) {
 
+        const direction =
+            plan.direction === "Short"
+                ? "short"
+                : "long";
+
+
+        if (plan.instrument === "Option") {
+
+            riskResult =
+                ROLyfeRiskEngine.calculateOption({
+
+                    accountBalance:
+                        plan.accountSize,
+
+                    riskPercent:
+                        plan.riskPercent,
+
+                    stockEntry:
+                        plan.stockEntry,
+
+                    stockStop:
+                        plan.stockStop,
+
+                    optionPremium:
+                        plan.optionEntry,
+
+                    /*
+                       Delta is optional for now.
+
+                       Risk engine will use the
+                       conservative fallback when
+                       no delta is available.
+                    */
+
+                    optionDelta:
+                        0,
+
+                    direction:
+                        direction,
+
+                    maxPremiumRisk:
+                        true
+
+                });
+
+        } else if (
+            plan.instrument === "Crypto"
+        ) {
+
+            riskResult =
+                ROLyfeRiskEngine.calculateCrypto({
+
+                    accountBalance:
+                        plan.accountSize,
+
+                    riskPercent:
+                        plan.riskPercent,
+
+                    entry:
+                        plan.stockEntry,
+
+                    stop:
+                        plan.stockStop,
+
+                    direction:
+                        direction
+
+                });
+
+        } else {
+
+            riskResult =
+                ROLyfeRiskEngine.calculateStock({
+
+                    accountBalance:
+                        plan.accountSize,
+
+                    riskPercent:
+                        plan.riskPercent,
+
+                    entry:
+                        plan.stockEntry,
+
+                    stop:
+                        plan.stockStop,
+
+                    direction:
+                        direction
+
+                });
+
+        }
+
+
         console.log(
-            "Running Risk Engine..."
+            "🛡 Risk Engine Result:",
+            riskResult
         );
 
     }
@@ -1151,16 +1251,97 @@ function buildTradePlan() {
 
 
     /*
-       3. BUILD LADDER
+       3. RUN REAL LADDER ENGINE
     */
 
+    let ladderResult = null;
+
+
     if (
-        typeof LadderEngine !==
+        typeof ROLyfeLadderEngine !==
         "undefined"
     ) {
 
+        const direction =
+            plan.direction === "Short"
+                ? "short"
+                : "long";
+
+
+        /*
+           OPTION LADDER
+        */
+
+        if (
+            plan.instrument === "Option" &&
+            riskResult &&
+            riskResult.valid
+        ) {
+
+            ladderResult =
+                ROLyfeLadderEngine
+                    .buildOptionLadder({
+
+                        stockEntry:
+                            plan.stockEntry,
+
+                        stockStop:
+                            plan.stockStop,
+
+                        contracts:
+                            riskResult.contracts,
+
+                        direction:
+                            direction
+
+                    });
+
+        }
+
+
+        /*
+           STOCK / CRYPTO LADDER
+        */
+
+        else if (
+            riskResult &&
+            riskResult.valid
+        ) {
+
+            const positionSize =
+                plan.instrument === "Crypto"
+                    ? riskResult.quantity
+                    : riskResult.shares;
+
+
+            ladderResult =
+                ROLyfeLadderEngine
+                    .buildStockLadder({
+
+                        entry:
+                            plan.stockEntry,
+
+                        stop:
+                            plan.stockStop,
+
+                        positionSize:
+                            positionSize,
+
+                        direction:
+                            direction,
+
+                        instrument:
+                            plan.instrument
+                                .toLowerCase()
+
+                    });
+
+        }
+
+
         console.log(
-            "Building RO'Lyfe Ladder..."
+            "🪜 Ladder Engine Result:",
+            ladderResult
         );
 
     }
@@ -1168,19 +1349,48 @@ function buildTradePlan() {
 
 
     /*
-       4. UPDATE DISPLAYS
+       4. ATTACH ENGINE RESULTS
+       TO CURRENT TRADE PLAN
     */
 
-    updateRiskDisplay(plan);
+    plan.riskEngine =
+        riskResult;
 
-    updateLadderDisplay(plan);
+
+    plan.ladderEngine =
+        ladderResult;
+
+
+
+    /*
+       5. UPDATE DISPLAYS
+    */
+
+    updateRiskDisplay(
+        plan,
+        riskResult
+    );
+
+
+    updateLadderDisplay(
+        plan,
+        ladderResult
+    );
+
+
+    /*
+       6. SAVE UPDATED PLAN
+    */
+
+    window.currentTradePlan =
+        plan;
 
 
     alert(
         "RO'Lyfe Trade Plan Built! 🎯"
     );
 
-}
+}     
 
 
 
