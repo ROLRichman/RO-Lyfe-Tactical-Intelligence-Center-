@@ -149,7 +149,6 @@
         </h2>
 
 
-
         <!-- =====================================
              MARKET CONTROLS
         ====================================== -->
@@ -163,6 +162,14 @@
 
                 <select id="marketSymbol">
 
+                    <option value="AMEX:SPY">
+                        SPY
+                    </option>
+
+                    <option value="NASDAQ:QQQ">
+                        QQQ
+                    </option>
+
                     <option value="NASDAQ:AAPL">
                         AAPL
                     </option>
@@ -173,14 +180,6 @@
 
                     <option value="NASDAQ:TSLA">
                         TSLA
-                    </option>
-
-                    <option value="AMEX:SPY">
-                        SPY
-                    </option>
-
-                    <option value="NASDAQ:QQQ">
-                        QQQ
                     </option>
 
                     <option value="NASDAQ:MSFT">
@@ -269,8 +268,6 @@
         <div class="market-grid">
 
 
-            <!-- SPY -->
-
             <div class="market-card">
 
                 <span>
@@ -290,8 +287,6 @@
             </div>
 
 
-
-            <!-- QQQ -->
 
             <div class="market-card">
 
@@ -313,8 +308,6 @@
 
 
 
-            <!-- VIX -->
-
             <div class="market-card">
 
                 <span>
@@ -334,8 +327,6 @@
             </div>
 
 
-
-            <!-- SYSTEM -->
 
             <div class="market-card">
 
@@ -393,8 +384,6 @@
         <div class="trade-form">
 
 
-            <!-- SYMBOL -->
-
             <label>
 
                 Symbol
@@ -409,8 +398,6 @@
             </label>
 
 
-
-            <!-- INSTRUMENT -->
 
             <label>
 
@@ -443,8 +430,6 @@
 
 
 
-            <!-- DIRECTION -->
-
             <label>
 
                 Direction
@@ -465,8 +450,6 @@
 
 
 
-            <!-- ACCOUNT SIZE -->
-
             <label>
 
                 Account Size
@@ -481,8 +464,6 @@
             </label>
 
 
-
-            <!-- RISK -->
 
             <label>
 
@@ -517,8 +498,6 @@
         <div class="trade-form">
 
 
-            <!-- PROBABILITY -->
-
             <label>
 
                 Probability % (Optional)
@@ -535,8 +514,6 @@
             </label>
 
 
-
-            <!-- IMPLIED VOLATILITY -->
 
             <label>
 
@@ -573,8 +550,6 @@
         >
 
 
-            <!-- STOCK ENTRY -->
-
             <label>
 
                 Stock Entry
@@ -589,8 +564,6 @@
             </label>
 
 
-
-            <!-- STOCK STOP -->
 
             <label>
 
@@ -607,8 +580,6 @@
 
 
 
-            <!-- STOCK TARGET 1 -->
-
             <label>
 
                 Stock Target 1
@@ -624,8 +595,6 @@
 
 
 
-            <!-- STOCK TARGET 2 -->
-
             <label>
 
                 Stock Target 2
@@ -640,8 +609,6 @@
             </label>
 
 
-
-            <!-- STOCK TARGET 3 -->
 
             <label>
 
@@ -677,8 +644,6 @@
         >
 
 
-            <!-- CALL / PUT -->
-
             <label>
 
                 Call / Put
@@ -699,8 +664,6 @@
 
 
 
-            <!-- STRIKE -->
-
             <label>
 
                 Option Strike
@@ -716,8 +679,6 @@
 
 
 
-            <!-- EXPIRATION -->
-
             <label>
 
                 Expiration Date
@@ -730,8 +691,6 @@
             </label>
 
 
-
-            <!-- OPTION PREMIUM -->
 
             <label>
 
@@ -749,8 +708,6 @@
 
 
 
-            <!-- OPTION TARGET 1 -->
-
             <label>
 
                 Take Profit 1
@@ -767,8 +724,6 @@
 
 
 
-            <!-- OPTION TARGET 2 -->
-
             <label>
 
                 Take Profit 2
@@ -784,8 +739,6 @@
             </label>
 
 
-
-            <!-- OPTION TARGET 3 -->
 
             <label>
 
@@ -831,7 +784,7 @@
 
             <button
                 type="button"
-                onclick="setExpiration('next')"
+                onclick="setExpiration('tomorrow')"
             >
                 🔥 TOMORROW
             </button>
@@ -840,7 +793,7 @@
 
             <button
                 type="button"
-                onclick="setExpiration('friday')"
+                onclick="setExpiration('thisFriday')"
             >
                 📅 THIS FRIDAY
             </button>
@@ -1079,50 +1032,132 @@
 function showSection(sectionId) {
 
     document
-        .querySelectorAll(".dashboard-section")
-        .forEach(section => {
+        .querySelectorAll(
+            ".dashboard-section"
+        )
+        .forEach(
+            section => {
 
-            section.classList.remove(
-                "active-section"
-            );
+                section.classList.remove(
+                    "active-section"
+                );
 
-        });
-
-
-    const selected =
-        document.getElementById(sectionId);
-
-
-    if (selected) {
-
-        selected.classList.add(
-            "active-section"
+            }
         );
 
 
-        window.scrollTo({
+    const selected =
+        document.getElementById(
+            sectionId
+        );
 
-            top: 0,
 
-            behavior: "smooth"
+    if (!selected) {
 
-        });
+        return;
 
     }
+
+
+    selected.classList.add(
+        "active-section"
+    );
+
+
+    window.scrollTo({
+
+        top: 0,
+
+        behavior: "smooth"
+
+    });
 
 }
 
 
 
-  /* =====================================
+/* =====================================
+   MONEY FORMATTER
+===================================== */
+
+function formatMoney(value) {
+
+    const number =
+        Number(value);
+
+
+    if (!Number.isFinite(number)) {
+
+        return "$0.00";
+
+    }
+
+
+    return new Intl.NumberFormat(
+
+        "en-US",
+
+        {
+
+            style: "currency",
+
+            currency: "USD"
+
+        }
+
+    ).format(number);
+
+}
+
+
+
+/* =====================================
+   PRICE FORMATTER
+===================================== */
+
+function formatPrice(value) {
+
+    const number =
+        Number(value);
+
+
+    if (!Number.isFinite(number)) {
+
+        return "—";
+
+    }
+
+
+    if (Math.abs(number) < 1) {
+
+        return number.toFixed(4);
+
+    }
+
+
+    if (Math.abs(number) < 10) {
+
+        return number.toFixed(3);
+
+    }
+
+
+    return number.toFixed(2);
+
+}
+
+
+
+/* =====================================
    BUILD COMPLETE TRADE
 ===================================== */
 
 function buildTradePlan() {
 
-    /*
-       1. CREATE TRADE PLAN
-    */
+
+    /* -------------------------------------
+       1. CREATE MASTER TRADE PLAN
+    ------------------------------------- */
 
     const plan =
         TradePlanner.createPlan();
@@ -1135,147 +1170,195 @@ function buildTradePlan() {
     }
 
 
-    /*
-       2. RUN REAL RISK ENGINE
-    */
+    const direction =
+        plan.direction === "Short"
+            ? "short"
+            : "long";
 
-    let riskResult = null;
 
+    let riskResult =
+        null;
+
+
+    let ladderResult =
+        null;
+
+
+
+    /* -------------------------------------
+       2. RUN RISK ENGINE
+    ------------------------------------- */
 
     if (
-        typeof ROLyfeRiskEngine !==
+
+        typeof ROLyfeRiskEngine ===
         "undefined"
+
     ) {
 
-        const direction =
-            plan.direction === "Short"
-                ? "short"
-                : "long";
+        console.error(
+            "ROLyfeRiskEngine not loaded."
+        );
+
+    }
+
+    else {
 
 
-        if (plan.instrument === "Option") {
+        /* ================================
+           OPTION RISK
+        ================================ */
+
+        if (
+            plan.instrument === "Option"
+        ) {
 
             riskResult =
-                ROLyfeRiskEngine.calculateOption({
+                ROLyfeRiskEngine
+                    .calculateOption({
 
-                    accountBalance:
-                        plan.accountSize,
+                        accountBalance:
+                            plan.accountSize,
 
-                    riskPercent:
-                        plan.riskPercent,
+                        riskPercent:
+                            plan.riskPercent,
 
-                    stockEntry:
-                        plan.stockEntry,
+                        stockEntry:
+                            plan.stockEntry,
 
-                    stockStop:
-                        plan.stockStop,
+                        stockStop:
+                            plan.stockStop,
 
-                    optionPremium:
-                        plan.optionEntry,
+                        optionPremium:
+                            plan.optionEntry,
 
-                    /*
-                       Delta is optional for now.
+                        optionDelta:
+                            0,
 
-                       Risk engine will use the
-                       conservative fallback when
-                       no delta is available.
-                    */
+                        direction:
+                            direction,
 
-                    optionDelta:
-                        0,
+                        maxPremiumRisk:
+                            true
 
-                    direction:
-                        direction,
+                    });
 
-                    maxPremiumRisk:
-                        true
+        }
 
-                });
 
-        } else if (
+
+        /* ================================
+           CRYPTO RISK
+        ================================ */
+
+        else if (
             plan.instrument === "Crypto"
         ) {
 
             riskResult =
-                ROLyfeRiskEngine.calculateCrypto({
+                ROLyfeRiskEngine
+                    .calculateCrypto({
 
-                    accountBalance:
-                        plan.accountSize,
+                        accountBalance:
+                            plan.accountSize,
 
-                    riskPercent:
-                        plan.riskPercent,
+                        riskPercent:
+                            plan.riskPercent,
 
-                    entry:
-                        plan.stockEntry,
+                        entry:
+                            plan.stockEntry,
 
-                    stop:
-                        plan.stockStop,
+                        stop:
+                            plan.stockStop,
 
-                    direction:
-                        direction
+                        direction:
+                            direction
 
-                });
+                    });
 
-        } else {
+        }
+
+
+
+        /* ================================
+           STOCK / FUTURES RISK
+
+           Futures currently uses the
+           stock-style risk model.
+
+           Later we can add point value
+           and contract multipliers.
+        ================================ */
+
+        else {
 
             riskResult =
-                ROLyfeRiskEngine.calculateStock({
+                ROLyfeRiskEngine
+                    .calculateStock({
 
-                    accountBalance:
-                        plan.accountSize,
+                        accountBalance:
+                            plan.accountSize,
 
-                    riskPercent:
-                        plan.riskPercent,
+                        riskPercent:
+                            plan.riskPercent,
 
-                    entry:
-                        plan.stockEntry,
+                        entry:
+                            plan.stockEntry,
 
-                    stop:
-                        plan.stockStop,
+                        stop:
+                            plan.stockStop,
 
-                    direction:
-                        direction
+                        direction:
+                            direction
 
-                });
+                    });
 
         }
 
 
         console.log(
-            "🛡 Risk Engine Result:",
+
+            "🛡 RO'LYFE Risk Engine:",
+
             riskResult
+
         );
 
     }
 
 
 
-    /*
-       3. RUN REAL LADDER ENGINE
-    */
-
-    let ladderResult = null;
-
+    /* -------------------------------------
+       3. RUN LADDER ENGINE
+    ------------------------------------- */
 
     if (
-        typeof ROLyfeLadderEngine !==
+
+        typeof ROLyfeLadderEngine ===
         "undefined"
+
     ) {
 
-        const direction =
-            plan.direction === "Short"
-                ? "short"
-                : "long";
+        console.error(
+            "ROLyfeLadderEngine not loaded."
+        );
+
+    }
+
+    else if (
+
+        riskResult &&
+        riskResult.valid
+
+    ) {
 
 
-        /*
+        /* ================================
            OPTION LADDER
-        */
+        ================================ */
 
         if (
-            plan.instrument === "Option" &&
-            riskResult &&
-            riskResult.valid
+            plan.instrument === "Option"
         ) {
 
             ladderResult =
@@ -1299,19 +1382,35 @@ function buildTradePlan() {
         }
 
 
-        /*
-           STOCK / CRYPTO LADDER
-        */
+
+        /* ================================
+           CRYPTO LADDER
+        ================================ */
 
         else if (
-            riskResult &&
-            riskResult.valid
+            plan.instrument === "Crypto"
         ) {
 
-            const positionSize =
-                plan.instrument === "Crypto"
-                    ? riskResult.quantity
-                    : riskResult.shares;
+            /*
+               Crypto can have fractional
+               quantities, but the current
+               ladder allocation engine
+               uses whole units.
+
+               For now we use a rounded
+               quantity.
+            */
+
+            const quantity =
+                Math.max(
+
+                    1,
+
+                    Math.floor(
+                        riskResult.quantity
+                    )
+
+                );
 
 
             ladderResult =
@@ -1325,7 +1424,38 @@ function buildTradePlan() {
                             plan.stockStop,
 
                         positionSize:
-                            positionSize,
+                            quantity,
+
+                        direction:
+                            direction,
+
+                        instrument:
+                            "crypto"
+
+                    });
+
+        }
+
+
+
+        /* ================================
+           STOCK / FUTURES LADDER
+        ================================ */
+
+        else {
+
+            ladderResult =
+                ROLyfeLadderEngine
+                    .buildStockLadder({
+
+                        entry:
+                            plan.stockEntry,
+
+                        stop:
+                            plan.stockStop,
+
+                        positionSize:
+                            riskResult.shares,
 
                         direction:
                             direction,
@@ -1340,18 +1470,20 @@ function buildTradePlan() {
 
 
         console.log(
-            "🪜 Ladder Engine Result:",
+
+            "🪜 RO'LYFE Ladder Engine:",
+
             ladderResult
+
         );
 
     }
 
 
 
-    /*
+    /* -------------------------------------
        4. ATTACH ENGINE RESULTS
-       TO CURRENT TRADE PLAN
-    */
+    ------------------------------------- */
 
     plan.riskEngine =
         riskResult;
@@ -1361,36 +1493,47 @@ function buildTradePlan() {
         ladderResult;
 
 
+    window.currentTradePlan =
+        plan;
 
-    /*
+
+
+    /* -------------------------------------
        5. UPDATE DISPLAYS
-    */
+    ------------------------------------- */
 
     updateRiskDisplay(
+
         plan,
+
         riskResult
+
     );
 
 
     updateLadderDisplay(
+
         plan,
+
         ladderResult
+
     );
 
 
-    /*
-       6. SAVE UPDATED PLAN
-    */
+    console.log(
 
-    window.currentTradePlan =
-        plan;
+        "🎯 COMPLETE RO'LYFE TRADE PLAN:",
+
+        plan
+
+    );
 
 
     alert(
         "RO'Lyfe Trade Plan Built! 🎯"
     );
 
-}     
+}
 
 
 
@@ -1402,8 +1545,25 @@ function addPlanToJournal() {
 
 
     if (
+
+        !window.currentTradePlan
+
+    ) {
+
+        alert(
+            "Build a trade plan first."
+        );
+
+        return;
+
+    }
+
+
+    if (
+
         typeof TradeJournal ===
         "undefined"
+
     ) {
 
         alert(
@@ -1427,10 +1587,16 @@ function addPlanToJournal() {
 
 
 /* =====================================
-   BASIC RISK DISPLAY
+   RISK ENGINE DISPLAY
 ===================================== */
 
-function updateRiskDisplay(plan) {
+function updateRiskDisplay(
+
+    plan,
+
+    riskResult
+
+) {
 
 
     const output =
@@ -1439,102 +1605,358 @@ function updateRiskDisplay(plan) {
         );
 
 
-    if (!output) return;
+    if (!output) {
+
+        return;
+
+    }
 
 
-    const riskAmount =
-        plan.riskAmount || 0;
+    if (
+
+        !riskResult
+
+    ) {
+
+        output.innerHTML = `
+
+            <h3>
+                🛡 Risk Engine
+            </h3>
+
+            <p>
+                Risk calculation unavailable.
+            </p>
+
+        `;
+
+        return;
+
+    }
+
+
+    if (
+
+        !riskResult.valid
+
+    ) {
+
+        output.innerHTML = `
+
+            <h3>
+                ⚠️ Risk Engine Warning
+            </h3>
+
+            <p>
+                ${riskResult.error}
+            </p>
+
+        `;
+
+        return;
+
+    }
+
+
+    let positionDetails =
+        "";
+
+
+    /* -------------------------------------
+       OPTION DETAILS
+    ------------------------------------- */
+
+    if (
+        riskResult.instrument ===
+        "option"
+    ) {
+
+        positionDetails = `
+
+            <p>
+
+                <strong>
+                    Contracts:
+                </strong>
+
+                ${riskResult.contracts}
+
+            </p>
+
+
+            <p>
+
+                <strong>
+                    Cost Per Contract:
+                </strong>
+
+                ${formatMoney(
+                    riskResult.contractCost
+                )}
+
+            </p>
+
+
+            <p>
+
+                <strong>
+                    Premium Exposure:
+                </strong>
+
+                ${formatMoney(
+                    riskResult.totalPremiumExposure
+                )}
+
+            </p>
+
+
+            <p>
+
+                <strong>
+                    Estimated Risk:
+                </strong>
+
+                ${formatMoney(
+                    riskResult.estimatedTotalRisk
+                )}
+
+            </p>
+
+        `;
+
+    }
+
+
+
+    /* -------------------------------------
+       CRYPTO DETAILS
+    ------------------------------------- */
+
+    else if (
+        riskResult.instrument ===
+        "crypto"
+    ) {
+
+        positionDetails = `
+
+            <p>
+
+                <strong>
+                    Quantity:
+                </strong>
+
+                ${Number(
+                    riskResult.quantity
+                ).toFixed(6)}
+
+            </p>
+
+
+            <p>
+
+                <strong>
+                    Position Value:
+                </strong>
+
+                ${formatMoney(
+                    riskResult.quantity *
+                    riskResult.entry
+                )}
+
+            </p>
+
+        `;
+
+    }
+
+
+
+    /* -------------------------------------
+       STOCK DETAILS
+    ------------------------------------- */
+
+    else {
+
+        positionDetails = `
+
+            <p>
+
+                <strong>
+                    Shares:
+                </strong>
+
+                ${riskResult.shares}
+
+            </p>
+
+
+            <p>
+
+                <strong>
+                    Position Value:
+                </strong>
+
+                ${formatMoney(
+                    riskResult.positionValue
+                )}
+
+            </p>
+
+        `;
+
+    }
 
 
     output.innerHTML = `
 
-        <h3>
-            🛡 Risk Summary
-        </h3>
+        <div class="risk-summary-card">
 
 
-        <p>
-
-            <strong>
-                Symbol:
-            </strong>
-
-            ${plan.symbol}
-
-        </p>
+            <h3>
+                🛡 RO'LYFE RISK SUMMARY
+            </h3>
 
 
-        <p>
+            <p>
 
-            <strong>
-                Account:
-            </strong>
+                <strong>
+                    Symbol:
+                </strong>
 
-            $${Number(
-                plan.accountSize || 0
-            ).toFixed(2)}
+                ${plan.symbol}
 
-        </p>
+            </p>
 
 
-        <p>
+            <p>
 
-            <strong>
-                Risk Budget:
-            </strong>
+                <strong>
+                    Instrument:
+                </strong>
 
-            $${Number(
-                riskAmount
-            ).toFixed(2)}
+                ${plan.instrument}
 
-        </p>
+            </p>
 
 
-        <hr>
+            <p>
+
+                <strong>
+                    Direction:
+                </strong>
+
+                ${plan.direction}
+
+            </p>
 
 
-        <h4>
-            📈 Stock Risk
-        </h4>
+            <hr>
 
 
-        <p>
+            <p>
 
-            <strong>
-                Stock Entry:
-            </strong>
+                <strong>
+                    Account Balance:
+                </strong>
 
-            $${Number(
-                plan.entry
-            ).toFixed(2)}
+                ${formatMoney(
+                    riskResult.accountBalance
+                )}
 
-        </p>
-
-
-        <p>
-
-            <strong>
-                Stock Stop:
-            </strong>
-
-            $${Number(
-                plan.stop
-            ).toFixed(2)}
-
-        </p>
+            </p>
 
 
-        <p>
+            <p>
 
-            <strong>
-                Risk Per Share:
-            </strong>
+                <strong>
+                    Risk %:
+                </strong>
 
-            $${Number(
-                plan.riskPerUnit
-            ).toFixed(2)}
+                ${Number(
+                    riskResult.riskPercent
+                ).toFixed(2)}%
 
-        </p>
+            </p>
+
+
+            <p>
+
+                <strong>
+                    Dollar Risk Budget:
+                </strong>
+
+                ${formatMoney(
+                    riskResult.dollarRisk
+                )}
+
+            </p>
+
+
+            <hr>
+
+
+            <h4>
+                📈 STOCK RISK MAP
+            </h4>
+
+
+            <p>
+
+                <strong>
+                    Entry:
+                </strong>
+
+                ${formatMoney(
+                    plan.stockEntry
+                )}
+
+            </p>
+
+
+            <p>
+
+                <strong>
+                    Stop:
+                </strong>
+
+                ${formatMoney(
+                    plan.stockStop
+                )}
+
+            </p>
+
+
+            <p>
+
+                <strong>
+                    Risk Per Unit:
+                </strong>
+
+                ${formatMoney(
+
+                    riskResult.riskPerShare ||
+
+                    riskResult.stockMoveToStop ||
+
+                    plan.stockRiskPerShare
+
+                )}
+
+            </p>
+
+
+            <hr>
+
+
+            <h4>
+                🎯 POSITION SIZE
+            </h4>
+
+
+            ${positionDetails}
+
+
+        </div>
 
     `;
 
@@ -1543,12 +1965,16 @@ function updateRiskDisplay(plan) {
 
 
 /* =====================================
-   RO'LYFE LADDER DISPLAY
-
-   Uses OPTION targets when available.
+   LADDER DISPLAY
 ===================================== */
 
-function updateLadderDisplay(plan) {
+function updateLadderDisplay(
+
+    plan,
+
+    ladderResult
+
+) {
 
 
     const output =
@@ -1557,181 +1983,553 @@ function updateLadderDisplay(plan) {
         );
 
 
-    if (!output) return;
+    if (!output) {
+
+        return;
+
+    }
+
+
+    if (
+
+        !ladderResult
+
+    ) {
+
+        output.innerHTML = `
+
+            <h3>
+                🪜 RO'LYFE Trade Ladder
+            </h3>
+
+            <p>
+                Build a valid risk-sized trade
+                to generate your ladder.
+            </p>
+
+        `;
+
+        return;
+
+    }
+
+
+    if (
+
+        !ladderResult.valid
+
+    ) {
+
+        output.innerHTML = `
+
+            <h3>
+                ⚠️ Ladder Warning
+            </h3>
+
+            <p>
+                ${ladderResult.error}
+            </p>
+
+        `;
+
+        return;
+
+    }
 
 
 
-    const optionEntry =
-        Number(plan.optionEntry) || 0;
+    /* =====================================
+       OPTION LADDER
+    ====================================== */
+
+    if (
+
+        ladderResult.instrument ===
+        "option"
+
+    ) {
+
+
+        const tp1 =
+            ladderResult.targets.tp1;
+
+
+        const tp2 =
+            ladderResult.targets.tp2;
+
+
+        const tp3 =
+            ladderResult.targets.tp3;
+
+
+        const runner =
+            ladderResult.targets.runner;
+
+
+        output.innerHTML = `
+
+            <div class="ladder-card">
+
+
+                <h3>
+                    🪜 RO'LYFE OPTION LADDER
+                </h3>
+
+
+                <p>
+
+                    <strong>
+                        ${plan.symbol}
+                    </strong>
+
+                    • ${plan.optionType}
+
+                    • ${plan.direction}
+
+                </p>
+
+
+                <p>
+
+                    <strong>
+                        Total Contracts:
+                    </strong>
+
+                    ${ladderResult.allocation.positionSize}
+
+                </p>
+
+
+                <hr>
+
+
+                <div class="ladder-level">
+
+
+                    <strong>
+                        🟢 TAKE PROFIT 1
+                    </strong>
+
+
+                    <p>
+
+                        Stock Target:
+                        ${formatMoney(
+                            tp1.stockPrice
+                        )}
+
+                    </p>
+
+
+                    <p>
+
+                        ${tp1.r}R Target
+
+                    </p>
+
+
+                    <p>
+
+                        Sell:
+                        ${tp1.contracts}
+                        Contract(s)
+
+                    </p>
+
+
+                </div>
 
 
 
-    const t1 =
-        Number(plan.optionTarget1) ||
-        Number(plan.target1) ||
-        0;
+                <div class="ladder-level">
+
+
+                    <strong>
+                        🟢 TAKE PROFIT 2
+                    </strong>
+
+
+                    <p>
+
+                        Stock Target:
+                        ${formatMoney(
+                            tp2.stockPrice
+                        )}
+
+                    </p>
+
+
+                    <p>
+
+                        ${tp2.r}R Target
+
+                    </p>
+
+
+                    <p>
+
+                        Sell:
+                        ${tp2.contracts}
+                        Contract(s)
+
+                    </p>
+
+
+                </div>
 
 
 
-    const t2 =
-        Number(plan.optionTarget2) ||
-        Number(plan.target2) ||
-        0;
+                <div class="ladder-level">
+
+
+                    <strong>
+                        🚀 TAKE PROFIT 3
+                    </strong>
+
+
+                    <p>
+
+                        Stock Target:
+                        ${formatMoney(
+                            tp3.stockPrice
+                        )}
+
+                    </p>
+
+
+                    <p>
+
+                        ${tp3.r}R Target
+
+                    </p>
+
+
+                    <p>
+
+                        Sell:
+                        ${tp3.contracts}
+                        Contract(s)
+
+                    </p>
+
+
+                </div>
 
 
 
-    const t3 =
-        Number(plan.optionTarget3) ||
-        Number(plan.target3) ||
-        0;
+                <div class="ladder-level runner">
+
+
+                    <strong>
+                        🏃 RUNNER
+                    </strong>
+
+
+                    <p>
+
+                        Stock Target:
+                        ${formatMoney(
+                            runner.stockPrice
+                        )}
+
+                    </p>
+
+
+                    <p>
+
+                        ${runner.r}R Target
+
+                    </p>
+
+
+                    <p>
+
+                        Keep:
+                        ${runner.contracts}
+                        Contract(s)
+
+                    </p>
+
+
+                    <p>
+
+                        Trail With Structure
+
+                    </p>
+
+
+                </div>
+
+
+            </div>
+
+        `;
+
+        return;
+
+    }
 
 
 
-    const roi1 =
-        optionEntry > 0 && t1 > 0
-            ? ((t1 - optionEntry) / optionEntry) * 100
-            : 0;
+    /* =====================================
+       STOCK / CRYPTO LADDER
+    ====================================== */
+
+    const tp1 =
+        ladderResult.targets.tp1;
 
 
-
-    const roi2 =
-        optionEntry > 0 && t2 > 0
-            ? ((t2 - optionEntry) / optionEntry) * 100
-            : 0;
+    const tp2 =
+        ladderResult.targets.tp2;
 
 
+    const tp3 =
+        ladderResult.targets.tp3;
 
-    const roi3 =
-        optionEntry > 0 && t3 > 0
-            ? ((t3 - optionEntry) / optionEntry) * 100
-            : 0;
 
+    const runner =
+        ladderResult.targets.runner;
+
+
+    const unitLabel =
+        ladderResult.instrument === "crypto"
+            ? "Units"
+            : "Shares";
 
 
     output.innerHTML = `
 
-        <h3>
-            🪜 RO'Lyfe Profit Ladder
-        </h3>
+        <div class="ladder-card">
 
 
-        <div class="ladder-level">
+            <h3>
+                🪜 RO'LYFE PROFIT LADDER
+            </h3>
 
 
-            <strong>
-                🟢 TAKE PROFIT 1
-            </strong>
+            <p>
 
+                <strong>
+                    ${plan.symbol}
+                </strong>
 
-            <br><br>
+                • ${plan.instrument}
 
+                • ${plan.direction}
 
-            $${t1.toFixed(2)}
+            </p>
 
 
-            <br>
+            <p>
 
+                <strong>
+                    Position Size:
+                </strong>
 
-            ${roi1 > 0
-                ? `ROI: +${roi1.toFixed(2)}%`
-                : ""
-            }
+                ${ladderResult.allocation.positionSize}
 
+            </p>
 
-            <br><br>
 
+            <hr>
 
-            Sell 40%
 
+            <div class="ladder-level">
 
-        </div>
 
+                <strong>
+                    🟢 TAKE PROFIT 1
+                </strong>
 
 
-        <div class="ladder-level">
+                <p>
 
+                    Target:
+                    ${formatMoney(
+                        tp1.price
+                    )}
 
-            <strong>
-                🟢 TAKE PROFIT 2
-            </strong>
+                </p>
 
 
-            <br><br>
+                <p>
 
+                    ${tp1.r}R
 
-            $${t2.toFixed(2)}
+                </p>
 
 
-            <br>
+                <p>
 
+                    Sell:
+                    ${tp1.quantity}
+                    ${unitLabel}
 
-            ${roi2 > 0
-                ? `ROI: +${roi2.toFixed(2)}%`
-                : ""
-            }
+                </p>
 
 
-            <br><br>
+                <p>
 
+                    Estimated Profit:
+                    ${formatMoney(
+                        tp1.estimatedProfit
+                    )}
 
-            Sell 30%
+                </p>
 
 
-        </div>
+            </div>
 
 
 
-        <div class="ladder-level">
+            <div class="ladder-level">
 
 
-            <strong>
-                🚀 TAKE PROFIT 3
-            </strong>
+                <strong>
+                    🟢 TAKE PROFIT 2
+                </strong>
 
 
-            <br><br>
+                <p>
 
+                    Target:
+                    ${formatMoney(
+                        tp2.price
+                    )}
 
-            $${t3.toFixed(2)}
+                </p>
 
 
-            <br>
+                <p>
 
+                    ${tp2.r}R
 
-            ${roi3 > 0
-                ? `ROI: +${roi3.toFixed(2)}%`
-                : ""
-            }
+                </p>
 
 
-            <br><br>
+                <p>
 
+                    Sell:
+                    ${tp2.quantity}
+                    ${unitLabel}
 
-            Sell 20%
+                </p>
 
 
-        </div>
+                <p>
 
+                    Estimated Profit:
+                    ${formatMoney(
+                        tp2.estimatedProfit
+                    )}
 
+                </p>
 
-        <div class="ladder-level runner">
 
+            </div>
 
-            <strong>
-                🏃 RUNNER
-            </strong>
 
 
-            <br><br>
+            <div class="ladder-level">
 
 
-            Keep 10%
+                <strong>
+                    🚀 TAKE PROFIT 3
+                </strong>
 
 
-            <br>
+                <p>
 
+                    Target:
+                    ${formatMoney(
+                        tp3.price
+                    )}
 
-            Trail With Structure
+                </p>
+
+
+                <p>
+
+                    ${tp3.r}R
+
+                </p>
+
+
+                <p>
+
+                    Sell:
+                    ${tp3.quantity}
+                    ${unitLabel}
+
+                </p>
+
+
+                <p>
+
+                    Estimated Profit:
+                    ${formatMoney(
+                        tp3.estimatedProfit
+                    )}
+
+                </p>
+
+
+            </div>
+
+
+
+            <div class="ladder-level runner">
+
+
+                <strong>
+                    🏃 RUNNER
+                </strong>
+
+
+                <p>
+
+                    Target:
+                    ${formatMoney(
+                        runner.price
+                    )}
+
+                </p>
+
+
+                <p>
+
+                    ${runner.r}R
+
+                </p>
+
+
+                <p>
+
+                    Keep:
+                    ${runner.quantity}
+                    ${unitLabel}
+
+                </p>
+
+
+                <p>
+
+                    Estimated Profit:
+                    ${formatMoney(
+                        runner.estimatedProfit
+                    )}
+
+                </p>
+
+
+                <p>
+
+                    Trail With Structure
+
+                </p>
+
+
+            </div>
 
 
         </div>
@@ -1749,16 +2547,16 @@ function updateLadderDisplay(plan) {
 function loadMainChart() {
 
 
-    const symbol =
+    const symbolElement =
         document.getElementById(
             "marketSymbol"
-        ).value;
+        );
 
 
-    const interval =
+    const timeframeElement =
         document.getElementById(
             "timeframe"
-        ).value;
+        );
 
 
     const chartContainer =
@@ -1767,10 +2565,51 @@ function loadMainChart() {
         );
 
 
-    if (!chartContainer) return;
+    if (
+
+        !symbolElement ||
+
+        !timeframeElement ||
+
+        !chartContainer
+
+    ) {
+
+        return;
+
+    }
 
 
-    chartContainer.innerHTML = "";
+    const symbol =
+        symbolElement.value;
+
+
+    const interval =
+        timeframeElement.value;
+
+
+    chartContainer.innerHTML =
+        "";
+
+
+    if (
+
+        typeof TradingView ===
+        "undefined"
+
+    ) {
+
+        chartContainer.innerHTML = `
+
+            <p>
+                TradingView is loading...
+            </p>
+
+        `;
+
+        return;
+
+    }
 
 
     new TradingView.widget({
@@ -1841,6 +2680,37 @@ function loadMainChart() {
    OPTION EXPIRATION SHORTCUTS
 ===================================== */
 
+function formatDateForInput(date) {
+
+
+    const year =
+        date.getFullYear();
+
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    return `${year}-${month}-${day}`;
+
+}
+
+
+
 function setExpiration(type) {
 
 
@@ -1850,61 +2720,76 @@ function setExpiration(type) {
         );
 
 
-    if (!input) return;
+    if (!input) {
+
+        return;
+
+    }
 
 
     const today =
         new Date();
 
 
-    let date =
-        new Date();
+    let selectedDate =
+        new Date(today);
 
 
-    /*
+
+    /* -------------------------------------
        ⚡ 0DTE
-    */
+    ------------------------------------- */
 
-    if (type === "0dte") {
+    if (
+        type === "0dte"
+    ) {
 
-        date = new Date(today);
+        selectedDate =
+            new Date(today);
 
     }
 
 
 
-    /*
+    /* -------------------------------------
        🔥 TOMORROW
-    */
+    ------------------------------------- */
 
-    if (type === "next") {
+    else if (
+        type === "tomorrow"
+    ) {
 
-        date.setDate(
-            date.getDate() + 1
+        selectedDate.setDate(
+            selectedDate.getDate() + 1
         );
 
     }
 
 
 
-    /*
+    /* -------------------------------------
        📅 THIS FRIDAY
-    */
 
-    if (type === "friday") {
+       If today is Friday,
+       it selects today.
+    ------------------------------------- */
 
+    else if (
+        type === "thisFriday"
+    ) {
 
         const day =
-            date.getDay();
+            today.getDay();
 
 
         const daysUntilFriday =
             (5 - day + 7) % 7;
 
 
-        date.setDate(
+        selectedDate.setDate(
 
-            date.getDate() +
+            today.getDate() +
+
             daysUntilFriday
 
         );
@@ -1913,27 +2798,46 @@ function setExpiration(type) {
 
 
 
-    /*
+    /* -------------------------------------
        📆 NEXT FRIDAY
-    */
 
-    if (type === "nextFriday") {
+       Always the Friday AFTER
+       this upcoming Friday.
+    ------------------------------------- */
 
+    else if (
+        type === "nextFriday"
+    ) {
 
         const day =
-            date.getDay();
+            today.getDay();
 
 
         let daysUntilFriday =
             (5 - day + 7) % 7;
 
 
-        daysUntilFriday += 7;
+        if (
+            daysUntilFriday === 0
+        ) {
+
+            daysUntilFriday =
+                7;
+
+        }
+
+        else {
+
+            daysUntilFriday +=
+                7;
+
+        }
 
 
-        date.setDate(
+        selectedDate.setDate(
 
-            date.getDate() +
+            today.getDate() +
+
             daysUntilFriday
 
         );
@@ -1941,30 +2845,10 @@ function setExpiration(type) {
     }
 
 
-
-    /*
-       FORMAT YYYY-MM-DD
-       REQUIRED FOR HTML DATE INPUT
-    */
-
-    const year =
-        date.getFullYear();
-
-
-    const month =
-        String(
-            date.getMonth() + 1
-        ).padStart(2, "0");
-
-
-    const day =
-        String(
-            date.getDate()
-        ).padStart(2, "0");
-
-
     input.value =
-        `${year}-${month}-${day}`;
+        formatDateForInput(
+            selectedDate
+        );
 
 }
 
@@ -1980,7 +2864,62 @@ document.addEventListener(
 
     function () {
 
+
         loadMainChart();
+
+
+        console.log(
+            "🔥 RO'LYFE RTIC ONLINE"
+        );
+
+
+        console.log(
+
+            "Risk Engine:",
+
+            typeof ROLyfeRiskEngine !==
+            "undefined"
+                ? "ONLINE 🟢"
+                : "OFFLINE 🔴"
+
+        );
+
+
+        console.log(
+
+            "Ladder Engine:",
+
+            typeof ROLyfeLadderEngine !==
+            "undefined"
+                ? "ONLINE 🟢"
+                : "OFFLINE 🔴"
+
+        );
+
+
+        console.log(
+
+            "Trade Planner:",
+
+            typeof TradePlanner !==
+            "undefined"
+                ? "ONLINE 🟢"
+                : "OFFLINE 🔴"
+
+        );
+
+
+        console.log(
+
+            "Trade Journal:",
+
+            typeof TradeJournal !==
+            "undefined"
+                ? "ONLINE 🟢"
+                : "OFFLINE 🔴"
+
+        );
+
 
     }
 
