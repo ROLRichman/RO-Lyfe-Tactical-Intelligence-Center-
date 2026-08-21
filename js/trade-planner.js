@@ -18,9 +18,7 @@ const TradePlanner = {
             document.getElementById(id);
 
         if (!element) {
-
             return null;
-
         }
 
         const value =
@@ -29,7 +27,6 @@ const TradePlanner = {
         return isNaN(value)
             ? null
             : value;
-
     },
 
 
@@ -39,13 +36,10 @@ const TradePlanner = {
             document.getElementById(id);
 
         if (!element) {
-
             return fallback;
-
         }
 
         return element.value || fallback;
-
     },
 
 
@@ -56,7 +50,7 @@ const TradePlanner = {
     createPlan() {
 
         /* ---------------------------------
-           BASIC TRADE INFORMATION
+           BASIC INFORMATION
         --------------------------------- */
 
         const symbol =
@@ -192,8 +186,6 @@ const TradePlanner = {
 
         /* ---------------------------------
            VALIDATION
-
-           Stock Map is the foundation.
         --------------------------------- */
 
         if (!symbol) {
@@ -203,7 +195,6 @@ const TradePlanner = {
             );
 
             return null;
-
         }
 
 
@@ -217,7 +208,6 @@ const TradePlanner = {
             );
 
             return null;
-
         }
 
 
@@ -231,7 +221,22 @@ const TradePlanner = {
             );
 
             return null;
+        }
 
+
+        if (
+            probability !== null &&
+            (
+                probability < 0 ||
+                probability > 100
+            )
+        ) {
+
+            alert(
+                "Probability must be between 0 and 100."
+            );
+
+            return null;
         }
 
 
@@ -245,7 +250,6 @@ const TradePlanner = {
             );
 
             return null;
-
         }
 
 
@@ -259,7 +263,6 @@ const TradePlanner = {
             );
 
             return null;
-
         }
 
 
@@ -289,18 +292,15 @@ const TradePlanner = {
                 (
                     riskPercent / 100
                 );
-
         }
 
 
         /* ---------------------------------
-           STOCK ROI / RESULTS
+           STOCK TARGET CALCULATOR
 
-           Long:
-           Target - Entry
-
-           Short:
-           Entry - Target
+           RESULT
+           ROI
+           R MULTIPLE
         --------------------------------- */
 
         const calculateStockResult =
@@ -308,11 +308,9 @@ const TradePlanner = {
 
                 if (
                     target === null ||
-                    stockEntry === null
+                    target === undefined
                 ) {
-
                     return null;
-
                 }
 
 
@@ -332,7 +330,6 @@ const TradePlanner = {
                     result =
                         stockEntry -
                         target;
-
                 }
 
 
@@ -343,16 +340,23 @@ const TradePlanner = {
                     ) * 100;
 
 
+                const rMultiple =
+                    stockRiskPerShare > 0
+                        ? result /
+                          stockRiskPerShare
+                        : 0;
+
+
                 return {
 
-                    target: target,
+                    target,
 
-                    result: result,
+                    result,
 
-                    roi: roi
+                    roi,
 
+                    rMultiple
                 };
-
             };
 
 
@@ -375,10 +379,16 @@ const TradePlanner = {
 
 
         /* ---------------------------------
-           OPTION ROI / RESULTS
+           OPTION CALCULATOR
 
-           Premium movement.
+           Standard option contract = 100
         --------------------------------- */
+
+        const optionContractCost =
+            optionEntry !== null
+                ? optionEntry * 100
+                : null;
+
 
         const calculateOptionResult =
             (target) => {
@@ -388,15 +398,18 @@ const TradePlanner = {
                     optionEntry === null ||
                     optionEntry <= 0
                 ) {
-
                     return null;
-
                 }
 
 
                 const profitPerShare =
                     target -
                     optionEntry;
+
+
+                const profitPerContract =
+                    profitPerShare *
+                    100;
 
 
                 const roi =
@@ -406,30 +419,16 @@ const TradePlanner = {
                     ) * 100;
 
 
-                /*
-                   Standard equity option
-                   contract = 100 shares
-                */
-
-                const profitPerContract =
-                    profitPerShare *
-                    100;
-
-
                 return {
 
-                    target: target,
+                    target,
 
-                    profitPerShare:
-                        profitPerShare,
+                    profitPerShare,
 
-                    profitPerContract:
-                        profitPerContract,
+                    profitPerContract,
 
-                    roi: roi
-
+                    roi
                 };
-
             };
 
 
@@ -452,6 +451,46 @@ const TradePlanner = {
 
 
         /* ---------------------------------
+           PROBABILITY RESULT
+
+           This is informational.
+
+           Example:
+           65% probability =
+           user-estimated probability
+           of the planned trade idea.
+
+           Future AI can calculate
+           its own probability score.
+        --------------------------------- */
+
+        let probabilityResult =
+            "Not Set";
+
+
+        if (probability !== null) {
+
+            if (probability >= 70) {
+
+                probabilityResult =
+                    "HIGH";
+
+            } else if (
+                probability >= 50
+            ) {
+
+                probabilityResult =
+                    "MODERATE";
+
+            } else {
+
+                probabilityResult =
+                    "LOW";
+            }
+        }
+
+
+        /* ---------------------------------
            BUILD COMPLETE PLAN
         --------------------------------- */
 
@@ -470,125 +509,86 @@ const TradePlanner = {
                 "PLANNED",
 
 
-            /* BASIC */
+            /* =============================
+               BASIC
+            ============================= */
 
-            symbol:
-                symbol,
+            symbol,
 
+            instrument,
 
-            instrument:
-                instrument,
-
-
-            direction:
-                direction,
-
+            direction,
 
             accountSize:
                 accountSize || 0,
 
-
             riskPercent:
                 riskPercent || 0,
 
-
-            riskAmount:
-                riskAmount,
+            riskAmount,
 
 
-            /* PROBABILITY */
+            /* =============================
+               PROBABILITY
+            ============================= */
 
-            probability:
-                probability,
+            probability,
 
+            probabilityResult,
 
-            impliedVolatility:
-                impliedVolatility,
+            impliedVolatility,
 
 
             /* =============================
                STOCK MAP
             ============================= */
 
-            stockEntry:
-                stockEntry,
+            stockEntry,
 
+            stockStop,
 
-            stockStop:
-                stockStop,
+            stockRiskPerShare,
 
+            stockTarget1,
 
-            stockRiskPerShare:
-                stockRiskPerShare,
+            stockTarget2,
 
+            stockTarget3,
 
-            stockTarget1:
-                stockTarget1,
+            stockResult1,
 
+            stockResult2,
 
-            stockTarget2:
-                stockTarget2,
-
-
-            stockTarget3:
-                stockTarget3,
-
-
-            stockResult1:
-                stockResult1,
-
-
-            stockResult2:
-                stockResult2,
-
-
-            stockResult3:
-                stockResult3,
+            stockResult3,
 
 
             /* =============================
                OPTION EXECUTION
             ============================= */
 
-            optionType:
-                optionType,
+            optionType,
 
-
-            strike:
-                strike,
-
+            strike,
 
             expiration:
                 expiration ||
                 "Not Selected",
 
+            optionEntry,
 
-            optionEntry:
-                optionEntry,
+            optionContractCost,
 
+            optionTarget1,
 
-            optionTarget1:
-                optionTarget1,
+            optionTarget2,
 
+            optionTarget3,
 
-            optionTarget2:
-                optionTarget2,
+            optionResult1,
 
+            optionResult2,
 
-            optionTarget3:
-                optionTarget3,
-
-
-            optionResult1:
-                optionResult1,
-
-
-            optionResult2:
-                optionResult2,
-
-
-            optionResult3:
-                optionResult3,
+            optionResult3,
 
 
             /* =============================
@@ -600,30 +600,21 @@ const TradePlanner = {
                 target1Percent:
                     40,
 
-
                 target2Percent:
                     30,
-
 
                 target3Percent:
                     20,
 
-
                 runnerPercent:
                     10
-
             }
-
         };
 
 
-        /*
+        /* ---------------------------------
            BACKWARD COMPATIBILITY
-
-           Keeps your existing Risk,
-           Ladder, and Journal code
-           from immediately breaking.
-        */
+        --------------------------------- */
 
         plan.entry =
             stockEntry;
@@ -649,17 +640,17 @@ const TradePlanner = {
             stockTarget3;
 
 
-        /*
+        /* ---------------------------------
            SAVE CURRENT PLAN
-        */
+        --------------------------------- */
 
         window.currentTradePlan =
             plan;
 
 
-        /*
-           DISPLAY COMPLETE PLAN
-        */
+        /* ---------------------------------
+           DISPLAY PLAN
+        --------------------------------- */
 
         this.displayPlan(plan);
 
@@ -671,7 +662,6 @@ const TradePlanner = {
 
 
         return plan;
-
     },
 
 
@@ -688,9 +678,7 @@ const TradePlanner = {
 
 
         if (!output) {
-
             return;
-
         }
 
 
@@ -699,18 +687,18 @@ const TradePlanner = {
 
                 if (
                     value === null ||
-                    value === undefined
+                    value === undefined ||
+                    !Number.isFinite(
+                        Number(value)
+                    )
                 ) {
-
                     return "Not Set";
-
                 }
 
 
                 return "$" +
                     Number(value)
                         .toFixed(2);
-
             };
 
 
@@ -722,9 +710,7 @@ const TradePlanner = {
                     value === undefined ||
                     isNaN(value)
                 ) {
-
                     return "Not Set";
-
                 }
 
 
@@ -733,7 +719,26 @@ const TradePlanner = {
                         .toFixed(2)
                     + "%"
                 );
+            };
 
+
+        const rMultiple =
+            (value) => {
+
+                if (
+                    value === null ||
+                    value === undefined ||
+                    isNaN(value)
+                ) {
+                    return "Not Set";
+                }
+
+
+                return (
+                    Number(value)
+                        .toFixed(2)
+                    + "R"
+                );
             };
 
 
@@ -747,7 +752,6 @@ const TradePlanner = {
                             Not Set
                         </span>
                     `;
-
                 }
 
 
@@ -756,23 +760,28 @@ const TradePlanner = {
                     <div class="result-line">
 
                         <span>
-
                             Result:
-                            ${money(result.result)}
-
+                            ${money(
+                                result.result
+                            )}
                         </span>
 
                         <span>
-
                             ROI:
-                            ${percent(result.roi)}
+                            ${percent(
+                                result.roi
+                            )}
+                        </span>
 
+                        <span>
+                            R/R:
+                            ${rMultiple(
+                                result.rMultiple
+                            )}
                         </span>
 
                     </div>
-
                 `;
-
             };
 
 
@@ -786,7 +795,6 @@ const TradePlanner = {
                             Not Set
                         </span>
                     `;
-
                 }
 
 
@@ -795,27 +803,21 @@ const TradePlanner = {
                     <div class="result-line">
 
                         <span>
-
                             Profit / Contract:
                             ${money(
                                 result.profitPerContract
                             )}
-
                         </span>
 
                         <span>
-
                             ROI:
                             ${percent(
                                 result.roi
                             )}
-
                         </span>
 
                     </div>
-
                 `;
-
             };
 
 
@@ -829,14 +831,12 @@ const TradePlanner = {
 
 
                 <div class="plan-status">
-
                     ${plan.status}
-
                 </div>
 
 
                 <!-- =========================
-                     BASIC
+                     TRADE INFORMATION
                 ========================== -->
 
                 <div class="plan-section">
@@ -886,6 +886,11 @@ const TradePlanner = {
                     <p>
                         <strong>Probability:</strong>
                         ${percent(plan.probability)}
+                    </p>
+
+                    <p>
+                        <strong>Result:</strong>
+                        ${plan.probabilityResult}
                     </p>
 
                     <p>
@@ -1013,6 +1018,13 @@ const TradePlanner = {
                         ${money(plan.optionEntry)}
                     </p>
 
+                    <p>
+                        <strong>Contract Cost:</strong>
+                        ${money(
+                            plan.optionContractCost
+                        )}
+                    </p>
+
 
                     <hr>
 
@@ -1091,7 +1103,7 @@ const TradePlanner = {
 
 
                 <!-- =========================
-                     DATE
+                     PLAN DATE
                 ========================== -->
 
                 <p class="plan-date">
@@ -1105,15 +1117,11 @@ const TradePlanner = {
                 <button
                     onclick="TradePlanner.savePlan()"
                 >
-
                     💾 SAVE TRADE PLAN
-
                 </button>
 
             </div>
-
         `;
-
     },
 
 
@@ -1130,7 +1138,6 @@ const TradePlanner = {
             );
 
             return;
-
         }
 
 
@@ -1165,7 +1172,6 @@ const TradePlanner = {
             `🎯 ${window.currentTradePlan.symbol} trade plan saved!`
 
         );
-
     },
 
 
@@ -1182,7 +1188,6 @@ const TradePlanner = {
             ) || "[]"
 
         );
-
     },
 
 
@@ -1214,7 +1219,6 @@ const TradePlanner = {
             )
 
         );
-
     }
 
 };
