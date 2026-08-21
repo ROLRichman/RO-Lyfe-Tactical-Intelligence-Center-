@@ -1286,6 +1286,110 @@ document.addEventListener(
 
 );
 
+/* =====================================
+   OPTION EXPIRATION SHORTCUTS
+===================================== */
+
+function setExpiration(type) {
+
+    const input =
+        document.getElementById(
+            "expiration"
+        );
+
+
+    if (!input) return;
+
+
+    const today =
+        new Date();
+
+
+    let date =
+        new Date();
+
+
+    if (type === "0dte") {
+
+        date =
+            today;
+
+    }
+
+
+    if (type === "next") {
+
+        date.setDate(
+            date.getDate() + 1
+        );
+
+    }
+
+
+    if (type === "friday") {
+
+        const day =
+            date.getDay();
+
+
+        const daysUntilFriday =
+            (5 - day + 7) % 7;
+
+
+        date.setDate(
+
+            date.getDate() +
+            daysUntilFriday
+
+        );
+
+    }
+
+
+    if (type === "nextFriday") {
+
+        const day =
+            date.getDay();
+
+
+        let daysUntilFriday =
+            (5 - day + 7) % 7;
+
+
+        daysUntilFriday += 7;
+
+
+        date.setDate(
+
+            date.getDate() +
+            daysUntilFriday
+
+        );
+
+    }
+
+
+    const year =
+        date.getFullYear();
+
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
+
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(2, "0");
+
+
+    input.value =
+        `${year}-${month}-${day}`;
+
+}
+    
 </script>
 
 
