@@ -313,195 +313,337 @@
 
         <div class="trade-form">
 
+    <label>
+        Symbol
+        <input
+            id="symbol"
+            value="SPY"
+        >
+    </label>
 
-            <label>
 
-                Symbol
+    <label>
+        Instrument
+        <select id="instrument">
 
-                <input
-                    id="symbol"
-                    value="SPY"
-                >
+            <option value="Stock">
+                Stock
+            </option>
 
-            </label>
+            <option value="Option" selected>
+                Option
+            </option>
 
+            <option value="Crypto">
+                Crypto
+            </option>
 
+            <option value="Futures">
+                Futures
+            </option>
 
-            <label>
+        </select>
+    </label>
 
-                Instrument
 
-                <select id="instrument">
+    <label>
+        Direction
+        <select id="direction">
 
-                    <option>
-                        Stock
-                    </option>
+            <option value="Long">
+                Long
+            </option>
 
-                    <option>
-                        Option
-                    </option>
+            <option value="Short">
+                Short
+            </option>
 
-                    <option>
-                        Crypto
-                    </option>
+        </select>
+    </label>
 
-                    <option>
-                        Futures
-                    </option>
 
-                </select>
+    <label>
+        Account Size
+        <input
+            id="accountSize"
+            type="number"
+            value="1000"
+        >
+    </label>
 
-            </label>
 
+    <label>
+        Risk %
+        <input
+            id="riskPercent"
+            type="number"
+            step="0.1"
+            value="1"
+        >
+    </label>
 
+</div>
 
-            <label>
 
-                Direction
+<!-- =====================================
+     PROBABILITY / VOLATILITY
+===================================== -->
 
-                <select id="direction">
+<h3 class="planner-title">
+    🧠 TRADE PROBABILITY
+</h3>
 
-                    <option>
-                        Long
-                    </option>
 
-                    <option>
-                        Short
-                    </option>
+<div class="trade-form">
 
-                </select>
+    <label>
+        Probability % (Optional)
 
-            </label>
+        <input
+            id="probability"
+            type="number"
+            min="0"
+            max="100"
+            step="0.1"
+            placeholder="Example: 65"
+        >
+    </label>
 
 
+    <label>
+        Implied Volatility % (Optional)
 
-            <label>
+        <input
+            id="impliedVolatility"
+            type="number"
+            min="0"
+            step="0.1"
+            placeholder="Example: 32.5"
+        >
+    </label>
 
-                Account Size
+</div>
 
-                <input
-                    id="accountSize"
-                    type="number"
-                    value="1000"
-                >
 
-            </label>
 
+<!-- =====================================
+     STOCK MAP
+===================================== -->
 
+<h3 class="planner-title">
+    📈 STOCK MAP
+</h3>
 
-            <label>
 
-                Risk %
+<div class="trade-form stock-map">
 
-                <input
-                    id="riskPercent"
-                    type="number"
-                    value="1"
-                >
+    <label>
+        Stock Entry
 
-            </label>
+        <input
+            id="entry"
+            type="number"
+            step="0.01"
+            value="100"
+        >
+    </label>
 
 
+    <label>
+        Stock Stop
 
-            <label>
+        <input
+            id="stop"
+            type="number"
+            step="0.01"
+            value="98"
+        >
+    </label>
 
-                Entry Price
 
-                <input
-                    id="entry"
-                    type="number"
-                    step="0.01"
-                    value="100"
-                >
+    <label>
+        Stock Target 1
 
-            </label>
+        <input
+            id="target1"
+            type="number"
+            step="0.01"
+            placeholder="Example: 102"
+        >
+    </label>
 
 
+    <label>
+        Stock Target 2
 
-            <label>
+        <input
+            id="target2"
+            type="number"
+            step="0.01"
+            placeholder="Example: 104"
+        >
+    </label>
 
-                Stop Price
 
-                <input
-                    id="stop"
-                    type="number"
-                    step="0.01"
-                    value="98"
-                >
+    <label>
+        Stock Target 3
 
-            </label>
+        <input
+            id="target3"
+            type="number"
+            step="0.01"
+            placeholder="Example: 106"
+        >
+    </label>
 
+</div>
 
 
-            <label>
 
-                Target 1
+<!-- =====================================
+     OPTION EXECUTION
+===================================== -->
 
-                <input
-                    id="target1"
-                    type="number"
-                    step="0.01"
-                >
+<h3 class="planner-title">
+    🎯 OPTION EXECUTION
+</h3>
 
-            </label>
 
+<div class="trade-form option-execution">
 
+    <label>
+        Call / Put
 
-            <label>
+        <select id="optionType">
 
-                Target 2
+            <option value="Call">
+                📈 Call
+            </option>
 
-                <input
-                    id="target2"
-                    type="number"
-                    step="0.01"
-                >
+            <option value="Put">
+                📉 Put
+            </option>
 
-            </label>
+        </select>
+    </label>
 
 
+    <label>
+        Option Strike
 
-            <label>
+        <input
+            id="strike"
+            type="number"
+            step="0.01"
+            placeholder="Example: 100"
+        >
+    </label>
 
-                Target 3
 
-                <input
-                    id="target3"
-                    type="number"
-                    step="0.01"
-                >
+    <label>
+        Expiration Date
 
-            </label>
+        <input
+            id="expiration"
+            type="date"
+        >
+    </label>
 
 
+    <label>
+        Option Premium Entry
 
-            <label>
+        <input
+            id="optionEntry"
+            type="number"
+            step="0.01"
+            placeholder="Example: 0.50"
+        >
+    </label>
 
-                Option Strike
 
-                <input
-                    id="strike"
-                    placeholder="Example: 100C"
-                >
+    <label>
+        Take Profit 1
 
-            </label>
+        <input
+            id="optionTarget1"
+            type="number"
+            step="0.01"
+            placeholder="Example: 0.80"
+        >
+    </label>
 
 
+    <label>
+        Take Profit 2
 
-            <label>
+        <input
+            id="optionTarget2"
+            type="number"
+            step="0.01"
+            placeholder="Example: 1.60"
+        >
+    </label>
 
-    Expiration Date
 
-    <input
-        id="expiration"
-        type="date"
+    <label>
+        Take Profit 3
+
+        <input
+            id="optionTarget3"
+            type="number"
+            step="0.01"
+            placeholder="Example: 2.00"
+        >
+    </label>
+
+</div>
+
+
+
+<!-- =====================================
+     EXPIRATION SHORTCUTS
+===================================== -->
+
+<h3 class="planner-title">
+    ⚡ EXPIRATION SHORTCUTS
+</h3>
+
+
+<div class="expiration-buttons">
+
+    <button
+        type="button"
+        onclick="setExpiration('0dte')"
     >
+        ⚡ 0DTE
+    </button>
 
-            </label>
-            
 
-        </div>
+    <button
+        type="button"
+        onclick="setExpiration('next')"
+    >
+        🔥 NEXT EXPIRATION
+    </button>
 
+
+    <button
+        type="button"
+        onclick="setExpiration('friday')"
+    >
+        📅 THIS FRIDAY
+    </button>
+
+
+    <button
+        type="button"
+        onclick="setExpiration('nextFriday')"
+    >
+        📆 NEXT FRIDAY
+    </button>
+
+</div>
 
         <button
             class="primary-button"
