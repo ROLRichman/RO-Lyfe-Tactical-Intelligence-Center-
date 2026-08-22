@@ -149,9 +149,7 @@
         </h2>
 
 
-        <!-- =====================================
-             MARKET CONTROLS
-        ====================================== -->
+        <!-- MARKET CONTROLS -->
 
         <div class="market-controls">
 
@@ -247,41 +245,31 @@
 
 
 
-        <!-- =====================================
-             TRADINGVIEW CHART
-        ====================================== -->
+        <!-- TRADINGVIEW CHART -->
 
         <div class="chart-card">
 
-            <div id="tradingview_chart">
-
-            </div>
+            <div id="tradingview_chart"></div>
 
         </div>
 
 
 
-        <!-- =====================================
-             MARKET STATUS
-        ====================================== -->
+        <!-- MARKET STATUS -->
 
         <div class="market-grid">
 
 
             <div class="market-card">
 
-                <span>
-                    SPY
-                </span>
+                <span>SPY</span>
 
                 <strong>
                     MARKET TREND
                 </strong>
 
                 <div id="spyStatus">
-
                     ANALYZING
-
                 </div>
 
             </div>
@@ -290,18 +278,14 @@
 
             <div class="market-card">
 
-                <span>
-                    QQQ
-                </span>
+                <span>QQQ</span>
 
                 <strong>
                     TECH TREND
                 </strong>
 
                 <div id="qqqStatus">
-
                     ANALYZING
-
                 </div>
 
             </div>
@@ -310,18 +294,14 @@
 
             <div class="market-card">
 
-                <span>
-                    VIX
-                </span>
+                <span>VIX</span>
 
                 <strong>
                     VOLATILITY
                 </strong>
 
                 <div id="vixStatus">
-
                     ANALYZING
-
                 </div>
 
             </div>
@@ -330,18 +310,14 @@
 
             <div class="market-card">
 
-                <span>
-                    RTIC
-                </span>
+                <span>RTIC</span>
 
                 <strong>
                     SYSTEM STATUS
                 </strong>
 
                 <div id="systemStatus">
-
                     ONLINE 🟢
-
                 </div>
 
             </div>
@@ -369,15 +345,10 @@
         </h2>
 
 
-
-        <!-- =====================================
-             BASIC TRADE INFORMATION
-        ====================================== -->
+        <!-- TRADE SETUP -->
 
         <h3 class="planner-title">
-
             🎯 TRADE SETUP
-
         </h3>
 
 
@@ -484,14 +455,10 @@
 
 
 
-        <!-- =====================================
-             TRADE PROBABILITY
-        ====================================== -->
+        <!-- TRADE PROBABILITY -->
 
         <h3 class="planner-title">
-
             🧠 TRADE PROBABILITY
-
         </h3>
 
 
@@ -534,20 +501,14 @@
 
 
 
-        <!-- =====================================
-             STOCK MAP
-        ====================================== -->
+        <!-- STOCK MAP -->
 
         <h3 class="planner-title">
-
             📈 STOCK MAP
-
         </h3>
 
 
-        <div
-            class="trade-form stock-map"
-        >
+        <div class="trade-form stock-map">
 
 
             <label>
@@ -628,20 +589,14 @@
 
 
 
-        <!-- =====================================
-             OPTION EXECUTION
-        ====================================== -->
+        <!-- OPTION EXECUTION -->
 
         <h3 class="planner-title">
-
             🎯 OPTION EXECUTION
-
         </h3>
 
 
-        <div
-            class="trade-form option-execution"
-        >
+        <div class="trade-form option-execution">
 
 
             <label>
@@ -759,14 +714,10 @@
 
 
 
-        <!-- =====================================
-             EXPIRATION SHORTCUTS
-        ====================================== -->
+        <!-- EXPIRATION SHORTCUTS -->
 
         <h3 class="planner-title">
-
             ⚡ EXPIRATION SHORTCUTS
-
         </h3>
 
 
@@ -781,7 +732,6 @@
             </button>
 
 
-
             <button
                 type="button"
                 onclick="setExpiration('tomorrow')"
@@ -790,14 +740,12 @@
             </button>
 
 
-
             <button
                 type="button"
                 onclick="setExpiration('thisFriday')"
             >
                 📅 THIS FRIDAY
             </button>
-
 
 
             <button
@@ -812,9 +760,7 @@
 
 
 
-        <!-- =====================================
-             BUILD PLAN
-        ====================================== -->
+        <!-- BUILD PLAN -->
 
         <button
             type="button"
@@ -828,22 +774,16 @@
 
 
 
-        <!-- =====================================
-             PLAN OUTPUT
-        ====================================== -->
+        <!-- PLAN OUTPUT -->
 
         <div
             id="tradePlanOutput"
             class="output-card"
-        >
-
-        </div>
+        ></div>
 
 
 
-        <!-- =====================================
-             JOURNAL BUTTON
-        ====================================== -->
+        <!-- JOURNAL BUTTON -->
 
         <button
             type="button"
@@ -933,11 +873,7 @@
         </h2>
 
 
-        <div
-            id="journalStats"
-        >
-
-        </div>
+        <div id="journalStats"></div>
 
 
 
@@ -953,11 +889,7 @@
 
 
 
-        <div
-            id="tradeJournal"
-        >
-
-        </div>
+        <div id="tradeJournal"></div>
 
 
     </section>
@@ -1032,24 +964,18 @@
 function showSection(sectionId) {
 
     document
-        .querySelectorAll(
-            ".dashboard-section"
-        )
-        .forEach(
-            section => {
+        .querySelectorAll(".dashboard-section")
+        .forEach(section => {
 
-                section.classList.remove(
-                    "active-section"
-                );
+            section.classList.remove(
+                "active-section"
+            );
 
-            }
-        );
+        });
 
 
     const selected =
-        document.getElementById(
-            sectionId
-        );
+        document.getElementById(sectionId);
 
 
     if (!selected) {
@@ -1082,8 +1008,7 @@ function showSection(sectionId) {
 
 function formatMoney(value) {
 
-    const number =
-        Number(value);
+    const number = Number(value);
 
 
     if (!Number.isFinite(number)) {
@@ -1112,52 +1037,11 @@ function formatMoney(value) {
 
 
 /* =====================================
-   PRICE FORMATTER
-===================================== */
-
-function formatPrice(value) {
-
-    const number =
-        Number(value);
-
-
-    if (!Number.isFinite(number)) {
-
-        return "—";
-
-    }
-
-
-    if (Math.abs(number) < 1) {
-
-        return number.toFixed(4);
-
-    }
-
-
-    if (Math.abs(number) < 10) {
-
-        return number.toFixed(3);
-
-    }
-
-
-    return number.toFixed(2);
-
-}
-
-
-
-/* =====================================
    BUILD COMPLETE TRADE
 ===================================== */
 
 function buildTradePlan() {
 
-
-    /* -------------------------------------
-       1. CREATE MASTER TRADE PLAN
-    ------------------------------------- */
 
     const plan =
         TradePlanner.createPlan();
@@ -1176,18 +1060,15 @@ function buildTradePlan() {
             : "long";
 
 
-    let riskResult =
-        null;
+    let riskResult = null;
 
-
-    let ladderResult =
-        null;
+    let ladderResult = null;
 
 
 
-    /* -------------------------------------
-       2. RUN RISK ENGINE
-    ------------------------------------- */
+    /* =====================================
+       RUN RISK ENGINE
+    ====================================== */
 
     if (
 
@@ -1205,9 +1086,7 @@ function buildTradePlan() {
     else {
 
 
-        /* ================================
-           OPTION RISK
-        ================================ */
+        /* OPTION */
 
         if (
             plan.instrument === "Option"
@@ -1246,10 +1125,7 @@ function buildTradePlan() {
         }
 
 
-
-        /* ================================
-           CRYPTO RISK
-        ================================ */
+        /* CRYPTO */
 
         else if (
             plan.instrument === "Crypto"
@@ -1279,16 +1155,7 @@ function buildTradePlan() {
         }
 
 
-
-        /* ================================
-           STOCK / FUTURES RISK
-
-           Futures currently uses the
-           stock-style risk model.
-
-           Later we can add point value
-           and contract multipliers.
-        ================================ */
+        /* STOCK / FUTURES */
 
         else {
 
@@ -1317,20 +1184,17 @@ function buildTradePlan() {
 
 
         console.log(
-
             "🛡 RO'LYFE Risk Engine:",
-
             riskResult
-
         );
 
     }
 
 
 
-    /* -------------------------------------
-       3. RUN LADDER ENGINE
-    ------------------------------------- */
+    /* =====================================
+       RUN LADDER ENGINE
+    ====================================== */
 
     if (
 
@@ -1353,9 +1217,7 @@ function buildTradePlan() {
     ) {
 
 
-        /* ================================
-           OPTION LADDER
-        ================================ */
+        /* OPTION LADDER */
 
         if (
             plan.instrument === "Option"
@@ -1382,24 +1244,11 @@ function buildTradePlan() {
         }
 
 
-
-        /* ================================
-           CRYPTO LADDER
-        ================================ */
+        /* CRYPTO LADDER */
 
         else if (
             plan.instrument === "Crypto"
         ) {
-
-            /*
-               Crypto can have fractional
-               quantities, but the current
-               ladder allocation engine
-               uses whole units.
-
-               For now we use a rounded
-               quantity.
-            */
 
             const quantity =
                 Math.max(
@@ -1437,10 +1286,7 @@ function buildTradePlan() {
         }
 
 
-
-        /* ================================
-           STOCK / FUTURES LADDER
-        ================================ */
+        /* STOCK / FUTURES LADDER */
 
         else {
 
@@ -1470,20 +1316,17 @@ function buildTradePlan() {
 
 
         console.log(
-
             "🪜 RO'LYFE Ladder Engine:",
-
             ladderResult
-
         );
 
     }
 
 
 
-    /* -------------------------------------
-       4. ATTACH ENGINE RESULTS
-    ------------------------------------- */
+    /* =====================================
+       ATTACH RESULTS
+    ====================================== */
 
     plan.riskEngine =
         riskResult;
@@ -1498,34 +1341,26 @@ function buildTradePlan() {
 
 
 
-    /* -------------------------------------
-       5. UPDATE DISPLAYS
-    ------------------------------------- */
+    /* =====================================
+       UPDATE ALL DISPLAYS
+    ====================================== */
+
+    updateTradePlanDisplay(plan);
 
     updateRiskDisplay(
-
         plan,
-
         riskResult
-
     );
 
-
     updateLadderDisplay(
-
         plan,
-
         ladderResult
-
     );
 
 
     console.log(
-
         "🎯 COMPLETE RO'LYFE TRADE PLAN:",
-
         plan
-
     );
 
 
@@ -1538,17 +1373,163 @@ function buildTradePlan() {
 
 
 /* =====================================
+   TRADE PLAN DISPLAY
+===================================== */
+
+function updateTradePlanDisplay(plan) {
+
+    const output =
+        document.getElementById(
+            "tradePlanOutput"
+        );
+
+
+    if (!output) {
+
+        return;
+
+    }
+
+
+    const targets = [];
+
+
+    if (plan.stockTarget1) {
+
+        targets.push(
+            `TP1: ${formatMoney(
+                plan.stockTarget1
+            )}`
+        );
+
+    }
+
+
+    if (plan.stockTarget2) {
+
+        targets.push(
+            `TP2: ${formatMoney(
+                plan.stockTarget2
+            )}`
+        );
+
+    }
+
+
+    if (plan.stockTarget3) {
+
+        targets.push(
+            `TP3: ${formatMoney(
+                plan.stockTarget3
+            )}`
+        );
+
+    }
+
+
+    output.innerHTML = `
+
+        <div class="trade-plan-card">
+
+            <h3>
+                🎯 RO'LYFE TRADE PLAN
+            </h3>
+
+            <p>
+                <strong>Symbol:</strong>
+                ${plan.symbol}
+            </p>
+
+            <p>
+                <strong>Instrument:</strong>
+                ${plan.instrument}
+            </p>
+
+            <p>
+                <strong>Direction:</strong>
+                ${plan.direction}
+            </p>
+
+            <hr>
+
+            <p>
+                <strong>Account Size:</strong>
+                ${formatMoney(plan.accountSize)}
+            </p>
+
+            <p>
+                <strong>Risk Budget:</strong>
+                ${formatMoney(plan.riskAmount)}
+            </p>
+
+            <hr>
+
+            <p>
+                <strong>Entry:</strong>
+                ${formatMoney(plan.stockEntry)}
+            </p>
+
+            <p>
+                <strong>Stop:</strong>
+                ${formatMoney(plan.stockStop)}
+            </p>
+
+            <p>
+                <strong>Targets:</strong>
+                ${targets.length
+                    ? targets.join(" • ")
+                    : "Engine Generated"
+                }
+            </p>
+
+            ${plan.instrument === "Option"
+                ? `
+
+                    <hr>
+
+                    <p>
+                        <strong>Option:</strong>
+                        ${plan.optionType || "Not Set"}
+                    </p>
+
+                    <p>
+                        <strong>Strike:</strong>
+                        ${plan.strike
+                            ? formatMoney(plan.strike)
+                            : "Not Set"
+                        }
+                    </p>
+
+                    <p>
+                        <strong>Expiration:</strong>
+                        ${plan.expiration || "Not Set"}
+                    </p>
+
+                    <p>
+                        <strong>Premium Entry:</strong>
+                        ${formatMoney(plan.optionEntry)}
+                    </p>
+
+                `
+                : ""
+            }
+
+        </div>
+
+    `;
+
+}
+
+
+
+/* =====================================
    ADD PLAN TO JOURNAL
 ===================================== */
 
 function addPlanToJournal() {
 
 
-    if (
-
-        !window.currentTradePlan
-
-    ) {
+    if (!window.currentTradePlan) {
 
         alert(
             "Build a trade plan first."
@@ -1577,7 +1558,6 @@ function addPlanToJournal() {
 
     TradeJournal.addTrade();
 
-
     showSection(
         "journal-section"
     );
@@ -1587,7 +1567,7 @@ function addPlanToJournal() {
 
 
 /* =====================================
-   RO'LYFE RISK ENGINE DISPLAY
+   RISK ENGINE DISPLAY
 ===================================== */
 
 function updateRiskDisplay(
@@ -1608,13 +1588,6 @@ function updateRiskDisplay(
     }
 
 
-    /*
-       FALLBACK
-
-       If Risk Engine did not return
-       a valid result.
-    */
-
     if (
         !riskResult ||
         !riskResult.valid
@@ -1629,17 +1602,14 @@ function updateRiskDisplay(
                 </h3>
 
                 <p>
-
                     Unable to calculate
                     position sizing.
-
                 </p>
 
                 <p>
-
                     Check your Account Size,
-                    Risk %, Entry, and Stop.
-
+                    Risk %, Entry, Stop,
+                    and Option Premium.
                 </p>
 
             </div>
@@ -1650,54 +1620,6 @@ function updateRiskDisplay(
 
     }
 
-
-    const money =
-        (value) => {
-
-            if (
-                value === null ||
-                value === undefined ||
-                isNaN(value)
-            ) {
-
-                return "$0.00";
-
-            }
-
-
-            return "$" +
-                Number(value)
-                    .toFixed(2);
-
-        };
-
-
-    const number =
-        (value) => {
-
-            if (
-                value === null ||
-                value === undefined ||
-                isNaN(value)
-            ) {
-
-                return "0";
-
-            }
-
-
-            return Number(value)
-                .toLocaleString();
-
-        };
-
-
-    /*
-       POSITION SIZE
-
-       Different instruments return
-       different position values.
-    */
 
     let positionLabel =
         "Position Size";
@@ -1719,7 +1641,6 @@ function updateRiskDisplay(
 
     }
 
-
     else if (
         plan.instrument === "Crypto"
     ) {
@@ -1732,7 +1653,6 @@ function updateRiskDisplay(
 
     }
 
-
     else {
 
         positionLabel =
@@ -1744,19 +1664,11 @@ function updateRiskDisplay(
     }
 
 
-    /*
-       RISK STATUS
-    */
-
     const riskStatus =
         riskResult.riskStatus ||
         riskResult.status ||
         "CALCULATED";
 
-
-    /*
-       MAX LOSS
-    */
 
     const maxLoss =
         riskResult.maxLoss ||
@@ -1765,10 +1677,6 @@ function updateRiskDisplay(
         plan.riskAmount ||
         0;
 
-
-    /*
-       RISK PER UNIT
-    */
 
     const riskPerUnit =
         riskResult.riskPerShare ||
@@ -1781,7 +1689,6 @@ function updateRiskDisplay(
     output.innerHTML = `
 
         <div class="risk-engine-card">
-
 
             <h3>
                 🛡 RO'LYFE RISK ENGINE
@@ -1798,13 +1705,9 @@ function updateRiskDisplay(
             <div class="risk-grid">
 
 
-                <!-- SYMBOL -->
-
                 <div class="risk-item">
 
-                    <span>
-                        Symbol
-                    </span>
+                    <span>Symbol</span>
 
                     <strong>
                         ${plan.symbol}
@@ -1813,13 +1716,9 @@ function updateRiskDisplay(
                 </div>
 
 
-                <!-- INSTRUMENT -->
-
                 <div class="risk-item">
 
-                    <span>
-                        Instrument
-                    </span>
+                    <span>Instrument</span>
 
                     <strong>
                         ${plan.instrument}
@@ -1828,13 +1727,9 @@ function updateRiskDisplay(
                 </div>
 
 
-                <!-- DIRECTION -->
-
                 <div class="risk-item">
 
-                    <span>
-                        Direction
-                    </span>
+                    <span>Direction</span>
 
                     <strong>
                         ${plan.direction}
@@ -1843,30 +1738,20 @@ function updateRiskDisplay(
                 </div>
 
 
-                <!-- ACCOUNT -->
-
                 <div class="risk-item">
 
-                    <span>
-                        Account Balance
-                    </span>
+                    <span>Account Balance</span>
 
                     <strong>
-                        ${money(
-                            plan.accountSize
-                        )}
+                        ${formatMoney(plan.accountSize)}
                     </strong>
 
                 </div>
 
 
-                <!-- RISK PERCENT -->
-
                 <div class="risk-item">
 
-                    <span>
-                        Risk %
-                    </span>
+                    <span>Risk %</span>
 
                     <strong>
                         ${Number(
@@ -1877,75 +1762,49 @@ function updateRiskDisplay(
                 </div>
 
 
-                <!-- RISK BUDGET -->
-
                 <div class="risk-item">
 
-                    <span>
-                        Risk Budget
-                    </span>
+                    <span>Risk Budget</span>
 
                     <strong>
-                        ${money(
-                            plan.riskAmount
-                        )}
+                        ${formatMoney(plan.riskAmount)}
                     </strong>
 
                 </div>
 
 
-                <!-- ENTRY -->
-
                 <div class="risk-item">
 
-                    <span>
-                        Entry
-                    </span>
+                    <span>Entry</span>
 
                     <strong>
-                        ${money(
-                            plan.stockEntry
-                        )}
+                        ${formatMoney(plan.stockEntry)}
                     </strong>
 
                 </div>
 
 
-                <!-- STOP -->
-
                 <div class="risk-item">
 
-                    <span>
-                        Stop
-                    </span>
+                    <span>Stop</span>
 
                     <strong>
-                        ${money(
-                            plan.stockStop
-                        )}
+                        ${formatMoney(plan.stockStop)}
                     </strong>
 
                 </div>
 
 
-                <!-- RISK PER UNIT -->
-
                 <div class="risk-item">
 
-                    <span>
-                        Risk Per Unit
-                    </span>
+                    <span>Risk Per Unit</span>
 
                     <strong>
-                        ${money(
-                            riskPerUnit
-                        )}
+                        ${formatMoney(riskPerUnit)}
                     </strong>
 
                 </div>
 
-
-                <!-- POSITION SIZE -->
 
                 <div class="risk-item highlight">
 
@@ -1954,15 +1813,13 @@ function updateRiskDisplay(
                     </span>
 
                     <strong>
-                        ${number(
+                        ${Number(
                             positionSize
-                        )}
+                        ).toLocaleString()}
                     </strong>
 
                 </div>
 
-
-                <!-- MAX LOSS -->
 
                 <div class="risk-item danger">
 
@@ -1971,9 +1828,7 @@ function updateRiskDisplay(
                     </span>
 
                     <strong>
-                        ${money(
-                            maxLoss
-                        )}
+                        ${formatMoney(maxLoss)}
                     </strong>
 
                 </div>
@@ -1981,8 +1836,6 @@ function updateRiskDisplay(
 
             </div>
 
-
-            <!-- OPTION DETAILS -->
 
             ${plan.instrument === "Option"
                 ? `
@@ -1993,51 +1846,29 @@ function updateRiskDisplay(
                             🎯 Option Risk Details
                         </h4>
 
-
                         <p>
-
-                            <strong>
-                                Premium:
-                            </strong>
-
-                            ${money(
-                                plan.optionEntry
-                            )}
-
+                            <strong>Premium:</strong>
+                            ${formatMoney(plan.optionEntry)}
                         </p>
 
-
                         <p>
-
-                            <strong>
-                                Strike:
-                            </strong>
-
-                            ${plan.strike !== null
-                                ? money(plan.strike)
+                            <strong>Strike:</strong>
+                            ${plan.strike
+                                ? formatMoney(plan.strike)
                                 : "Not Set"
                             }
-
                         </p>
-
 
                         <p>
-
-                            <strong>
-                                Expiration:
-                            </strong>
-
-                            ${plan.expiration}
-
+                            <strong>Expiration:</strong>
+                            ${plan.expiration || "Not Set"}
                         </p>
-
 
                     </div>
 
                 `
                 : ""
             }
-
 
         </div>
 
@@ -2046,8 +1877,9 @@ function updateRiskDisplay(
 }
 
 
+
 /* =====================================
-   RO'LYFE LADDER ENGINE DISPLAY
+   LADDER ENGINE DISPLAY
 ===================================== */
 
 function updateLadderDisplay(
@@ -2067,13 +1899,6 @@ function updateLadderDisplay(
 
     }
 
-
-    /*
-       FALLBACK
-
-       If Ladder Engine did not return
-       a valid ladder.
-    */
 
     if (
         !ladderResult ||
@@ -2089,16 +1914,12 @@ function updateLadderDisplay(
                 </h3>
 
                 <p>
-
                     Ladder could not be generated.
-
                 </p>
 
                 <p>
-
                     Build a valid trade with
                     Entry and Stop.
-
                 </p>
 
             </div>
@@ -2110,1159 +1931,93 @@ function updateLadderDisplay(
     }
 
 
-    const money =
-        (value) => {
-
-            if (
-                value === null ||
-                value === undefined ||
-                isNaN(value)
-            ) {
-
-                return "$0.00";
-
-            }
+    const targets =
+        ladderResult.targets || {};
 
 
-            return "$" +
-                Number(value)
-                    .toFixed(2);
-
-        };
+    const tp1 =
+        targets.tp1 || {};
 
 
-    const percent =
-        (value) => {
-
-            if (
-                value === null ||
-                value === undefined ||
-                isNaN(value)
-            ) {
-
-                return "0.00%";
-
-            }
+    const tp2 =
+        targets.tp2 || {};
 
 
-            return Number(value)
-                .toFixed(2) +
-                "%";
+    const tp3 =
+        targets.tp3 || {};
 
-        };
-
-
-    /*
-       GET TARGETS
-
-       Flexible so the display works
-       with Stock and Option ladders.
-    */
-
-    const target1 =
-        ladderResult.target1 ||
-        ladderResult.tp1 ||
-        ladderResult.targets?.target1 ||
-        null;
-
-
-    const target2 =
-        ladderResult.target2 ||
-        ladderResult.tp2 ||
-        ladderResult.targets?.target2 ||
-        null;
-
-
-    const target3 =
-        ladderResult.target3 ||
-        ladderResult.tp3 ||
-        ladderResult.targets?.target3 ||
-        null;
-
-
-    /*
-       RUNNER
-    */
 
     const runner =
-        ladderResult.runner ||
-        ladderResult.runnerTarget ||
-        ladderResult.targets?.runner ||
-        null;
+        targets.runner || {};
 
 
-    /*
-       R MULTIPLES
-    */
-
-    const r1 =
-        target1?.rMultiple ||
-        target1?.r ||
-        1;
-
-
-    const r2 =
-        target2?.rMultiple ||
-        target2?.r ||
-        2;
-
-
-    const r3 =
-        target3?.rMultiple ||
-        target3?.r ||
-        3;
-
-
-    /*
-       TARGET PRICES
-
-       Engine may return an object
-       or a direct number.
-    */
-
-    const getPrice =
+    const getTargetPrice =
         (target) => {
-
-            if (
-                target === null ||
-                target === undefined
-            ) {
-
-                return 0;
-
-            }
-
-
-            if (
-                typeof target === "number"
-            ) {
-
-                return target;
-
-            }
-
 
             return (
                 target.price ||
+                target.stockPrice ||
                 target.target ||
-                target.value ||
                 0
             );
 
         };
 
 
-    const price1 =
-        getPrice(target1);
-
-
-    const price2 =
-        getPrice(target2);
-
-
-    const price3 =
-        getPrice(target3);
-
-
-    /*
-       ROI
-
-       Based on Stock Map.
-    */
-
-    const entry =
-        Number(plan.stockEntry) || 0;
-
-
-    const direction =
-        plan.direction;
-
-
-    const calculateROI =
-        (targetPrice) => {
-
-            if (
-                entry <= 0 ||
-                targetPrice <= 0
-            ) {
-
-                return 0;
-
-            }
-
-
-            let movement = 0;
-
-
-            if (
-                direction === "Long"
-            ) {
-
-                movement =
-                    targetPrice - entry;
-
-            } else {
-
-                movement =
-                    entry - targetPrice;
-
-            }
-
+    const getQuantity =
+        (target) => {
 
             return (
-                movement /
-                entry
-            ) * 100;
+                target.quantity ||
+                target.contracts ||
+                0
+            );
 
         };
 
 
-    const roi1 =
-        calculateROI(price1);
+    const getR =
+        (target) => {
 
+            return target.r || 0;
 
-    const roi2 =
-        calculateROI(price2);
+        };
 
 
-    const roi3 =
-        calculateROI(price3);
+    const getProfit =
+        (target) => {
 
+            return (
+                target.estimatedProfit ||
+                0
+            );
 
-    /*
-       POSITION SIZE
-    */
-
-    let positionSize =
-        0;
-
-
-    if (
-        plan.instrument === "Option" &&
-        plan.riskEngine
-    ) {
-
-        positionSize =
-            plan.riskEngine.contracts || 0;
-
-    }
-
-
-    else if (
-        plan.instrument === "Crypto" &&
-        plan.riskEngine
-    ) {
-
-        positionSize =
-            plan.riskEngine.quantity || 0;
-
-    }
-
-
-    else if (
-        plan.riskEngine
-    ) {
-
-        positionSize =
-            plan.riskEngine.shares || 0;
-
-    }
-
-
-    /*
-       ALLOCATION
-    */
-
-    const sell1 =
-        ladderResult.target1Percent ||
-        40;
-
-
-    const sell2 =
-        ladderResult.target2Percent ||
-        30;
-
-
-    const sell3 =
-        ladderResult.target3Percent ||
-        20;
-
-
-    const keepRunner =
-        ladderResult.runnerPercent ||
-        10;
-
-
-    output.innerHTML = `
-
-        <div class="ladder-engine-card">
-
-
-            <h3>
-                🪜 RO'LYFE PROFIT LADDER
-            </h3>
-
-
-            <p class="ladder-symbol">
-
-                ${plan.symbol}
-
-                • ${plan.direction}
-
-                • ${plan.instrument}
-
-            </p>
-
-
-            <!-- ENTRY -->
-
-            <div class="ladder-summary">
-
-                <span>
-                    Entry
-                </span>
-
-                <strong>
-                    ${money(entry)}
-                </strong>
-
-            </div>
-
-
-            <!-- STOP -->
-
-            <div class="ladder-summary">
-
-                <span>
-                    Stop
-                </span>
-
-                <strong>
-                    ${money(
-                        plan.stockStop
-                    )}
-                </strong>
-
-            </div>
-
-
-            <!-- POSITION -->
-
-            <div class="ladder-summary">
-
-                <span>
-                    Position Size
-                </span>
-
-                <strong>
-                    ${Number(
-                        positionSize
-                    ).toLocaleString()}
-                </strong>
-
-            </div>
-
-
-            <hr>
-
-
-            <!-- TARGET 1 -->
-
-            <div class="ladder-level">
-
-                <strong>
-
-                    🟢 TAKE PROFIT 1
-
-                </strong>
-
-
-                <div class="ladder-price">
-
-                    ${money(price1)}
-
-                </div>
-
-
-                <div>
-
-                    ${r1}R
-
-                    • ROI:
-                    +${percent(roi1)}
-
-                </div>
-
-
-                <small>
-
-                    Sell ${sell1}%
-
-                </small>
-
-            </div>
-
-
-            <!-- TARGET 2 -->
-
-            <div class="ladder-level">
-
-                <strong>
-
-                    🟢 TAKE PROFIT 2
-
-                </strong>
-
-
-                <div class="ladder-price">
-
-                    ${money(price2)}
-
-                </div>
-
-
-                <div>
-
-                    ${r2}R
-
-                    • ROI:
-                    +${percent(roi2)}
-
-                </div>
-
-
-                <small>
-
-                    Sell ${sell2}%
-
-                </small>
-
-            </div>
-
-
-            <!-- TARGET 3 -->
-
-            <div class="ladder-level">
-
-                <strong>
-
-                    🚀 TAKE PROFIT 3
-
-                </strong>
-
-
-                <div class="ladder-price">
-
-                    ${money(price3)}
-
-                </div>
-
-
-                <div>
-
-                    ${r3}R
-
-                    • ROI:
-                    +${percent(roi3)}
-
-                </div>
-
-
-                <small>
-
-                    Sell ${sell3}%
-
-                </small>
-
-            </div>
-
-
-            <!-- RUNNER -->
-
-            <div class="ladder-level runner">
-
-                <strong>
-
-                    🏃 RUNNER
-
-                </strong>
-
-
-                <br><br>
-
-
-                Keep ${keepRunner}%
-
-
-                <br><br>
-
-
-                Trail With Structure
-
-
-                ${runner
-                    ? `
-
-                        <br><br>
-
-                        Runner Target:
-                        ${money(
-                            getPrice(runner)
-                        )}
-
-                    `
-                    : ""
-                }
-
-            </div>
-
-
-        </div>
-
-    `;
-
-}    
-    
-
-    /* -------------------------------------
-       OPTION DETAILS
-    ------------------------------------- */
-
-    if (
-        riskResult.instrument ===
-        "option"
-    ) {
-
-        positionDetails = `
-
-            <p>
-
-                <strong>
-                    Contracts:
-                </strong>
-
-                ${riskResult.contracts}
-
-            </p>
-
-
-            <p>
-
-                <strong>
-                    Cost Per Contract:
-                </strong>
-
-                ${formatMoney(
-                    riskResult.contractCost
-                )}
-
-            </p>
-
-
-            <p>
-
-                <strong>
-                    Premium Exposure:
-                </strong>
-
-                ${formatMoney(
-                    riskResult.totalPremiumExposure
-                )}
-
-            </p>
-
-
-            <p>
-
-                <strong>
-                    Estimated Risk:
-                </strong>
-
-                ${formatMoney(
-                    riskResult.estimatedTotalRisk
-                )}
-
-            </p>
-
-        `;
-
-    }
-
-
-
-    /* -------------------------------------
-       CRYPTO DETAILS
-    ------------------------------------- */
-
-    else if (
-        riskResult.instrument ===
-        "crypto"
-    ) {
-
-        positionDetails = `
-
-            <p>
-
-                <strong>
-                    Quantity:
-                </strong>
-
-                ${Number(
-                    riskResult.quantity
-                ).toFixed(6)}
-
-            </p>
-
-
-            <p>
-
-                <strong>
-                    Position Value:
-                </strong>
-
-                ${formatMoney(
-                    riskResult.quantity *
-                    riskResult.entry
-                )}
-
-            </p>
-
-        `;
-
-    }
-
-
-
-    /* -------------------------------------
-       STOCK DETAILS
-    ------------------------------------- */
-
-    else {
-
-        positionDetails = `
-
-            <p>
-
-                <strong>
-                    Shares:
-                </strong>
-
-                ${riskResult.shares}
-
-            </p>
-
-
-            <p>
-
-                <strong>
-                    Position Value:
-                </strong>
-
-                ${formatMoney(
-                    riskResult.positionValue
-                )}
-
-            </p>
-
-        `;
-
-    }
-
-
-    output.innerHTML = `
-
-        <div class="risk-summary-card">
-
-
-            <h3>
-                🛡 RO'LYFE RISK SUMMARY
-            </h3>
-
-
-            <p>
-
-                <strong>
-                    Symbol:
-                </strong>
-
-                ${plan.symbol}
-
-            </p>
-
-
-            <p>
-
-                <strong>
-                    Instrument:
-                </strong>
-
-                ${plan.instrument}
-
-            </p>
-
-
-            <p>
-
-                <strong>
-                    Direction:
-                </strong>
-
-                ${plan.direction}
-
-            </p>
-
-
-            <hr>
-
-
-            <p>
-
-                <strong>
-                    Account Balance:
-                </strong>
-
-                ${formatMoney(
-                    riskResult.accountBalance
-                )}
-
-            </p>
-
-
-            <p>
-
-                <strong>
-                    Risk %:
-                </strong>
-
-                ${Number(
-                    riskResult.riskPercent
-                ).toFixed(2)}%
-
-            </p>
-
-
-            <p>
-
-                <strong>
-                    Dollar Risk Budget:
-                </strong>
-
-                ${formatMoney(
-                    riskResult.dollarRisk
-                )}
-
-            </p>
-
-
-            <hr>
-
-
-            <h4>
-                📈 STOCK RISK MAP
-            </h4>
-
-
-            <p>
-
-                <strong>
-                    Entry:
-                </strong>
-
-                ${formatMoney(
-                    plan.stockEntry
-                )}
-
-            </p>
-
-
-            <p>
-
-                <strong>
-                    Stop:
-                </strong>
-
-                ${formatMoney(
-                    plan.stockStop
-                )}
-
-            </p>
-
-
-            <p>
-
-                <strong>
-                    Risk Per Unit:
-                </strong>
-
-                ${formatMoney(
-
-                    riskResult.riskPerShare ||
-
-                    riskResult.stockMoveToStop ||
-
-                    plan.stockRiskPerShare
-
-                )}
-
-            </p>
-
-
-            <hr>
-
-
-            <h4>
-                🎯 POSITION SIZE
-            </h4>
-
-
-            ${positionDetails}
-
-
-        </div>
-
-    `;
-
-}
-
-
-
-/* =====================================
-   LADDER DISPLAY
-===================================== */
-
-function updateLadderDisplay(
-
-    plan,
-
-    ladderResult
-
-) {
-
-
-    const output =
-        document.getElementById(
-            "ladderOutput"
-        );
-
-
-    if (!output) {
-
-        return;
-
-    }
-
-
-    if (
-
-        !ladderResult
-
-    ) {
-
-        output.innerHTML = `
-
-            <h3>
-                🪜 RO'LYFE Trade Ladder
-            </h3>
-
-            <p>
-                Build a valid risk-sized trade
-                to generate your ladder.
-            </p>
-
-        `;
-
-        return;
-
-    }
-
-
-    if (
-
-        !ladderResult.valid
-
-    ) {
-
-        output.innerHTML = `
-
-            <h3>
-                ⚠️ Ladder Warning
-            </h3>
-
-            <p>
-                ${ladderResult.error}
-            </p>
-
-        `;
-
-        return;
-
-    }
-
-
-
-    /* =====================================
-       OPTION LADDER
-    ====================================== */
-
-    if (
-
-        ladderResult.instrument ===
-        "option"
-
-    ) {
-
-
-        const tp1 =
-            ladderResult.targets.tp1;
-
-
-        const tp2 =
-            ladderResult.targets.tp2;
-
-
-        const tp3 =
-            ladderResult.targets.tp3;
-
-
-        const runner =
-            ladderResult.targets.runner;
-
-
-        output.innerHTML = `
-
-            <div class="ladder-card">
-
-
-                <h3>
-                    🪜 RO'LYFE OPTION LADDER
-                </h3>
-
-
-                <p>
-
-                    <strong>
-                        ${plan.symbol}
-                    </strong>
-
-                    • ${plan.optionType}
-
-                    • ${plan.direction}
-
-                </p>
-
-
-                <p>
-
-                    <strong>
-                        Total Contracts:
-                    </strong>
-
-                    ${ladderResult.allocation.positionSize}
-
-                </p>
-
-
-                <hr>
-
-
-                <div class="ladder-level">
-
-
-                    <strong>
-                        🟢 TAKE PROFIT 1
-                    </strong>
-
-
-                    <p>
-
-                        Stock Target:
-                        ${formatMoney(
-                            tp1.stockPrice
-                        )}
-
-                    </p>
-
-
-                    <p>
-
-                        ${tp1.r}R Target
-
-                    </p>
-
-
-                    <p>
-
-                        Sell:
-                        ${tp1.contracts}
-                        Contract(s)
-
-                    </p>
-
-
-                </div>
-
-
-
-                <div class="ladder-level">
-
-
-                    <strong>
-                        🟢 TAKE PROFIT 2
-                    </strong>
-
-
-                    <p>
-
-                        Stock Target:
-                        ${formatMoney(
-                            tp2.stockPrice
-                        )}
-
-                    </p>
-
-
-                    <p>
-
-                        ${tp2.r}R Target
-
-                    </p>
-
-
-                    <p>
-
-                        Sell:
-                        ${tp2.contracts}
-                        Contract(s)
-
-                    </p>
-
-
-                </div>
-
-
-
-                <div class="ladder-level">
-
-
-                    <strong>
-                        🚀 TAKE PROFIT 3
-                    </strong>
-
-
-                    <p>
-
-                        Stock Target:
-                        ${formatMoney(
-                            tp3.stockPrice
-                        )}
-
-                    </p>
-
-
-                    <p>
-
-                        ${tp3.r}R Target
-
-                    </p>
-
-
-                    <p>
-
-                        Sell:
-                        ${tp3.contracts}
-                        Contract(s)
-
-                    </p>
-
-
-                </div>
-
-
-
-                <div class="ladder-level runner">
-
-
-                    <strong>
-                        🏃 RUNNER
-                    </strong>
-
-
-                    <p>
-
-                        Stock Target:
-                        ${formatMoney(
-                            runner.stockPrice
-                        )}
-
-                    </p>
-
-
-                    <p>
-
-                        ${runner.r}R Target
-
-                    </p>
-
-
-                    <p>
-
-                        Keep:
-                        ${runner.contracts}
-                        Contract(s)
-
-                    </p>
-
-
-                    <p>
-
-                        Trail With Structure
-
-                    </p>
-
-
-                </div>
-
-
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-
-    /* =====================================
-       STOCK / CRYPTO LADDER
-    ====================================== */
-
-    const tp1 =
-        ladderResult.targets.tp1;
-
-
-    const tp2 =
-        ladderResult.targets.tp2;
-
-
-    const tp3 =
-        ladderResult.targets.tp3;
-
-
-    const runner =
-        ladderResult.targets.runner;
+        };
 
 
     const unitLabel =
-        ladderResult.instrument === "crypto"
-            ? "Units"
-            : "Shares";
+        plan.instrument === "Option"
+            ? "Contract(s)"
+            : plan.instrument === "Crypto"
+                ? "Units"
+                : "Shares";
+
+
+    const positionSize =
+        ladderResult.allocation?.positionSize ||
+
+        plan.riskEngine?.contracts ||
+
+        plan.riskEngine?.quantity ||
+
+        plan.riskEngine?.shares ||
+
+        0;
 
 
     output.innerHTML = `
 
         <div class="ladder-card">
-
 
             <h3>
                 🪜 RO'LYFE PROFIT LADDER
@@ -3288,7 +2043,9 @@ function updateLadderDisplay(
                     Position Size:
                 </strong>
 
-                ${ladderResult.allocation.positionSize}
+                ${Number(
+                    positionSize
+                ).toLocaleString()}
 
             </p>
 
@@ -3296,8 +2053,9 @@ function updateLadderDisplay(
             <hr>
 
 
-            <div class="ladder-level">
+            <!-- TAKE PROFIT 1 -->
 
+            <div class="ladder-level">
 
                 <strong>
                     🟢 TAKE PROFIT 1
@@ -3307,8 +2065,9 @@ function updateLadderDisplay(
                 <p>
 
                     Target:
+
                     ${formatMoney(
-                        tp1.price
+                        getTargetPrice(tp1)
                     )}
 
                 </p>
@@ -3316,7 +2075,7 @@ function updateLadderDisplay(
 
                 <p>
 
-                    ${tp1.r}R
+                    ${getR(tp1)}R
 
                 </p>
 
@@ -3324,28 +2083,37 @@ function updateLadderDisplay(
                 <p>
 
                     Sell:
-                    ${tp1.quantity}
+
+                    ${getQuantity(tp1)}
+
                     ${unitLabel}
 
                 </p>
 
 
-                <p>
+                ${getProfit(tp1)
+                    ? `
 
-                    Estimated Profit:
-                    ${formatMoney(
-                        tp1.estimatedProfit
-                    )}
+                        <p>
 
-                </p>
+                            Estimated Profit:
 
+                            ${formatMoney(
+                                getProfit(tp1)
+                            )}
+
+                        </p>
+
+                    `
+                    : ""
+                }
 
             </div>
 
 
+            <!-- TAKE PROFIT 2 -->
 
             <div class="ladder-level">
-
 
                 <strong>
                     🟢 TAKE PROFIT 2
@@ -3355,8 +2123,9 @@ function updateLadderDisplay(
                 <p>
 
                     Target:
+
                     ${formatMoney(
-                        tp2.price
+                        getTargetPrice(tp2)
                     )}
 
                 </p>
@@ -3364,7 +2133,7 @@ function updateLadderDisplay(
 
                 <p>
 
-                    ${tp2.r}R
+                    ${getR(tp2)}R
 
                 </p>
 
@@ -3372,28 +2141,37 @@ function updateLadderDisplay(
                 <p>
 
                     Sell:
-                    ${tp2.quantity}
+
+                    ${getQuantity(tp2)}
+
                     ${unitLabel}
 
                 </p>
 
 
-                <p>
+                ${getProfit(tp2)
+                    ? `
 
-                    Estimated Profit:
-                    ${formatMoney(
-                        tp2.estimatedProfit
-                    )}
+                        <p>
 
-                </p>
+                            Estimated Profit:
 
+                            ${formatMoney(
+                                getProfit(tp2)
+                            )}
+
+                        </p>
+
+                    `
+                    : ""
+                }
 
             </div>
 
 
+            <!-- TAKE PROFIT 3 -->
 
             <div class="ladder-level">
-
 
                 <strong>
                     🚀 TAKE PROFIT 3
@@ -3403,8 +2181,9 @@ function updateLadderDisplay(
                 <p>
 
                     Target:
+
                     ${formatMoney(
-                        tp3.price
+                        getTargetPrice(tp3)
                     )}
 
                 </p>
@@ -3412,7 +2191,7 @@ function updateLadderDisplay(
 
                 <p>
 
-                    ${tp3.r}R
+                    ${getR(tp3)}R
 
                 </p>
 
@@ -3420,28 +2199,37 @@ function updateLadderDisplay(
                 <p>
 
                     Sell:
-                    ${tp3.quantity}
+
+                    ${getQuantity(tp3)}
+
                     ${unitLabel}
 
                 </p>
 
 
-                <p>
+                ${getProfit(tp3)
+                    ? `
 
-                    Estimated Profit:
-                    ${formatMoney(
-                        tp3.estimatedProfit
-                    )}
+                        <p>
 
-                </p>
+                            Estimated Profit:
 
+                            ${formatMoney(
+                                getProfit(tp3)
+                            )}
+
+                        </p>
+
+                    `
+                    : ""
+                }
 
             </div>
 
 
+            <!-- RUNNER -->
 
             <div class="ladder-level runner">
-
 
                 <strong>
                     🏃 RUNNER
@@ -3451,8 +2239,9 @@ function updateLadderDisplay(
                 <p>
 
                     Target:
+
                     ${formatMoney(
-                        runner.price
+                        getTargetPrice(runner)
                     )}
 
                 </p>
@@ -3460,7 +2249,7 @@ function updateLadderDisplay(
 
                 <p>
 
-                    ${runner.r}R
+                    ${getR(runner)}R
 
                 </p>
 
@@ -3468,28 +2257,35 @@ function updateLadderDisplay(
                 <p>
 
                     Keep:
-                    ${runner.quantity}
+
+                    ${getQuantity(runner)}
+
                     ${unitLabel}
 
                 </p>
 
 
+                ${getProfit(runner)
+                    ? `
+
+                        <p>
+
+                            Estimated Profit:
+
+                            ${formatMoney(
+                                getProfit(runner)
+                            )}
+
+                        </p>
+
+                    `
+                    : ""
+                }
+
+
                 <p>
-
-                    Estimated Profit:
-                    ${formatMoney(
-                        runner.estimatedProfit
-                    )}
-
-                </p>
-
-
-                <p>
-
                     Trail With Structure
-
                 </p>
-
 
             </div>
 
@@ -3530,9 +2326,7 @@ function loadMainChart() {
     if (
 
         !symbolElement ||
-
         !timeframeElement ||
-
         !chartContainer
 
     ) {
@@ -3644,7 +2438,6 @@ function loadMainChart() {
 
 function formatDateForInput(date) {
 
-
     const year =
         date.getFullYear();
 
@@ -3698,9 +2491,7 @@ function setExpiration(type) {
 
 
 
-    /* -------------------------------------
-       ⚡ 0DTE
-    ------------------------------------- */
+    /* ⚡ 0DTE */
 
     if (
         type === "0dte"
@@ -3713,9 +2504,7 @@ function setExpiration(type) {
 
 
 
-    /* -------------------------------------
-       🔥 TOMORROW
-    ------------------------------------- */
+    /* 🔥 TOMORROW */
 
     else if (
         type === "tomorrow"
@@ -3729,12 +2518,7 @@ function setExpiration(type) {
 
 
 
-    /* -------------------------------------
-       📅 THIS FRIDAY
-
-       If today is Friday,
-       it selects today.
-    ------------------------------------- */
+    /* 📅 THIS FRIDAY */
 
     else if (
         type === "thisFriday"
@@ -3751,7 +2535,6 @@ function setExpiration(type) {
         selectedDate.setDate(
 
             today.getDate() +
-
             daysUntilFriday
 
         );
@@ -3760,12 +2543,7 @@ function setExpiration(type) {
 
 
 
-    /* -------------------------------------
-       📆 NEXT FRIDAY
-
-       Always the Friday AFTER
-       this upcoming Friday.
-    ------------------------------------- */
+    /* 📆 NEXT FRIDAY */
 
     else if (
         type === "nextFriday"
@@ -3799,7 +2577,6 @@ function setExpiration(type) {
         selectedDate.setDate(
 
             today.getDate() +
-
             daysUntilFriday
 
         );
@@ -3893,4 +2670,4 @@ document.addEventListener(
 
 </body>
 
-    </html>
+                    </html>
