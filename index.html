@@ -2046,6 +2046,584 @@ function updateRiskDisplay(
 }
 
 
+/* =====================================
+   RO'LYFE LADDER ENGINE DISPLAY
+===================================== */
+
+function updateLadderDisplay(
+    plan,
+    ladderResult
+) {
+
+    const output =
+        document.getElementById(
+            "ladderOutput"
+        );
+
+
+    if (!output) {
+
+        return;
+
+    }
+
+
+    /*
+       FALLBACK
+
+       If Ladder Engine did not return
+       a valid ladder.
+    */
+
+    if (
+        !ladderResult ||
+        !ladderResult.valid
+    ) {
+
+        output.innerHTML = `
+
+            <div class="ladder-error">
+
+                <h3>
+                    🪜 RO'LYFE TRADE LADDER
+                </h3>
+
+                <p>
+
+                    Ladder could not be generated.
+
+                </p>
+
+                <p>
+
+                    Build a valid trade with
+                    Entry and Stop.
+
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    const money =
+        (value) => {
+
+            if (
+                value === null ||
+                value === undefined ||
+                isNaN(value)
+            ) {
+
+                return "$0.00";
+
+            }
+
+
+            return "$" +
+                Number(value)
+                    .toFixed(2);
+
+        };
+
+
+    const percent =
+        (value) => {
+
+            if (
+                value === null ||
+                value === undefined ||
+                isNaN(value)
+            ) {
+
+                return "0.00%";
+
+            }
+
+
+            return Number(value)
+                .toFixed(2) +
+                "%";
+
+        };
+
+
+    /*
+       GET TARGETS
+
+       Flexible so the display works
+       with Stock and Option ladders.
+    */
+
+    const target1 =
+        ladderResult.target1 ||
+        ladderResult.tp1 ||
+        ladderResult.targets?.target1 ||
+        null;
+
+
+    const target2 =
+        ladderResult.target2 ||
+        ladderResult.tp2 ||
+        ladderResult.targets?.target2 ||
+        null;
+
+
+    const target3 =
+        ladderResult.target3 ||
+        ladderResult.tp3 ||
+        ladderResult.targets?.target3 ||
+        null;
+
+
+    /*
+       RUNNER
+    */
+
+    const runner =
+        ladderResult.runner ||
+        ladderResult.runnerTarget ||
+        ladderResult.targets?.runner ||
+        null;
+
+
+    /*
+       R MULTIPLES
+    */
+
+    const r1 =
+        target1?.rMultiple ||
+        target1?.r ||
+        1;
+
+
+    const r2 =
+        target2?.rMultiple ||
+        target2?.r ||
+        2;
+
+
+    const r3 =
+        target3?.rMultiple ||
+        target3?.r ||
+        3;
+
+
+    /*
+       TARGET PRICES
+
+       Engine may return an object
+       or a direct number.
+    */
+
+    const getPrice =
+        (target) => {
+
+            if (
+                target === null ||
+                target === undefined
+            ) {
+
+                return 0;
+
+            }
+
+
+            if (
+                typeof target === "number"
+            ) {
+
+                return target;
+
+            }
+
+
+            return (
+                target.price ||
+                target.target ||
+                target.value ||
+                0
+            );
+
+        };
+
+
+    const price1 =
+        getPrice(target1);
+
+
+    const price2 =
+        getPrice(target2);
+
+
+    const price3 =
+        getPrice(target3);
+
+
+    /*
+       ROI
+
+       Based on Stock Map.
+    */
+
+    const entry =
+        Number(plan.stockEntry) || 0;
+
+
+    const direction =
+        plan.direction;
+
+
+    const calculateROI =
+        (targetPrice) => {
+
+            if (
+                entry <= 0 ||
+                targetPrice <= 0
+            ) {
+
+                return 0;
+
+            }
+
+
+            let movement = 0;
+
+
+            if (
+                direction === "Long"
+            ) {
+
+                movement =
+                    targetPrice - entry;
+
+            } else {
+
+                movement =
+                    entry - targetPrice;
+
+            }
+
+
+            return (
+                movement /
+                entry
+            ) * 100;
+
+        };
+
+
+    const roi1 =
+        calculateROI(price1);
+
+
+    const roi2 =
+        calculateROI(price2);
+
+
+    const roi3 =
+        calculateROI(price3);
+
+
+    /*
+       POSITION SIZE
+    */
+
+    let positionSize =
+        0;
+
+
+    if (
+        plan.instrument === "Option" &&
+        plan.riskEngine
+    ) {
+
+        positionSize =
+            plan.riskEngine.contracts || 0;
+
+    }
+
+
+    else if (
+        plan.instrument === "Crypto" &&
+        plan.riskEngine
+    ) {
+
+        positionSize =
+            plan.riskEngine.quantity || 0;
+
+    }
+
+
+    else if (
+        plan.riskEngine
+    ) {
+
+        positionSize =
+            plan.riskEngine.shares || 0;
+
+    }
+
+
+    /*
+       ALLOCATION
+    */
+
+    const sell1 =
+        ladderResult.target1Percent ||
+        40;
+
+
+    const sell2 =
+        ladderResult.target2Percent ||
+        30;
+
+
+    const sell3 =
+        ladderResult.target3Percent ||
+        20;
+
+
+    const keepRunner =
+        ladderResult.runnerPercent ||
+        10;
+
+
+    output.innerHTML = `
+
+        <div class="ladder-engine-card">
+
+
+            <h3>
+                🪜 RO'LYFE PROFIT LADDER
+            </h3>
+
+
+            <p class="ladder-symbol">
+
+                ${plan.symbol}
+
+                • ${plan.direction}
+
+                • ${plan.instrument}
+
+            </p>
+
+
+            <!-- ENTRY -->
+
+            <div class="ladder-summary">
+
+                <span>
+                    Entry
+                </span>
+
+                <strong>
+                    ${money(entry)}
+                </strong>
+
+            </div>
+
+
+            <!-- STOP -->
+
+            <div class="ladder-summary">
+
+                <span>
+                    Stop
+                </span>
+
+                <strong>
+                    ${money(
+                        plan.stockStop
+                    )}
+                </strong>
+
+            </div>
+
+
+            <!-- POSITION -->
+
+            <div class="ladder-summary">
+
+                <span>
+                    Position Size
+                </span>
+
+                <strong>
+                    ${Number(
+                        positionSize
+                    ).toLocaleString()}
+                </strong>
+
+            </div>
+
+
+            <hr>
+
+
+            <!-- TARGET 1 -->
+
+            <div class="ladder-level">
+
+                <strong>
+
+                    🟢 TAKE PROFIT 1
+
+                </strong>
+
+
+                <div class="ladder-price">
+
+                    ${money(price1)}
+
+                </div>
+
+
+                <div>
+
+                    ${r1}R
+
+                    • ROI:
+                    +${percent(roi1)}
+
+                </div>
+
+
+                <small>
+
+                    Sell ${sell1}%
+
+                </small>
+
+            </div>
+
+
+            <!-- TARGET 2 -->
+
+            <div class="ladder-level">
+
+                <strong>
+
+                    🟢 TAKE PROFIT 2
+
+                </strong>
+
+
+                <div class="ladder-price">
+
+                    ${money(price2)}
+
+                </div>
+
+
+                <div>
+
+                    ${r2}R
+
+                    • ROI:
+                    +${percent(roi2)}
+
+                </div>
+
+
+                <small>
+
+                    Sell ${sell2}%
+
+                </small>
+
+            </div>
+
+
+            <!-- TARGET 3 -->
+
+            <div class="ladder-level">
+
+                <strong>
+
+                    🚀 TAKE PROFIT 3
+
+                </strong>
+
+
+                <div class="ladder-price">
+
+                    ${money(price3)}
+
+                </div>
+
+
+                <div>
+
+                    ${r3}R
+
+                    • ROI:
+                    +${percent(roi3)}
+
+                </div>
+
+
+                <small>
+
+                    Sell ${sell3}%
+
+                </small>
+
+            </div>
+
+
+            <!-- RUNNER -->
+
+            <div class="ladder-level runner">
+
+                <strong>
+
+                    🏃 RUNNER
+
+                </strong>
+
+
+                <br><br>
+
+
+                Keep ${keepRunner}%
+
+
+                <br><br>
+
+
+                Trail With Structure
+
+
+                ${runner
+                    ? `
+
+                        <br><br>
+
+                        Runner Target:
+                        ${money(
+                            getPrice(runner)
+                        )}
+
+                    `
+                    : ""
+                }
+
+            </div>
+
+
+        </div>
+
+    `;
+
+}    
+    
+
     /* -------------------------------------
        OPTION DETAILS
     ------------------------------------- */
