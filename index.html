@@ -1587,17 +1587,13 @@ function addPlanToJournal() {
 
 
 /* =====================================
-   RISK ENGINE DISPLAY
+   RO'LYFE RISK ENGINE DISPLAY
 ===================================== */
 
 function updateRiskDisplay(
-
     plan,
-
     riskResult
-
 ) {
-
 
     const output =
         document.getElementById(
@@ -1612,44 +1608,41 @@ function updateRiskDisplay(
     }
 
 
-    if (
+    /*
+       FALLBACK
 
-        !riskResult
-
-    ) {
-
-        output.innerHTML = `
-
-            <h3>
-                🛡 Risk Engine
-            </h3>
-
-            <p>
-                Risk calculation unavailable.
-            </p>
-
-        `;
-
-        return;
-
-    }
-
+       If Risk Engine did not return
+       a valid result.
+    */
 
     if (
-
+        !riskResult ||
         !riskResult.valid
-
     ) {
 
         output.innerHTML = `
 
-            <h3>
-                ⚠️ Risk Engine Warning
-            </h3>
+            <div class="risk-error">
 
-            <p>
-                ${riskResult.error}
-            </p>
+                <h3>
+                    ⚠️ Risk Engine
+                </h3>
+
+                <p>
+
+                    Unable to calculate
+                    position sizing.
+
+                </p>
+
+                <p>
+
+                    Check your Account Size,
+                    Risk %, Entry, and Stop.
+
+                </p>
+
+            </div>
 
         `;
 
@@ -1658,8 +1651,399 @@ function updateRiskDisplay(
     }
 
 
-    let positionDetails =
-        "";
+    const money =
+        (value) => {
+
+            if (
+                value === null ||
+                value === undefined ||
+                isNaN(value)
+            ) {
+
+                return "$0.00";
+
+            }
+
+
+            return "$" +
+                Number(value)
+                    .toFixed(2);
+
+        };
+
+
+    const number =
+        (value) => {
+
+            if (
+                value === null ||
+                value === undefined ||
+                isNaN(value)
+            ) {
+
+                return "0";
+
+            }
+
+
+            return Number(value)
+                .toLocaleString();
+
+        };
+
+
+    /*
+       POSITION SIZE
+
+       Different instruments return
+       different position values.
+    */
+
+    let positionLabel =
+        "Position Size";
+
+
+    let positionSize =
+        0;
+
+
+    if (
+        plan.instrument === "Option"
+    ) {
+
+        positionLabel =
+            "Contracts";
+
+        positionSize =
+            riskResult.contracts || 0;
+
+    }
+
+
+    else if (
+        plan.instrument === "Crypto"
+    ) {
+
+        positionLabel =
+            "Quantity";
+
+        positionSize =
+            riskResult.quantity || 0;
+
+    }
+
+
+    else {
+
+        positionLabel =
+            "Shares";
+
+        positionSize =
+            riskResult.shares || 0;
+
+    }
+
+
+    /*
+       RISK STATUS
+    */
+
+    const riskStatus =
+        riskResult.riskStatus ||
+        riskResult.status ||
+        "CALCULATED";
+
+
+    /*
+       MAX LOSS
+    */
+
+    const maxLoss =
+        riskResult.maxLoss ||
+        riskResult.totalRisk ||
+        riskResult.riskAmount ||
+        plan.riskAmount ||
+        0;
+
+
+    /*
+       RISK PER UNIT
+    */
+
+    const riskPerUnit =
+        riskResult.riskPerShare ||
+        riskResult.riskPerContract ||
+        riskResult.riskPerUnit ||
+        plan.stockRiskPerShare ||
+        0;
+
+
+    output.innerHTML = `
+
+        <div class="risk-engine-card">
+
+
+            <h3>
+                🛡 RO'LYFE RISK ENGINE
+            </h3>
+
+
+            <div class="risk-status">
+
+                ${riskStatus}
+
+            </div>
+
+
+            <div class="risk-grid">
+
+
+                <!-- SYMBOL -->
+
+                <div class="risk-item">
+
+                    <span>
+                        Symbol
+                    </span>
+
+                    <strong>
+                        ${plan.symbol}
+                    </strong>
+
+                </div>
+
+
+                <!-- INSTRUMENT -->
+
+                <div class="risk-item">
+
+                    <span>
+                        Instrument
+                    </span>
+
+                    <strong>
+                        ${plan.instrument}
+                    </strong>
+
+                </div>
+
+
+                <!-- DIRECTION -->
+
+                <div class="risk-item">
+
+                    <span>
+                        Direction
+                    </span>
+
+                    <strong>
+                        ${plan.direction}
+                    </strong>
+
+                </div>
+
+
+                <!-- ACCOUNT -->
+
+                <div class="risk-item">
+
+                    <span>
+                        Account Balance
+                    </span>
+
+                    <strong>
+                        ${money(
+                            plan.accountSize
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <!-- RISK PERCENT -->
+
+                <div class="risk-item">
+
+                    <span>
+                        Risk %
+                    </span>
+
+                    <strong>
+                        ${Number(
+                            plan.riskPercent || 0
+                        ).toFixed(2)}%
+                    </strong>
+
+                </div>
+
+
+                <!-- RISK BUDGET -->
+
+                <div class="risk-item">
+
+                    <span>
+                        Risk Budget
+                    </span>
+
+                    <strong>
+                        ${money(
+                            plan.riskAmount
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <!-- ENTRY -->
+
+                <div class="risk-item">
+
+                    <span>
+                        Entry
+                    </span>
+
+                    <strong>
+                        ${money(
+                            plan.stockEntry
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <!-- STOP -->
+
+                <div class="risk-item">
+
+                    <span>
+                        Stop
+                    </span>
+
+                    <strong>
+                        ${money(
+                            plan.stockStop
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <!-- RISK PER UNIT -->
+
+                <div class="risk-item">
+
+                    <span>
+                        Risk Per Unit
+                    </span>
+
+                    <strong>
+                        ${money(
+                            riskPerUnit
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <!-- POSITION SIZE -->
+
+                <div class="risk-item highlight">
+
+                    <span>
+                        ${positionLabel}
+                    </span>
+
+                    <strong>
+                        ${number(
+                            positionSize
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <!-- MAX LOSS -->
+
+                <div class="risk-item danger">
+
+                    <span>
+                        Maximum Loss
+                    </span>
+
+                    <strong>
+                        ${money(
+                            maxLoss
+                        )}
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- OPTION DETAILS -->
+
+            ${plan.instrument === "Option"
+                ? `
+
+                    <div class="option-risk-details">
+
+                        <h4>
+                            🎯 Option Risk Details
+                        </h4>
+
+
+                        <p>
+
+                            <strong>
+                                Premium:
+                            </strong>
+
+                            ${money(
+                                plan.optionEntry
+                            )}
+
+                        </p>
+
+
+                        <p>
+
+                            <strong>
+                                Strike:
+                            </strong>
+
+                            ${plan.strike !== null
+                                ? money(plan.strike)
+                                : "Not Set"
+                            }
+
+                        </p>
+
+
+                        <p>
+
+                            <strong>
+                                Expiration:
+                            </strong>
+
+                            ${plan.expiration}
+
+                        </p>
+
+
+                    </div>
+
+                `
+                : ""
+            }
+
+
+        </div>
+
+    `;
+
+}
 
 
     /* -------------------------------------
