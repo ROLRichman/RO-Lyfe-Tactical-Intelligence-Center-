@@ -1,58 +1,48 @@
 /* =========================================================
    RO'LYFE TACTICAL INTELLIGENCE CENTER™
-   TRADE PLANNER ENGINE — ACCOUNT-AWARE UPGRADE
+   MASTER TRADE PLANNER ENGINE
+   js/trade-planner.js
 
-   PURPOSE:
+   PLAN → SIZE → LADDER → EXECUTE → JOURNAL → REVIEW
 
-   STOCK MAP
-   → OPTION EXECUTION
-   → ACCOUNT BUYING POWER
-   → MAX AFFORDABLE CONTRACTS
-   → RISK-BASED CONTRACT LIMIT
-   → USER REQUESTED CONTRACTS
-   → RO'LYFE SAFETY WARNING
-   → ROI / PROFIT TARGETS
+   CONNECTS:
 
-   IMPORTANT CONCEPT:
+   • ROLyfeRiskEngine
+   • ROLyfeLadderEngine
+   • Trade Journal
+   • Trade Planner UI
 
-   AFFORDABLE CONTRACTS
-   = How many contracts the account can physically buy.
-
-   RISK-SAFE CONTRACTS
-   = How many contracts fit inside the user's risk budget.
-
-   REQUESTED CONTRACTS
-   = How many contracts the trader wants to buy.
-
-   RO'LYFE compares all three.
+   TRADE SMART. STAY DISCIPLINED.
+   PROTECT YOUR CAPITAL. TRUST THE PROCESS.
 ========================================================= */
 
 const TradePlanner = {
-
 
     /* =====================================================
        HELPERS
     ===================================================== */
 
-    getNumber(id) {
+    getElement(id) {
+
+        return document.getElementById(id);
+
+    },
+
+
+    getNumber(id, fallback = null) {
 
         const element =
-            document.getElementById(id);
-
+            this.getElement(id);
 
         if (!element) {
-
-            return null;
-
+            return fallback;
         }
-
 
         const value =
             parseFloat(element.value);
 
-
         return isNaN(value)
-            ? null
+            ? fallback
             : value;
 
     },
@@ -61,136 +51,578 @@ const TradePlanner = {
     getValue(id, fallback = "") {
 
         const element =
-            document.getElementById(id);
-
+            this.getElement(id);
 
         if (!element) {
-
             return fallback;
-
         }
 
+        const value =
+            String(element.value || "").trim();
 
-        return element.value || fallback;
+        return value || fallback;
 
     },
 
 
-    /* =====================================================
-       MONEY FORMAT
-    ===================================================== */
+    normalizeDirection(direction) {
+
+        direction =
+            String(direction || "long")
+                .trim()
+                .toLowerCase();
+
+        return direction === "short"
+            ? "short"
+            : "long";
+
+    },
+
+
+    displayDirection(direction) {
+
+        return this.normalizeDirection(direction) === "short"
+            ? "Short"
+            : "Long";
+
+    },
+
+
+    normalizeInstrument(instrument) {
+
+        instrument =
+            String(instrument || "stock")
+                .trim()
+                .toLowerCase();
+
+        if (
+            instrument.includes("crypto")
+        ) {
+            return "crypto";
+        }
+
+        if (
+            instrument.includes("spread")
+        ) {
+            return "option_spread";
+        }
+
+        if (
+            instrument.includes("option")
+        ) {
+            return "option";
+        }
+
+        return "stock";
+
+    },
+
 
     formatMoney(value) {
 
         if (
-
             value === null ||
-
             value === undefined ||
-
-            !Number.isFinite(
-                Number(value)
-            )
-
+            !Number.isFinite(Number(value))
         ) {
-
             return "Not Set";
-
         }
 
-
         return new Intl.NumberFormat(
-
             "en-US",
-
             {
-
                 style: "currency",
-
                 currency: "USD"
-
             }
-
-        ).format(
-            Number(value)
-        );
+        ).format(Number(value));
 
     },
 
-
-    /* =====================================================
-       PERCENT FORMAT
-    ===================================================== */
 
     formatPercent(value) {
 
         if (
-
             value === null ||
-
             value === undefined ||
-
-            isNaN(value)
-
+            !Number.isFinite(Number(value))
         ) {
-
             return "Not Set";
-
         }
 
-
         return (
-
-            Number(value)
-                .toFixed(2)
-
-            + "%"
-
+            Number(value).toFixed(2) +
+            "%"
         );
 
     },
 
 
-    /* =====================================================
-       WHOLE NUMBER FORMAT
-    ===================================================== */
-
-    formatNumber(value) {
+    formatNumber(value, decimals = 2) {
 
         if (
-
             value === null ||
-
             value === undefined ||
-
-            !Number.isFinite(
-                Number(value)
-            )
-
+            !Number.isFinite(Number(value))
         ) {
-
-            return "0";
-
+            return "Not Set";
         }
 
+        return Number(value).toFixed(decimals);
 
-        return Math.floor(
-            Number(value)
-        ).toLocaleString();
+    },
+
+
+    formatPrice(value) {
+
+        if (
+            window.ROLyfeLadderEngine &&
+            typeof window.ROLyfeLadderEngine.formatPrice ===
+            "function"
+        ) {
+            return "$" +
+                window.ROLyfeLadderEngine.formatPrice(value);
+        }
+
+        return this.formatMoney(value);
 
     },
 
 
     /* =====================================================
-       CREATE COMPLETE TRADE PLAN
+       PROBABILITY CLASSIFICATION
+    ===================================================== */
+
+    calculateProbabilityResult(probability) {
+
+        if (
+            probability === null ||
+            probability === undefined
+        ) {
+            return "NOT SET";
+        }
+
+        probability =
+            Number(probability);
+
+        if (probability >= 70) {
+            return "HIGH";
+        }
+
+        if (probability >= 50) {
+            return "MODERATE";
+        }
+
+        return "LOW";
+
+    },
+
+
+    /* =====================================================
+       GET ENGINE STATUS
+
+       Prevents silent failures if scripts
+       are loaded in the wrong order.
+    ===================================================== */
+
+    checkEngines() {
+
+        const missing = [];
+
+        if (
+            !window.ROLyfeRiskEngine
+        ) {
+            missing.push(
+                "ROLyfeRiskEngine"
+            );
+        }
+
+        if (
+            !window.ROLyfeLadderEngine
+        ) {
+            missing.push(
+                "ROLyfeLadderEngine"
+            );
+        }
+
+        return {
+
+            valid:
+                missing.length === 0,
+
+            missing
+
+        };
+
+    },
+
+
+    /* =====================================================
+       VALIDATE CORE TRADE MAP
+    ===================================================== */
+
+    validateTrade({
+
+        symbol,
+
+        direction,
+
+        accountSize,
+
+        riskPercent,
+
+        stockEntry,
+
+        stockStop,
+
+        probability
+
+    }) {
+
+        if (!symbol) {
+
+            return {
+                valid: false,
+                error:
+                    "Please enter a Symbol."
+            };
+
+        }
+
+
+        if (
+            accountSize === null ||
+            accountSize <= 0
+        ) {
+
+            return {
+                valid: false,
+                error:
+                    "Please enter a valid Account Size."
+            };
+
+        }
+
+
+        if (
+            riskPercent === null ||
+            riskPercent <= 0
+        ) {
+
+            return {
+                valid: false,
+                error:
+                    "Please enter a valid Risk Percentage."
+            };
+
+        }
+
+
+        if (
+            stockEntry === null ||
+            stockEntry <= 0
+        ) {
+
+            return {
+                valid: false,
+                error:
+                    "Please enter a valid Stock Entry."
+            };
+
+        }
+
+
+        if (
+            stockStop === null ||
+            stockStop <= 0
+        ) {
+
+            return {
+                valid: false,
+                error:
+                    "Please enter a valid Stock Stop."
+            };
+
+        }
+
+
+        if (
+            probability !== null &&
+            (
+                probability < 0 ||
+                probability > 100
+            )
+        ) {
+
+            return {
+                valid: false,
+                error:
+                    "Probability must be between 0 and 100."
+            };
+
+        }
+
+
+        if (
+            direction === "long" &&
+            stockStop >= stockEntry
+        ) {
+
+            return {
+                valid: false,
+                error:
+                    "For a Long trade, the Stock Stop must be below the Stock Entry."
+            };
+
+        }
+
+
+        if (
+            direction === "short" &&
+            stockStop <= stockEntry
+        ) {
+
+            return {
+                valid: false,
+                error:
+                    "For a Short trade, the Stock Stop must be above the Stock Entry."
+            };
+
+        }
+
+
+        return {
+            valid: true
+        };
+
+    },
+
+
+    /* =====================================================
+       CALCULATE MANUAL TARGET RESULT
+    ===================================================== */
+
+    calculateStockTargetResult({
+
+        entry,
+
+        stop,
+
+        target,
+
+        direction,
+
+        quantity = 0
+
+    }) {
+
+        if (
+            target === null ||
+            target === undefined ||
+            !Number.isFinite(Number(target))
+        ) {
+            return null;
+        }
+
+
+        entry =
+            Number(entry);
+
+        stop =
+            Number(stop);
+
+        target =
+            Number(target);
+
+        quantity =
+            Number(quantity) || 0;
+
+
+        const riskPerUnit =
+            Math.abs(
+                entry - stop
+            );
+
+
+        let priceResult;
+
+
+        if (direction === "short") {
+
+            priceResult =
+                entry - target;
+
+        }
+
+        else {
+
+            priceResult =
+                target - entry;
+
+        }
+
+
+        const roi =
+            entry > 0
+                ? (
+                    priceResult /
+                    entry
+                ) * 100
+                : null;
+
+
+        const rMultiple =
+            riskPerUnit > 0
+                ? (
+                    priceResult /
+                    riskPerUnit
+                )
+                : null;
+
+
+        const estimatedProfit =
+            quantity > 0
+                ? priceResult * quantity
+                : null;
+
+
+        return {
+
+            target,
+
+            result:
+                priceResult,
+
+            roi,
+
+            rMultiple,
+
+            estimatedProfit
+
+        };
+
+    },
+
+
+    /* =====================================================
+       CALCULATE OPTION TARGET RESULT
+    ===================================================== */
+
+    calculateOptionTargetResult({
+
+        optionEntry,
+
+        optionTarget,
+
+        contracts = 0
+
+    }) {
+
+        if (
+            optionEntry === null ||
+            optionEntry === undefined ||
+            optionTarget === null ||
+            optionTarget === undefined
+        ) {
+            return null;
+        }
+
+
+        optionEntry =
+            Number(optionEntry);
+
+        optionTarget =
+            Number(optionTarget);
+
+        contracts =
+            Math.floor(
+                Number(contracts) || 0
+            );
+
+
+        if (
+            optionEntry <= 0 ||
+            optionTarget <= 0
+        ) {
+            return null;
+        }
+
+
+        const priceMove =
+            optionTarget -
+            optionEntry;
+
+
+        const profitPerContract =
+            priceMove * 100;
+
+
+        const roi =
+            (
+                priceMove /
+                optionEntry
+            ) * 100;
+
+
+        const estimatedTotalProfit =
+            contracts > 0
+                ? profitPerContract *
+                  contracts
+                : null;
+
+
+        return {
+
+            target:
+                optionTarget,
+
+            profitPerShare:
+                priceMove,
+
+            profitPerContract,
+
+            contracts,
+
+            estimatedTotalProfit,
+
+            roi
+
+        };
+
+    },
+
+
+    /* =====================================================
+       CREATE COMPLETE MASTER TRADE PLAN
     ===================================================== */
 
     createPlan() {
 
+        /* =============================================
+           CHECK ENGINES
+        ============================================== */
 
-        /* =================================================
+        const engineStatus =
+            this.checkEngines();
+
+
+        if (!engineStatus.valid) {
+
+            const message =
+                "Missing required engine(s): " +
+                engineStatus.missing.join(", ");
+
+            console.error(message);
+
+            alert(message);
+
+            return null;
+
+        }
+
+
+        /* =============================================
            BASIC INFORMATION
-        ================================================= */
+        ============================================== */
 
         const symbol =
             this.getValue(
@@ -199,17 +631,35 @@ const TradePlanner = {
             ).toUpperCase();
 
 
-        const instrument =
+        const instrumentInput =
             this.getValue(
                 "instrument",
-                "Option"
+                "Stock"
+            );
+
+
+        const instrument =
+            this.normalizeInstrument(
+                instrumentInput
+            );
+
+
+        const directionInput =
+            this.getValue(
+                "direction",
+                "Long"
             );
 
 
         const direction =
-            this.getValue(
-                "direction",
-                "Long"
+            this.normalizeDirection(
+                directionInput
+            );
+
+
+        const directionDisplay =
+            this.displayDirection(
+                direction
             );
 
 
@@ -225,32 +675,9 @@ const TradePlanner = {
             );
 
 
-        /*
-           NEW:
-
-           Optional input.
-
-           If the input does not exist yet,
-           default to automatic sizing.
-
-           When you later add this field
-           to the interface, it will work
-           automatically.
-
-           Example:
-
-           id="requestedContracts"
-        */
-
-        const requestedContractsInput =
-            this.getNumber(
-                "requestedContracts"
-            );
-
-
-        /* =================================================
+        /* =============================================
            PROBABILITY / VOLATILITY
-        ================================================= */
+        ============================================== */
 
         const probability =
             this.getNumber(
@@ -264,9 +691,9 @@ const TradePlanner = {
             );
 
 
-        /* =================================================
+        /* =============================================
            STOCK MAP
-        ================================================= */
+        ============================================== */
 
         const stockEntry =
             this.getNumber(
@@ -280,27 +707,34 @@ const TradePlanner = {
             );
 
 
-        const stockTarget1 =
+        /*
+           Manual targets are optional.
+
+           If not entered, the ladder engine
+           automatically creates 1R / 2R / 3R.
+        */
+
+        const manualTarget1 =
             this.getNumber(
                 "target1"
             );
 
 
-        const stockTarget2 =
+        const manualTarget2 =
             this.getNumber(
                 "target2"
             );
 
 
-        const stockTarget3 =
+        const manualTarget3 =
             this.getNumber(
                 "target3"
             );
 
 
-        /* =================================================
+        /* =============================================
            OPTION EXECUTION
-        ================================================= */
+        ============================================== */
 
         const optionType =
             this.getValue(
@@ -346,14 +780,41 @@ const TradePlanner = {
             );
 
 
-        /* =================================================
-           VALIDATION
-        ================================================= */
+        const optionDelta =
+            this.getNumber(
+                "optionDelta",
+                0
+            );
 
-        if (!symbol) {
+
+        /* =============================================
+           VALIDATE TRADE
+        ============================================== */
+
+        const validation =
+            this.validateTrade({
+
+                symbol,
+
+                direction,
+
+                accountSize,
+
+                riskPercent,
+
+                stockEntry,
+
+                stockStop,
+
+                probability
+
+            });
+
+
+        if (!validation.valid) {
 
             alert(
-                "Please enter a Symbol."
+                validation.error
             );
 
             return null;
@@ -361,900 +822,760 @@ const TradePlanner = {
         }
 
 
-        if (
-
-            accountSize === null ||
-
-            accountSize <= 0
-
-        ) {
-
-            alert(
-                "Please enter a valid Account Size."
-            );
-
-            return null;
-
-        }
-
-
-        if (
-
-            riskPercent === null ||
-
-            riskPercent <= 0
-
-        ) {
-
-            alert(
-                "Please enter a valid Risk %."
-            );
-
-            return null;
-
-        }
-
-
-        /*
-           Stock map validation.
-
-           Options still use the stock map
-           as the trade invalidation reference.
-        */
-
-        if (
-
-            stockEntry === null ||
-
-            stockStop === null
-
-        ) {
-
-            alert(
-                "Please enter Stock Entry and Stock Stop."
-            );
-
-            return null;
-
-        }
-
-
-        if (
-
-            stockEntry <= 0 ||
-
-            stockStop <= 0
-
-        ) {
-
-            alert(
-                "Stock Entry and Stock Stop must be greater than zero."
-            );
-
-            return null;
-
-        }
-
-
-        if (
-
-            probability !== null &&
-
-            (
-
-                probability < 0 ||
-
-                probability > 100
-
-            )
-
-        ) {
-
-            alert(
-                "Probability must be between 0 and 100."
-            );
-
-            return null;
-
-        }
-
-
-        if (
-
-            direction === "Long" &&
-
-            stockStop >= stockEntry
-
-        ) {
-
-            alert(
-                "For a Long trade, the Stock Stop must be below the Stock Entry."
-            );
-
-            return null;
-
-        }
-
-
-        if (
-
-            direction === "Short" &&
-
-            stockStop <= stockEntry
-
-        ) {
-
-            alert(
-                "For a Short trade, the Stock Stop must be above the Stock Entry."
-            );
-
-            return null;
-
-        }
-
-
-        /*
-           Option validation only when
-           the instrument is an Option.
-        */
-
-        if (
-
-            instrument === "Option" &&
-
-            (
-
-                optionEntry === null ||
-
-                optionEntry <= 0
-
-            )
-
-        ) {
-
-            alert(
-                "Please enter a valid Option Premium Entry."
-            );
-
-            return null;
-
-        }
-
-
-        /* =================================================
-           ACCOUNT RISK BUDGET
-        ================================================= */
-
-        const riskAmount =
+        /* =============================================
+           CALCULATE RISK BUDGET
+        ============================================== */
+
+        const dollarRisk =
             accountSize *
             (
                 riskPercent / 100
             );
 
 
-        /* =================================================
-           STOCK RISK
-        ================================================= */
+        /* =============================================
+           STOCK / CRYPTO RISK ENGINE
+        ============================================== */
 
-        const stockRiskPerShare =
+        let riskResult = null;
+
+        let positionSize = 0;
+
+        let positionValue = 0;
+
+        let riskPerUnit =
             Math.abs(
-
                 stockEntry -
-
                 stockStop
-
-            );
-
-
-        /* =================================================
-           STOCK BUYING POWER
-        ================================================= */
-
-        const maxAffordableShares =
-            Math.floor(
-
-                accountSize /
-
-                stockEntry
-
-            );
-
-
-        const riskBasedShares =
-            stockRiskPerShare > 0
-
-                ? Math.floor(
-
-                    riskAmount /
-
-                    stockRiskPerShare
-
-                )
-
-                : 0;
-
-
-        const recommendedShares =
-            Math.min(
-
-                maxAffordableShares,
-
-                riskBasedShares
-
-            );
-
-
-        const recommendedStockCost =
-            recommendedShares *
-            stockEntry;
-
-
-        const recommendedStockRisk =
-            recommendedShares *
-            stockRiskPerShare;
-
-
-        /* =================================================
-           OPTION CONTRACT ECONOMICS
-
-           OPTION PREMIUM × 100
-        ================================================= */
-
-        const optionContractCost =
-
-            optionEntry !== null &&
-
-            optionEntry > 0
-
-                ? optionEntry * 100
-
-                : 0;
-
-
-        /*
-           MAX AFFORDABLE CONTRACTS
-
-           Example:
-
-           Account = $1,000
-           Premium = $2.00
-
-           Contract Cost = $200
-
-           $1,000 / $200 = 5 Contracts
-        */
-
-        const maxAffordableContracts =
-
-            optionContractCost > 0
-
-                ? Math.floor(
-
-                    accountSize /
-
-                    optionContractCost
-
-                )
-
-                : 0;
-
-
-        /*
-           RISK-SAFE CONTRACTS
-
-           Conservative premium-risk model.
-
-           Example:
-
-           Account = $1,000
-           Risk = 5%
-
-           Risk Budget = $50
-
-           Contract Cost = $200
-
-           $50 / $200 = 0 Contracts
-
-           This tells the trader:
-
-           "You can afford 5 contracts,
-           but none fit inside your
-           current 5% premium-risk rule."
-        */
-
-        const riskBasedContracts =
-
-            optionContractCost > 0
-
-                ? Math.floor(
-
-                    riskAmount /
-
-                    optionContractCost
-
-                )
-
-                : 0;
-
-
-        /*
-           RECOMMENDED CONTRACTS
-
-           The lower of:
-
-           1. What the account can afford
-           2. What the risk budget allows
-        */
-
-        const recommendedContracts =
-            Math.min(
-
-                maxAffordableContracts,
-
-                riskBasedContracts
-
             );
 
 
         /*
-           REQUESTED CONTRACTS
-
-           If trader enters a number,
-           use it.
-
-           Otherwise use RO'Lyfe
-           recommended size.
-        */
-
-        let requestedContracts =
-            requestedContractsInput;
-
-
-        if (
-
-            requestedContracts === null ||
-
-            requestedContracts <= 0
-
-        ) {
-
-            requestedContracts =
-                recommendedContracts;
-
-        }
-
-
-        requestedContracts =
-            Math.floor(
-                requestedContracts
-            );
-
-
-        /* =================================================
-           CONTRACT EXPOSURE
-        ================================================= */
-
-        const requestedContractCost =
-            requestedContracts *
-            optionContractCost;
-
-
-        const remainingAccountAfterPurchase =
-            accountSize -
-            requestedContractCost;
-
-
-        const requestedPremiumRisk =
-            requestedContractCost;
-
-
-        const actualRiskPercent =
-            accountSize > 0
-
-                ? (
-
-                    requestedPremiumRisk /
-
-                    accountSize
-
-                ) * 100
-
-                : 0;
-
-
-        /* =================================================
-           RO'LYFE CONTRACT STATUS
-        ================================================= */
-
-        let contractStatus =
-            "GREEN";
-
-
-        let contractWarning =
-            "RO'LYFE sizing is within your account and defined risk limits.";
-
-
-        let contractWarningType =
-            "SAFE";
-
-
-        /*
-           RED:
-           Trader cannot physically afford
-           the requested contracts.
+           STOCK
         */
 
         if (
-
-            requestedContractCost >
-
-            accountSize
-
+            instrument === "stock"
         ) {
 
-            contractStatus =
-                "RED";
+            riskResult =
+                window.ROLyfeRiskEngine
+                    .calculateStock({
+
+                        accountBalance:
+                            accountSize,
+
+                        riskPercent,
+
+                        entry:
+                            stockEntry,
+
+                        stop:
+                            stockStop,
+
+                        direction
+
+                    });
 
 
-            contractWarningType =
-                "ACCOUNT_LIMIT";
+            if (!riskResult.valid) {
+
+                alert(
+                    riskResult.error ||
+                    "Unable to calculate stock risk."
+                );
+
+                return null;
+
+            }
 
 
-            contractWarning =
-                `⚠️ ACCOUNT LIMIT EXCEEDED: ${this.formatNumber(
-                    requestedContracts
-                )} contract(s) require ${this.formatMoney(
-                    requestedContractCost
-                )}, but the account contains only ${this.formatMoney(
-                    accountSize
-                )}. Maximum affordable: ${this.formatNumber(
-                    maxAffordableContracts
-                )} contract(s).`;
+            positionSize =
+                riskResult.shares;
+
+
+            positionValue =
+                riskResult.positionValue;
+
+
+            riskPerUnit =
+                riskResult.riskPerShare;
 
         }
 
 
         /*
-           YELLOW:
-           Trader can afford the contracts
-           but exceeds the defined risk rule.
+           CRYPTO
         */
 
         else if (
-
-            requestedContracts >
-
-            riskBasedContracts
-
+            instrument === "crypto"
         ) {
 
-            contractStatus =
-                "YELLOW";
+            riskResult =
+                window.ROLyfeRiskEngine
+                    .calculateCrypto({
+
+                        accountBalance:
+                            accountSize,
+
+                        riskPercent,
+
+                        entry:
+                            stockEntry,
+
+                        stop:
+                            stockStop,
+
+                        direction
+
+                    });
 
 
-            contractWarningType =
-                "RISK_LIMIT";
+            if (!riskResult.valid) {
+
+                alert(
+                    riskResult.error ||
+                    "Unable to calculate crypto risk."
+                );
+
+                return null;
+
+            }
 
 
-            contractWarning =
-                `⚠️ RISK LIMIT WARNING: ${this.formatNumber(
-                    requestedContracts
-                )} contract(s) cost ${this.formatMoney(
-                    requestedContractCost
-                )}. Your current risk budget is ${this.formatMoney(
-                    riskAmount
-                )}. RO'Lyfe risk-based limit is ${this.formatNumber(
-                    riskBasedContracts
-                )} contract(s).`;
+            positionSize =
+                riskResult.quantity;
+
+
+            positionValue =
+                riskResult.positionValue;
+
+
+            riskPerUnit =
+                riskResult.riskPerUnit;
 
         }
 
 
         /*
-           ORANGE:
-           The account can technically
-           afford one contract, but one
-           contract itself exceeds the
-           selected risk budget.
+           OPTIONS
+
+           Position sizing is based on
+           stock invalidation + option delta
+           when option information exists.
+
+           If no valid option entry exists,
+           the stock map is still created.
         */
 
         else if (
-
-            maxAffordableContracts >= 1 &&
-
-            riskBasedContracts === 0
-
+            instrument === "option"
         ) {
 
-            contractStatus =
-                "ORANGE";
+            if (
+                optionEntry !== null &&
+                optionEntry > 0
+            ) {
 
+                riskResult =
+                    window.ROLyfeRiskEngine
+                        .calculateOption({
 
-            contractWarningType =
-                "ONE_CONTRACT_EXCEEDS_RISK";
+                            accountBalance:
+                                accountSize,
 
+                            riskPercent,
 
-            contractWarning =
-                `⚠️ ONE CONTRACT EXCEEDS YOUR RISK RULE: One contract costs ${this.formatMoney(
-                    optionContractCost
-                )}, while your ${this.formatPercent(
-                    riskPercent
-                )} risk budget is only ${this.formatMoney(
-                    riskAmount
-                )}.`;
+                            stockEntry,
 
-        }
+                            stockStop,
 
+                            optionPremium:
+                                optionEntry,
 
-        /*
-           RED:
-           Account cannot afford one
-           complete contract.
-        */
+                            optionDelta:
+                                optionDelta || 0,
 
-        else if (
+                            direction,
 
-            maxAffordableContracts === 0 &&
+                            maxPremiumRisk:
+                                false
 
-            instrument === "Option"
-
-        ) {
-
-            contractStatus =
-                "RED";
-
-
-            contractWarningType =
-                "INSUFFICIENT_ACCOUNT_SIZE";
-
-
-            contractWarning =
-                `⚠️ INSUFFICIENT CAPITAL: One contract costs ${this.formatMoney(
-                    optionContractCost
-                )}, but the account size is ${this.formatMoney(
-                    accountSize
-                )}.`;
-
-        }
-
-
-        /* =================================================
-           CONTRACT DECISION
-        ================================================= */
-
-        const contractDecision = {
-
-            accountSize,
-
-            riskPercent,
-
-            riskBudget:
-                riskAmount,
-
-
-            contractCost:
-                optionContractCost,
-
-
-            maxAffordableContracts,
-
-
-            riskBasedContracts,
-
-
-            recommendedContracts,
-
-
-            requestedContracts,
-
-
-            requestedContractCost,
-
-
-            requestedPremiumRisk,
-
-
-            actualRiskPercent,
-
-
-            remainingAccountAfterPurchase,
-
-
-            status:
-                contractStatus,
-
-
-            warningType:
-                contractWarningType,
-
-
-            warning:
-                contractWarning
-
-        };
-
-
-        /* =================================================
-           STOCK TARGET CALCULATOR
-        ================================================= */
-
-        const calculateStockResult =
-            (target) => {
-
-                if (
-
-                    target === null ||
-
-                    target === undefined
-
-                ) {
-
-                    return null;
-
-                }
-
-
-                let result;
+                        });
 
 
                 if (
-                    direction === "Long"
+                    riskResult.valid
                 ) {
 
-                    result =
-                        target -
-                        stockEntry;
+                    positionSize =
+                        riskResult.contracts;
+
+
+                    positionValue =
+                        riskResult.totalPremiumExposure;
 
                 }
 
                 else {
 
-                    result =
-                        stockEntry -
-                        target;
+                    /*
+                       Do not kill the entire plan.
+
+                       The trader may still want
+                       to map the trade manually.
+                    */
+
+                    positionSize = 0;
+
+                    positionValue = 0;
 
                 }
-
-
-                const roi =
-                    (
-
-                        result /
-
-                        stockEntry
-
-                    ) * 100;
-
-
-                const rMultiple =
-
-                    stockRiskPerShare > 0
-
-                        ? (
-
-                            result /
-
-                            stockRiskPerShare
-
-                        )
-
-                        : 0;
-
-
-                return {
-
-                    target,
-
-                    result,
-
-                    roi,
-
-                    rMultiple
-
-                };
-
-            };
-
-
-        const stockResult1 =
-            calculateStockResult(
-                stockTarget1
-            );
-
-
-        const stockResult2 =
-            calculateStockResult(
-                stockTarget2
-            );
-
-
-        const stockResult3 =
-            calculateStockResult(
-                stockTarget3
-            );
-
-
-        /* =================================================
-           OPTION TARGET CALCULATOR
-
-           Calculates results using the
-           REQUESTED CONTRACT SIZE.
-        ================================================= */
-
-        const calculateOptionResult =
-            (target) => {
-
-                if (
-
-                    target === null ||
-
-                    optionEntry === null ||
-
-                    optionEntry <= 0
-
-                ) {
-
-                    return null;
-
-                }
-
-
-                const profitPerOptionShare =
-
-                    target -
-
-                    optionEntry;
-
-
-                const profitPerContract =
-
-                    profitPerOptionShare *
-
-                    100;
-
-
-                const totalProfit =
-
-                    profitPerContract *
-
-                    requestedContracts;
-
-
-                const roi =
-
-                    (
-
-                        profitPerOptionShare /
-
-                        optionEntry
-
-                    ) * 100;
-
-
-                return {
-
-                    target,
-
-                    profitPerShare:
-                        profitPerOptionShare,
-
-
-                    profitPerContract,
-
-
-                    totalProfit,
-
-
-                    contracts:
-                        requestedContracts,
-
-
-                    roi
-
-                };
-
-            };
-
-
-        const optionResult1 =
-            calculateOptionResult(
-                optionTarget1
-            );
-
-
-        const optionResult2 =
-            calculateOptionResult(
-                optionTarget2
-            );
-
-
-        const optionResult3 =
-            calculateOptionResult(
-                optionTarget3
-            );
-
-
-        /* =================================================
-           PROBABILITY RESULT
-        ================================================= */
-
-        let probabilityResult =
-            "Not Set";
-
-
-        if (
-            probability !== null
-        ) {
-
-            if (
-                probability >= 70
-            ) {
-
-                probabilityResult =
-                    "HIGH";
-
-            }
-
-            else if (
-                probability >= 50
-            ) {
-
-                probabilityResult =
-                    "MODERATE";
-
-            }
-
-            else {
-
-                probabilityResult =
-                    "LOW";
 
             }
 
         }
 
 
-        /* =================================================
-           BUILD COMPLETE PLAN
-        ================================================= */
+        /* =============================================
+           BUILD AUTOMATIC R-MULTIPLE LADDER
+        ============================================== */
+
+        const stockLadder =
+            window.ROLyfeLadderEngine
+                .calculateLevels({
+
+                    entry:
+                        stockEntry,
+
+                    stop:
+                        stockStop,
+
+                    direction,
+
+                    tp1R:
+                        1,
+
+                    tp2R:
+                        2,
+
+                    tp3R:
+                        3,
+
+                    runnerR:
+                        4
+
+                });
+
+
+        if (!stockLadder.valid) {
+
+            alert(
+                stockLadder.error ||
+                "Unable to calculate trade ladder."
+            );
+
+            return null;
+
+        }
+
+
+        /*
+           Manual targets override
+           automatic ladder targets.
+        */
+
+        const stockTarget1 =
+            manualTarget1 !== null
+                ? manualTarget1
+                : stockLadder.tp1.price;
+
+
+        const stockTarget2 =
+            manualTarget2 !== null
+                ? manualTarget2
+                : stockLadder.tp2.price;
+
+
+        const stockTarget3 =
+            manualTarget3 !== null
+                ? manualTarget3
+                : stockLadder.tp3.price;
+
+
+        const runnerTarget =
+            stockLadder.runner.price;
+
+
+        /* =============================================
+           BUILD POSITION ALLOCATION
+        ============================================== */
+
+        let allocationResult = null;
+
+
+        if (
+            positionSize > 0 &&
+            instrument !== "crypto"
+        ) {
+
+            allocationResult =
+                window.ROLyfeLadderEngine
+                    .calculateAllocation({
+
+                        positionSize
+
+                    });
+
+        }
+
+
+        /*
+           Crypto can be fractional.
+
+           Use percentage quantities.
+        */
+
+        else if (
+            positionSize > 0 &&
+            instrument === "crypto"
+        ) {
+
+            allocationResult = {
+
+                valid:
+                    true,
+
+                positionSize,
+
+                allocation:
+                    window.ROLyfeLadderEngine
+                        .defaultAllocation,
+
+                tp1:
+                    positionSize * 0.40,
+
+                tp2:
+                    positionSize * 0.30,
+
+                tp3:
+                    positionSize * 0.20,
+
+                runner:
+                    positionSize * 0.10
+
+            };
+
+        }
+
+
+        /* =============================================
+           CALCULATE STOCK TARGET RESULTS
+        ============================================== */
+
+        const stockResult1 =
+            this.calculateStockTargetResult({
+
+                entry:
+                    stockEntry,
+
+                stop:
+                    stockStop,
+
+                target:
+                    stockTarget1,
+
+                direction,
+
+                quantity:
+                    allocationResult
+                        ? allocationResult.tp1
+                        : 0
+
+            });
+
+
+        const stockResult2 =
+            this.calculateStockTargetResult({
+
+                entry:
+                    stockEntry,
+
+                stop:
+                    stockStop,
+
+                target:
+                    stockTarget2,
+
+                direction,
+
+                quantity:
+                    allocationResult
+                        ? allocationResult.tp2
+                        : 0
+
+            });
+
+
+        const stockResult3 =
+            this.calculateStockTargetResult({
+
+                entry:
+                    stockEntry,
+
+                stop:
+                    stockStop,
+
+                target:
+                    stockTarget3,
+
+                direction,
+
+                quantity:
+                    allocationResult
+                        ? allocationResult.tp3
+                        : 0
+
+            });
+
+
+        const runnerResult =
+            this.calculateStockTargetResult({
+
+                entry:
+                    stockEntry,
+
+                stop:
+                    stockStop,
+
+                target:
+                    runnerTarget,
+
+                direction,
+
+                quantity:
+                    allocationResult
+                        ? allocationResult.runner
+                        : 0
+
+            });
+
+
+        /* =============================================
+           CALCULATE RISK / REWARD
+        ============================================== */
+
+        const riskReward1 =
+            window.ROLyfeRiskEngine
+                .calculateRiskReward(
+
+                    stockEntry,
+                    stockStop,
+                    stockTarget1
+
+                );
+
+
+        const riskReward2 =
+            window.ROLyfeRiskEngine
+                .calculateRiskReward(
+
+                    stockEntry,
+                    stockStop,
+                    stockTarget2
+
+                );
+
+
+        const riskReward3 =
+            window.ROLyfeRiskEngine
+                .calculateRiskReward(
+
+                    stockEntry,
+                    stockStop,
+                    stockTarget3
+
+                );
+
+
+        /* =============================================
+           OPTION INFORMATION
+        ============================================== */
+
+        const optionContractCost =
+            optionEntry !== null &&
+            optionEntry > 0
+
+                ? optionEntry * 100
+
+                : null;
+
+
+        /*
+           OPTION LADDER
+
+           Allocation is based on
+           number of contracts.
+
+           Stock targets are still used
+           as the structural trade map.
+        */
+
+        let optionLadder = null;
+
+
+        if (
+            instrument === "option" &&
+            positionSize > 0
+        ) {
+
+            optionLadder =
+                window.ROLyfeLadderEngine
+                    .buildOptionLadder({
+
+                        stockEntry,
+
+                        stockStop,
+
+                        contracts:
+                            positionSize,
+
+                        direction
+
+                    });
+
+        }
+
+
+        /*
+           Option target calculations.
+
+           These use manually entered
+           option premium targets.
+        */
+
+        const optionResult1 =
+            this.calculateOptionTargetResult({
+
+                optionEntry,
+
+                optionTarget:
+                    optionTarget1,
+
+                contracts:
+                    optionLadder
+                        ? optionLadder.allocation.tp1
+                        : 0
+
+            });
+
+
+        const optionResult2 =
+            this.calculateOptionTargetResult({
+
+                optionEntry,
+
+                optionTarget:
+                    optionTarget2,
+
+                contracts:
+                    optionLadder
+                        ? optionLadder.allocation.tp2
+                        : 0
+
+            });
+
+
+        const optionResult3 =
+            this.calculateOptionTargetResult({
+
+                optionEntry,
+
+                optionTarget:
+                    optionTarget3,
+
+                contracts:
+                    optionLadder
+                        ? optionLadder.allocation.tp3
+                        : 0
+
+            });
+
+
+        /* =============================================
+           EXPECTED LADDER PROFIT
+
+           Theoretical estimate if every
+           ladder target is reached.
+        ============================================== */
+
+        const estimatedLadderProfit = [
+
+            stockResult1,
+
+            stockResult2,
+
+            stockResult3,
+
+            runnerResult
+
+        ]
+            .reduce(
+
+                (total, result) =>
+
+                    total +
+
+                    (
+                        result &&
+                        Number.isFinite(
+                            Number(
+                                result.estimatedProfit
+                            )
+                        )
+
+                            ? Number(
+                                result.estimatedProfit
+                            )
+
+                            : 0
+                    ),
+
+                0
+
+            );
+
+
+        /* =============================================
+           TRADE PROBABILITY
+        ============================================== */
+
+        const probabilityResult =
+            this.calculateProbabilityResult(
+                probability
+            );
+
+
+        /* =============================================
+           BREAK-EVEN / PROTECTION PLAN
+        ============================================== */
+
+        const protectionPlan =
+            window.ROLyfeLadderEngine
+                .calculateProtection({
+
+                    entry:
+                        stockEntry,
+
+                    stop:
+                        stockStop,
+
+                    direction,
+
+                    mode:
+                        "breakeven"
+
+                });
+
+
+        /* =============================================
+           BUILD MASTER TRADE OBJECT
+        ============================================== */
 
         const plan = {
 
+            /* =========================================
+               IDENTIFICATION
+            ========================================== */
 
             id:
                 Date.now(),
 
+            planId:
+                Date.now(),
 
             date:
                 new Date()
                     .toLocaleString(),
 
+            createdAt:
+                new Date()
+                    .toISOString(),
 
             status:
                 "PLANNED",
 
 
-            /* =============================================
-               BASIC
-            ============================================= */
+            /* =========================================
+               BASIC TRADE INFORMATION
+            ========================================== */
 
             symbol,
 
-            instrument,
+            instrument:
+                instrumentInput,
 
-            direction,
+            normalizedInstrument:
+                instrument,
 
+            direction:
+                directionDisplay,
+
+            normalizedDirection:
+                direction,
+
+
+            /* =========================================
+               ACCOUNT / RISK
+            ========================================== */
 
             accountSize,
 
             riskPercent,
 
-            riskAmount,
+            riskAmount:
+                dollarRisk,
+
+            dollarRisk,
+
+            riskEngine:
+                riskResult,
 
 
-            /* =============================================
-               PROBABILITY
-            ============================================= */
+            /* =========================================
+               POSITION SIZE
+            ========================================== */
+
+            positionSize,
+
+            quantity:
+                positionSize,
+
+            shares:
+
+                instrument === "stock"
+
+                    ? positionSize
+
+                    : 0,
+
+            contracts:
+
+                instrument === "option"
+
+                    ? positionSize
+
+                    : 0,
+
+            positionValue,
+
+            riskPerUnit,
+
+
+            /* =========================================
+               PROBABILITY / VOLATILITY
+            ========================================== */
 
             probability,
 
@@ -1263,15 +1584,16 @@ const TradePlanner = {
             impliedVolatility,
 
 
-            /* =============================================
+            /* =========================================
                STOCK MAP
-            ============================================= */
+            ========================================== */
 
             stockEntry,
 
             stockStop,
 
-            stockRiskPerShare,
+            stockRiskPerShare:
+                riskPerUnit,
 
             stockTarget1,
 
@@ -1279,31 +1601,44 @@ const TradePlanner = {
 
             stockTarget3,
 
+            runnerTarget,
+
             stockResult1,
 
             stockResult2,
 
             stockResult3,
 
-
-            /* =============================================
-               STOCK POSITION SIZING
-            ============================================= */
-
-            maxAffordableShares,
-
-            riskBasedShares,
-
-            recommendedShares,
-
-            recommendedStockCost,
-
-            recommendedStockRisk,
+            runnerResult,
 
 
-            /* =============================================
+            /* =========================================
+               RISK / REWARD
+            ========================================== */
+
+            riskReward1,
+
+            riskReward2,
+
+            riskReward3,
+
+
+            /* =========================================
+               STOCK LADDER STRUCTURE
+            ========================================== */
+
+            ladderLevels:
+                stockLadder,
+
+            allocation:
+                allocationResult,
+
+            estimatedLadderProfit,
+
+
+            /* =========================================
                OPTION EXECUTION
-            ============================================= */
+            ========================================== */
 
             optionType,
 
@@ -1313,8 +1648,9 @@ const TradePlanner = {
                 expiration ||
                 "Not Selected",
 
-
             optionEntry,
+
+            optionDelta,
 
             optionContractCost,
 
@@ -1330,66 +1666,73 @@ const TradePlanner = {
 
             optionResult3,
 
-
-            /* =============================================
-               RO'LYFE CONTRACT DECISION ENGINE
-            ============================================= */
-
-            contractDecision,
+            optionLadder,
 
 
-            maxAffordableContracts,
+            /* =========================================
+               PROTECTION
+            ========================================== */
 
-            riskBasedContracts,
-
-            recommendedContracts,
-
-            requestedContracts,
-
-            requestedContractCost,
-
-            requestedPremiumRisk,
-
-            actualRiskPercent,
-
-            remainingAccountAfterPurchase,
-
-            contractStatus,
-
-            contractWarning,
-
-            contractWarningType,
+            protectionPlan,
 
 
-            /* =============================================
-               LADDER ALLOCATION
-            ============================================= */
+            /* =========================================
+               LADDER PERCENTAGES
+
+               Backward compatible structure.
+            ========================================== */
 
             ladder: {
 
                 target1Percent:
                     40,
 
-
                 target2Percent:
                     30,
-
 
                 target3Percent:
                     20,
 
-
                 runnerPercent:
-                    10
+                    10,
+
+                tp1Quantity:
+                    allocationResult
+                        ? allocationResult.tp1
+                        : 0,
+
+                tp2Quantity:
+                    allocationResult
+                        ? allocationResult.tp2
+                        : 0,
+
+                tp3Quantity:
+                    allocationResult
+                        ? allocationResult.tp3
+                        : 0,
+
+                runnerQuantity:
+                    allocationResult
+                        ? allocationResult.runner
+                        : 0
 
             }
+
 
         };
 
 
-        /* =================================================
+        /* =============================================
            BACKWARD COMPATIBILITY
-        ================================================= */
+
+           Journal.js currently expects:
+           entry
+           stop
+           target1
+           target2
+           target3
+           riskPerUnit
+        ============================================== */
 
         plan.entry =
             stockEntry;
@@ -1397,10 +1740,6 @@ const TradePlanner = {
 
         plan.stop =
             stockStop;
-
-
-        plan.riskPerUnit =
-            stockRiskPerShare;
 
 
         plan.target1 =
@@ -1415,28 +1754,21 @@ const TradePlanner = {
             stockTarget3;
 
 
-        /*
-           Compatibility for Risk Engine.
-
-           These can be overwritten by
-           the Risk Engine after calculation.
-        */
-
-        plan.contracts =
-            requestedContracts;
+        plan.riskPerUnit =
+            riskPerUnit;
 
 
-        /* =================================================
-           SAVE CURRENT PLAN
-        ================================================= */
+        /* =============================================
+           SAVE CURRENT PLAN TO MEMORY
+        ============================================== */
 
         window.currentTradePlan =
             plan;
 
 
-        /* =================================================
+        /* =============================================
            DISPLAY PLAN
-        ================================================= */
+        ============================================== */
 
         this.displayPlan(
             plan
@@ -1444,7 +1776,7 @@ const TradePlanner = {
 
 
         console.log(
-            "🎯 RO'LYFE ACCOUNT-AWARE TRADE PLAN:",
+            "🎯 RO'LYFE MASTER TRADE PLAN CREATED",
             plan
         );
 
@@ -1455,11 +1787,10 @@ const TradePlanner = {
 
 
     /* =====================================================
-       DISPLAY COMPLETE PLAN
+       DISPLAY COMPLETE TRADE PLAN
     ===================================================== */
 
     displayPlan(plan) {
-
 
         const output =
             document.getElementById(
@@ -1468,52 +1799,8 @@ const TradePlanner = {
 
 
         if (!output) {
-
             return;
-
         }
-
-
-        const money =
-            this.formatMoney;
-
-
-        const percent =
-            this.formatPercent;
-
-
-        const number =
-            this.formatNumber;
-
-
-        const rMultiple =
-            (value) => {
-
-                if (
-
-                    value === null ||
-
-                    value === undefined ||
-
-                    isNaN(value)
-
-                ) {
-
-                    return "Not Set";
-
-                }
-
-
-                return (
-
-                    Number(value)
-                        .toFixed(2)
-
-                    + "R"
-
-                );
-
-            };
 
 
         const displayStockResult =
@@ -1535,35 +1822,31 @@ const TradePlanner = {
                     <div class="result-line">
 
                         <span>
-
-                            Result:
-
-                            ${money(
+                            Move:
+                            ${this.formatMoney(
                                 result.result
                             )}
-
                         </span>
 
-
                         <span>
-
                             ROI:
-
-                            ${percent(
+                            ${this.formatPercent(
                                 result.roi
                             )}
-
                         </span>
 
+                        <span>
+                            R:
+                            ${this.formatNumber(
+                                result.rMultiple
+                            )}R
+                        </span>
 
                         <span>
-
-                            R/R:
-
-                            ${rMultiple(
-                                result.rMultiple
+                            Est. Profit:
+                            ${this.formatMoney(
+                                result.estimatedProfit
                             )}
-
                         </span>
 
                     </div>
@@ -1592,35 +1875,29 @@ const TradePlanner = {
                     <div class="result-line">
 
                         <span>
+                            Contracts:
+                            ${result.contracts}
+                        </span>
 
+                        <span>
                             Profit / Contract:
-
-                            ${money(
+                            ${this.formatMoney(
                                 result.profitPerContract
                             )}
-
                         </span>
 
-
                         <span>
-
-                            Total Profit:
-
-                            ${money(
-                                result.totalProfit
+                            Total:
+                            ${this.formatMoney(
+                                result.estimatedTotalProfit
                             )}
-
                         </span>
 
-
                         <span>
-
                             ROI:
-
-                            ${percent(
+                            ${this.formatPercent(
                                 result.roi
                             )}
-
                         </span>
 
                     </div>
@@ -1630,53 +1907,25 @@ const TradePlanner = {
             };
 
 
-        /*
-           RO'LYFE STATUS DISPLAY
-        */
+        const positionLabel =
 
-        let statusEmoji =
-            "🟢";
+            plan.normalizedInstrument === "option"
 
+                ? "Contracts"
 
-        if (
-            plan.contractStatus === "YELLOW"
-        ) {
+                : plan.normalizedInstrument === "crypto"
 
-            statusEmoji =
-                "🟡";
+                    ? "Quantity"
 
-        }
-
-
-        if (
-            plan.contractStatus === "ORANGE"
-        ) {
-
-            statusEmoji =
-                "🟠";
-
-        }
-
-
-        if (
-            plan.contractStatus === "RED"
-        ) {
-
-            statusEmoji =
-                "🔴";
-
-        }
+                    : "Shares";
 
 
         output.innerHTML = `
 
             <div class="trade-plan-card">
 
-
                 <h3>
-
-                    🎯 RO'LYFE TRADE PLAN
-
+                    🎯 RO'LYFE MASTER TRADE PLAN
                 </h3>
 
 
@@ -1687,406 +1936,153 @@ const TradePlanner = {
                 </div>
 
 
-                <!-- =====================================
+                <!-- =============================
                      TRADE INFORMATION
-                ====================================== -->
+                ============================== -->
 
                 <div class="plan-section">
 
-
                     <h4>
-
                         📋 TRADE INFORMATION
-
                     </h4>
 
-
                     <p>
-
                         <strong>Symbol:</strong>
-
                         ${plan.symbol}
-
                     </p>
 
-
                     <p>
-
                         <strong>Instrument:</strong>
-
                         ${plan.instrument}
-
                     </p>
 
-
                     <p>
-
                         <strong>Direction:</strong>
-
                         ${plan.direction}
-
                     </p>
 
-
                     <p>
-
                         <strong>Account:</strong>
-
-                        ${money(
+                        ${this.formatMoney(
                             plan.accountSize
                         )}
-
                     </p>
 
-
                     <p>
-
-                        <strong>Risk Budget:</strong>
-
-                        ${money(
-                            plan.riskAmount
-                        )}
-
-                    </p>
-
-
-                    <p>
-
-                        <strong>Risk Rule:</strong>
-
-                        ${percent(
+                        <strong>Risk:</strong>
+                        ${this.formatPercent(
                             plan.riskPercent
                         )}
-
                     </p>
 
+                    <p>
+                        <strong>Risk Budget:</strong>
+                        ${this.formatMoney(
+                            plan.riskAmount
+                        )}
+                    </p>
 
                 </div>
 
 
-                <!-- =====================================
-                     RO'LYFE POSITION INTELLIGENCE
-                ====================================== -->
-
-                ${plan.instrument === "Option"
-                    ? `
-
-                    <div class="plan-section contract-decision-section">
-
-
-                        <h4>
-
-                            🧮 RO'LYFE CONTRACT INTELLIGENCE™
-
-                        </h4>
-
-
-                        <p>
-
-                            <strong>
-                                Account Size:
-                            </strong>
-
-                            ${money(
-                                plan.accountSize
-                            )}
-
-                        </p>
-
-
-                        <p>
-
-                            <strong>
-                                Cost Per Contract:
-                            </strong>
-
-                            ${money(
-                                plan.optionContractCost
-                            )}
-
-                        </p>
-
-
-                        <hr>
-
-
-                        <p>
-
-                            <strong>
-                                Maximum Account Can Afford:
-                            </strong>
-
-                            ${number(
-                                plan.maxAffordableContracts
-                            )}
-
-                            Contract(s)
-
-                        </p>
-
-
-                        <p>
-
-                            <strong>
-                                Maximum Inside Risk Limit:
-                            </strong>
-
-                            ${number(
-                                plan.riskBasedContracts
-                            )}
-
-                            Contract(s)
-
-                        </p>
-
-
-                        <p>
-
-                            <strong>
-                                RO'Lyfe Recommended:
-                            </strong>
-
-                            ${number(
-                                plan.recommendedContracts
-                            )}
-
-                            Contract(s)
-
-                        </p>
-
-
-                        <hr>
-
-
-                        <p>
-
-                            <strong>
-                                Trader Requested:
-                            </strong>
-
-                            ${number(
-                                plan.requestedContracts
-                            )}
-
-                            Contract(s)
-
-                        </p>
-
-
-                        <p>
-
-                            <strong>
-                                Total Contract Cost:
-                            </strong>
-
-                            ${money(
-                                plan.requestedContractCost
-                            )}
-
-                        </p>
-
-
-                        <p>
-
-                            <strong>
-                                Account Remaining:
-                            </strong>
-
-                            ${money(
-                                plan.remainingAccountAfterPurchase
-                            )}
-
-                        </p>
-
-
-                        <p>
-
-                            <strong>
-                                Actual Premium Exposure:
-                            </strong>
-
-                            ${percent(
-                                plan.actualRiskPercent
-                            )}
-
-                        </p>
-
-
-                        <div class="contract-warning contract-${String(
-                            plan.contractStatus
-                        ).toLowerCase()}">
-
-
-                            <strong>
-
-                                ${statusEmoji}
-
-                                RO'LYFE STATUS:
-
-                                ${plan.contractStatus}
-
-                            </strong>
-
-
-                            <p>
-
-                                ${plan.contractWarning}
-
-                            </p>
-
-                        </div>
-
-
-                    </div>
-
-                `
-                    : ""
-                }
-
-
-                <!-- =====================================
-                     PROBABILITY
-                ====================================== -->
+                <!-- =============================
+                     POSITION SIZE
+                ============================== -->
 
                 <div class="plan-section">
 
-
                     <h4>
-
-                        🧠 TRADE PROBABILITY
-
+                        📦 POSITION SIZE
                     </h4>
 
-
                     <p>
-
-                        <strong>
-                            Probability:
-                        </strong>
-
-                        ${percent(
-                            plan.probability
+                        <strong>${positionLabel}:</strong>
+                        ${this.formatNumber(
+                            plan.positionSize,
+                            plan.normalizedInstrument === "crypto"
+                                ? 6
+                                : 0
                         )}
-
                     </p>
 
-
                     <p>
-
-                        <strong>
-                            Result:
-                        </strong>
-
-                        ${plan.probabilityResult}
-
-                    </p>
-
-
-                    <p>
-
-                        <strong>
-                            Implied Volatility:
-                        </strong>
-
-                        ${percent(
-                            plan.impliedVolatility
+                        <strong>Position Value:</strong>
+                        ${this.formatMoney(
+                            plan.positionValue
                         )}
-
                     </p>
 
+                    <p>
+                        <strong>Risk Per Unit:</strong>
+                        ${this.formatMoney(
+                            plan.riskPerUnit
+                        )}
+                    </p>
 
                 </div>
 
 
-                <!-- =====================================
+                <!-- =============================
+                     PROBABILITY
+                ============================== -->
+
+                <div class="plan-section">
+
+                    <h4>
+                        🧠 TRADE INTELLIGENCE
+                    </h4>
+
+                    <p>
+                        <strong>Probability:</strong>
+                        ${this.formatPercent(
+                            plan.probability
+                        )}
+                    </p>
+
+                    <p>
+                        <strong>Signal:</strong>
+                        ${plan.probabilityResult}
+                    </p>
+
+                    <p>
+                        <strong>Implied Volatility:</strong>
+                        ${this.formatPercent(
+                            plan.impliedVolatility
+                        )}
+                    </p>
+
+                </div>
+
+
+                <!-- =============================
                      STOCK MAP
-                ====================================== -->
+                ============================== -->
 
                 <div class="plan-section stock-plan">
 
-
                     <h4>
-
                         📈 STOCK MAP
-
                     </h4>
 
-
                     <p>
-
-                        <strong>
-                            Stock Entry:
-                        </strong>
-
-                        ${money(
+                        <strong>Entry:</strong>
+                        ${this.formatPrice(
                             plan.stockEntry
                         )}
-
                     </p>
 
-
                     <p>
-
-                        <strong>
-                            Stock Stop:
-                        </strong>
-
-                        ${money(
+                        <strong>Stop:</strong>
+                        ${this.formatPrice(
                             plan.stockStop
                         )}
-
                     </p>
 
-
                     <p>
-
-                        <strong>
-                            Risk Per Share:
-                        </strong>
-
-                        ${money(
-                            plan.stockRiskPerShare
+                        <strong>1R Risk:</strong>
+                        ${this.formatMoney(
+                            plan.riskPerUnit
                         )}
-
-                    </p>
-
-
-                    <p>
-
-                        <strong>
-                            Max Affordable Shares:
-                        </strong>
-
-                        ${number(
-                            plan.maxAffordableShares
-                        )}
-
-                    </p>
-
-
-                    <p>
-
-                        <strong>
-                            RO'Lyfe Risk-Based Shares:
-                        </strong>
-
-                        ${number(
-                            plan.riskBasedShares
-                        )}
-
-                    </p>
-
-
-                    <p>
-
-                        <strong>
-                            Recommended Shares:
-                        </strong>
-
-                        ${number(
-                            plan.recommendedShares
-                        )}
-
                     </p>
 
 
@@ -2095,304 +2091,335 @@ const TradePlanner = {
 
                     <div class="target-result">
 
-
                         <strong>
+                            🎯 TP1 — 1R
 
-                            Target 1:
-
-                            ${money(
+                            ${this.formatPrice(
                                 plan.stockTarget1
                             )}
-
                         </strong>
-
 
                         ${displayStockResult(
                             plan.stockResult1
                         )}
 
+                        <small>
+                            Sell 40%
+                            ${
+                                plan.allocation
+                                    ? `(${plan.allocation.tp1})`
+                                    : ""
+                            }
+                        </small>
 
                     </div>
 
 
                     <div class="target-result">
 
-
                         <strong>
+                            🎯 TP2 — 2R
 
-                            Target 2:
-
-                            ${money(
+                            ${this.formatPrice(
                                 plan.stockTarget2
                             )}
-
                         </strong>
-
 
                         ${displayStockResult(
                             plan.stockResult2
                         )}
 
+                        <small>
+                            Sell 30%
+                            ${
+                                plan.allocation
+                                    ? `(${plan.allocation.tp2})`
+                                    : ""
+                            }
+                        </small>
 
                     </div>
 
 
                     <div class="target-result">
 
-
                         <strong>
+                            🎯 TP3 — 3R
 
-                            Target 3:
-
-                            ${money(
+                            ${this.formatPrice(
                                 plan.stockTarget3
                             )}
-
                         </strong>
-
 
                         ${displayStockResult(
                             plan.stockResult3
                         )}
 
+                        <small>
+                            Sell 20%
+                            ${
+                                plan.allocation
+                                    ? `(${plan.allocation.tp3})`
+                                    : ""
+                            }
+                        </small>
 
                     </div>
 
+
+                    <div class="runner-box">
+
+                        🏃 RUNNER — 4R
+
+                        <br>
+
+                        Target:
+                        ${this.formatPrice(
+                            plan.runnerTarget
+                        )}
+
+                        <br>
+
+                        ${
+                            plan.allocation
+                                ? `Quantity: ${plan.allocation.runner}`
+                                : ""
+                        }
+
+                    </div>
 
                 </div>
 
 
-                <!-- =====================================
+                <!-- =============================
+                     RISK / REWARD
+                ============================== -->
+
+                <div class="plan-section">
+
+                    <h4>
+                        ⚖️ RISK / REWARD
+                    </h4>
+
+                    <p>
+                        <strong>TP1:</strong>
+                        ${
+                            plan.riskReward1 !== null
+                                ? this.formatNumber(
+                                    plan.riskReward1
+                                ) + " : 1"
+                                : "Not Set"
+                        }
+                    </p>
+
+                    <p>
+                        <strong>TP2:</strong>
+                        ${
+                            plan.riskReward2 !== null
+                                ? this.formatNumber(
+                                    plan.riskReward2
+                                ) + " : 1"
+                                : "Not Set"
+                        }
+                    </p>
+
+                    <p>
+                        <strong>TP3:</strong>
+                        ${
+                            plan.riskReward3 !== null
+                                ? this.formatNumber(
+                                    plan.riskReward3
+                                ) + " : 1"
+                                : "Not Set"
+                        }
+                    </p>
+
+                    <p>
+                        <strong>Full Ladder Estimate:</strong>
+                        ${this.formatMoney(
+                            plan.estimatedLadderProfit
+                        )}
+                    </p>
+
+                </div>
+
+
+                <!-- =============================
                      OPTION EXECUTION
-                ====================================== -->
+                ============================== -->
 
-                ${plan.instrument === "Option"
-                    ? `
+                <div class="plan-section option-plan">
 
-                    <div class="plan-section option-plan">
+                    <h4>
+                        🎯 OPTION EXECUTION
+                    </h4>
+
+                    <p>
+                        <strong>Type:</strong>
+                        ${plan.optionType}
+                    </p>
+
+                    <p>
+                        <strong>Strike:</strong>
+                        ${
+                            plan.strike !== null
+                                ? this.formatPrice(
+                                    plan.strike
+                                )
+                                : "Not Set"
+                        }
+                    </p>
+
+                    <p>
+                        <strong>Expiration:</strong>
+                        ${plan.expiration}
+                    </p>
+
+                    <p>
+                        <strong>Premium Entry:</strong>
+                        ${this.formatMoney(
+                            plan.optionEntry
+                        )}
+                    </p>
+
+                    <p>
+                        <strong>Delta:</strong>
+                        ${
+                            plan.optionDelta
+                                ? this.formatNumber(
+                                    plan.optionDelta,
+                                    2
+                                )
+                                : "Not Set"
+                        }
+                    </p>
+
+                    <p>
+                        <strong>Contract Cost:</strong>
+                        ${this.formatMoney(
+                            plan.optionContractCost
+                        )}
+                    </p>
 
 
-                        <h4>
-
-                            🎯 OPTION EXECUTION
-
-                        </h4>
+                    <hr>
 
 
-                        <p>
+                    <div class="target-result">
 
-                            <strong>
-                                Type:
-                            </strong>
-
-                            ${plan.optionType}
-
-                        </p>
-
-
-                        <p>
-
-                            <strong>
-                                Strike:
-                            </strong>
-
-                            ${
-                                plan.strike !== null
-
-                                    ? money(
-                                        plan.strike
-                                    )
-
-                                    : "Not Set"
-                            }
-
-                        </p>
-
-
-                        <p>
-
-                            <strong>
-                                Expiration:
-                            </strong>
-
-                            ${plan.expiration}
-
-                        </p>
-
-
-                        <p>
-
-                            <strong>
-                                Premium Entry:
-                            </strong>
-
-                            ${money(
-                                plan.optionEntry
+                        <strong>
+                            Option TP1:
+                            ${this.formatMoney(
+                                plan.optionTarget1
                             )}
-
-                        </p>
-
-
-                        <p>
-
-                            <strong>
-                                Contract Cost:
-                            </strong>
-
-                            ${money(
-                                plan.optionContractCost
-                            )}
-
-                        </p>
-
-
-                        <p>
-
-                            <strong>
-                                Contracts Used:
-                            </strong>
-
-                            ${number(
-                                plan.requestedContracts
-                            )}
-
-                        </p>
-
-
-                        <hr>
-
-
-                        <div class="target-result">
-
-
-                            <strong>
-
-                                Take Profit 1:
-
-                                ${money(
-                                    plan.optionTarget1
-                                )}
-
-                            </strong>
-
-
-                            ${displayOptionResult(
-                                plan.optionResult1
-                            )}
-
-
-                            <small>
-
-                                Sell 40%
-
-                            </small>
-
-
-                        </div>
-
-
-                        <div class="target-result">
-
-
-                            <strong>
-
-                                Take Profit 2:
-
-                                ${money(
-                                    plan.optionTarget2
-                                )}
-
-                            </strong>
-
-
-                            ${displayOptionResult(
-                                plan.optionResult2
-                            )}
-
-
-                            <small>
-
-                                Sell 30%
-
-                            </small>
-
-
-                        </div>
-
-
-                        <div class="target-result">
-
-
-                            <strong>
-
-                                Take Profit 3:
-
-                                ${money(
-                                    plan.optionTarget3
-                                )}
-
-                            </strong>
-
-
-                            ${displayOptionResult(
-                                plan.optionResult3
-                            )}
-
-
-                            <small>
-
-                                Sell 20%
-
-                            </small>
-
-
-                        </div>
-
-
-                        <div class="runner-box">
-
-
-                            🏃 RUNNER — 10%
-
-                            <br>
-
-                            Trail With Structure
-
-
-                        </div>
-
+                        </strong>
+
+                        ${displayOptionResult(
+                            plan.optionResult1
+                        )}
 
                     </div>
 
-                `
-                    : ""
-                }
+
+                    <div class="target-result">
+
+                        <strong>
+                            Option TP2:
+                            ${this.formatMoney(
+                                plan.optionTarget2
+                            )}
+                        </strong>
+
+                        ${displayOptionResult(
+                            plan.optionResult2
+                        )}
+
+                    </div>
 
 
-                <!-- =====================================
+                    <div class="target-result">
+
+                        <strong>
+                            Option TP3:
+                            ${this.formatMoney(
+                                plan.optionTarget3
+                            )}
+                        </strong>
+
+                        ${displayOptionResult(
+                            plan.optionResult3
+                        )}
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================
+                     TRADE PROTECTION
+                ============================== -->
+
+                <div class="plan-section">
+
+                    <h4>
+                        🛡️ TRADE PROTECTION
+                    </h4>
+
+                    <p>
+                        <strong>After TP1:</strong>
+                        Move Stop to Break-Even
+                    </p>
+
+                    <p>
+                        <strong>Protected Stop:</strong>
+                        ${
+                            plan.protectionPlan &&
+                            plan.protectionPlan.valid
+
+                                ? this.formatPrice(
+                                    plan.protectionPlan
+                                        .protectedStop
+                                )
+
+                                : "Not Set"
+                        }
+                    </p>
+
+                </div>
+
+
+                <!-- =============================
                      PLAN DATE
-                ====================================== -->
+                ============================== -->
 
                 <p class="plan-date">
 
-
                     Created:
-
                     ${plan.date}
-
 
                 </p>
 
 
-                <button
-                    type="button"
-                    onclick="TradePlanner.savePlan()"
-                >
+                <!-- =============================
+                     ACTIONS
+                ============================== -->
 
-                    💾 SAVE TRADE PLAN
+                <div class="trade-plan-actions">
 
-                </button>
+                    <button
+                        onclick="TradePlanner.savePlan()"
+                    >
+                        💾 SAVE PLAN
+                    </button>
 
+
+                    <button
+                        onclick="TradePlanner.addToJournal()"
+                    >
+                        📓 ADD TO JOURNAL
+                    </button>
+
+                </div>
 
             </div>
 
@@ -2403,10 +2430,11 @@ const TradePlanner = {
 
     /* =====================================================
        SAVE PLAN
+
+       Prevent duplicate saves of the same plan ID.
     ===================================================== */
 
     savePlan() {
-
 
         if (
             !window.currentTradePlan
@@ -2422,15 +2450,28 @@ const TradePlanner = {
 
 
         let plans =
-            JSON.parse(
+            this.loadPlans();
 
-                localStorage.getItem(
-                    "roLyfeTradePlans"
-                )
 
-                || "[]"
+        const alreadySaved =
+            plans.some(
+
+                plan =>
+                    plan.planId ===
+                    window.currentTradePlan.planId
 
             );
+
+
+        if (alreadySaved) {
+
+            alert(
+                "This trade plan is already saved."
+            );
+
+            return;
+
+        }
 
 
         plans.push(
@@ -2459,20 +2500,76 @@ const TradePlanner = {
 
 
     /* =====================================================
-       LOAD PLANS
+       ADD CURRENT PLAN TO JOURNAL
+    ===================================================== */
+
+    addToJournal() {
+
+        if (
+            !window.currentTradePlan
+        ) {
+
+            alert(
+                "Create a Trade Plan first."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !window.TradeJournal ||
+            typeof window.TradeJournal.addTrade !==
+            "function"
+        ) {
+
+            alert(
+                "Trade Journal is not loaded."
+            );
+
+            console.error(
+                "TradeJournal.addTrade() not available."
+            );
+
+            return;
+
+        }
+
+
+        window.TradeJournal.addTrade();
+
+    },
+
+
+    /* =====================================================
+       LOAD SAVED PLANS
     ===================================================== */
 
     loadPlans() {
 
-        return JSON.parse(
+        try {
 
-            localStorage.getItem(
-                "roLyfeTradePlans"
-            )
+            return JSON.parse(
 
-            || "[]"
+                localStorage.getItem(
+                    "roLyfeTradePlans"
+                ) || "[]"
 
-        );
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Error loading trade plans:",
+                error
+            );
+
+            return [];
+
+        }
 
     },
 
@@ -2483,7 +2580,6 @@ const TradePlanner = {
 
     deletePlan(id) {
 
-
         let plans =
             this.loadPlans();
 
@@ -2493,7 +2589,8 @@ const TradePlanner = {
 
                 plan =>
 
-                    plan.id !== id
+                    plan.id !== id &&
+                    plan.planId !== id
 
             );
 
@@ -2508,6 +2605,35 @@ const TradePlanner = {
 
         );
 
+    },
+
+
+    /* =====================================================
+       CLEAR ALL SAVED PLANS
+    ===================================================== */
+
+    clearPlans() {
+
+        const confirmed =
+            confirm(
+                "Delete all saved RO'Lyfe Trade Plans?"
+            );
+
+
+        if (!confirmed) {
+            return;
+        }
+
+
+        localStorage.removeItem(
+            "roLyfeTradePlans"
+        );
+
+
+        alert(
+            "All saved trade plans cleared."
+        );
+
     }
 
 };
@@ -2519,3 +2645,12 @@ const TradePlanner = {
 
 window.TradePlanner =
     TradePlanner;
+
+
+/* =========================================================
+   SYSTEM READY MESSAGE
+========================================================= */
+
+console.log(
+    "🎯 RO'LYFE MASTER TRADE PLANNER ENGINE ONLINE"
+);
