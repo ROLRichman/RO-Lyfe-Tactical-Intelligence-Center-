@@ -1,3205 +1,1325 @@
-/* =========================================================
-   RO'LYFE TACTICAL INTELLIGENCE CENTER™
-   ADVANCED TRADE JOURNAL ENGINE
-   js/journal.js
-
-   PLAN → ENTER → MANAGE → EXIT → REVIEW → LEARN
-
-   CONNECTED SYSTEMS:
-   - TradePlanner
-   - ROLyfeRiskEngine
-   - ROLyfeLadderEngine
-
-========================================================= */
-
 const TradeJournal = {
 
-    /* =====================================================
-       STORAGE
-    ===================================================== */
+storageKey: "roLyfeTradeJournal",
 
-    storageKey:
-        "roLyfeTradeJournal",
+getTrades() {
 
+    try {
+        return JSON.parse(
+            localStorage.getItem(this.storageKey) || "[]"
+        );
+    } catch (error) {
+        console.error("Journal Load Error:", error);
+        return [];
+    }
 
-    getTrades() {
+},
 
-        try {
+saveTrades(trades) {
 
-            return JSON.parse(
+    localStorage.setItem(
+        this.storageKey,
+        JSON.stringify(trades)
+    );
 
-                localStorage.getItem(
-                    this.storageKey
-                ) || "[]"
+},
 
-            );
+money(value) {
 
+    const number = Number(value);
+
+    if (!Number.isFinite(number)) {
+        return "—";
+    }
+
+    return new Intl.NumberFormat(
+        "en-US",
+        {
+            style: "currency",
+            currency: "USD"
         }
+    ).format(number);
 
-        catch (error) {
+},
 
-            console.error(
-                "RO'Lyfe Journal Load Error:",
-                error
-            );
+percent(value) {
 
-            return [];
+    const number = Number(value);
 
-        }
+    return Number.isFinite(number)
+        ? number.toFixed(2) + "%"
+        : "—";
 
-    },
+},
 
+escapeHTML(value) {
 
-    saveTrades(trades) {
+    const div = document.createElement("div");
 
-        localStorage.setItem(
+    div.textContent =
+        value === null || value === undefined
+            ? ""
+            : String(value);
 
-            this.storageKey,
+    return div.innerHTML;
 
-            JSON.stringify(
-                trades
-            )
+},
 
+findTrade(journalId) {
+
+    return this.getTrades().find(
+        trade =>
+            Number(trade.journalId) ===
+            Number(journalId)
+    );
+
+},
+
+addTrade() {
+
+    const plan = window.currentTradePlan;
+
+    if (!plan) {
+        alert("Create a Trade Plan first.");
+        return;
+    }
+
+    const trades = this.getTrades();
+
+    const instrument =
+        String(plan.instrument || "Stock");
+
+    const lowerInstrument =
+        instrument.toLowerCase();
+
+    const isOption =
+        lowerInstrument.includes("option");
+
+    const positionSize =
+        Number(
+            plan.positionSize ??
+            plan.shares ??
+            plan.contracts ??
+            plan.ladderData?.allocation?.positionSize ??
+            plan.stockLadder?.allocation?.positionSize ??
+            plan.optionLadder?.allocation?.positionSize ??
+            0
         );
 
-    },
+    if (positionSize < 1) {
+        alert("Trade plan does not contain a valid position size.");
+        return;
+    }
 
+    const ladderData =
+        plan.ladderData ??
+        plan.stockLadder ??
+        plan.optionLadder ??
+        null;
 
-    /* =====================================================
-       HELPERS
-    ===================================================== */
+    const allocation =
+        ladderData?.allocation?.allocation ??
+        {
+            tp1: 0,
+            tp2: 0,
+            tp3: 0,
+            runner: positionSize
+        };
 
-    money(value) {
-
-        const number =
-            Number(value);
-
-
-        if (!Number.isFinite(number)) {
-
-            return "—";
-
-        }
-
-
-        return new Intl.NumberFormat(
-
-            "en-US",
-
-            {
-
-                style:
-                    "currency",
-
-                currency:
-                    "USD"
-
-            }
-
-        ).format(number);
-
-    },
-
-
-    number(value, decimals = 2) {
-
-        const numeric =
-            Number(value);
-
-
-        if (!Number.isFinite(numeric)) {
-
-            return "—";
-
-        }
-
-
-        return numeric.toFixed(
-            decimals
+    const entry =
+        Number(
+            plan.entry ??
+            plan.stockEntry ??
+            0
         );
 
-    },
-
-
-    percent(value) {
-
-        const numeric =
-            Number(value);
-
-
-        if (!Number.isFinite(numeric)) {
-
-            return "—";
-
-        }
-
-
-        return (
-            numeric.toFixed(2)
-            + "%"
+    const stop =
+        Number(
+            plan.stop ??
+            plan.stockStop ??
+            0
         );
 
-    },
-
-
-    escapeHTML(value) {
-
-        if (
-
-            value === null ||
-
-            value === undefined
-
-        ) {
-
-            return "";
-
-        }
-
-
-        const div =
-            document.createElement(
-                "div"
-            );
-
-
-        div.textContent =
-            String(value);
-
-
-        return div.innerHTML;
-
-    },
-
-
-    /* =====================================================
-       FIND TRADE
-    ===================================================== */
-
-    findTrade(journalId) {
-
-        const trades =
-            this.getTrades();
-
-
-        return trades.find(
-
-            trade =>
-
-                Number(trade.journalId) ===
-                Number(journalId)
-
+    const plannedRisk =
+        Number(
+            plan.actualRisk ??
+            plan.estimatedTotalRisk ??
+            plan.totalMaximumRisk ??
+            plan.riskAmount ??
+            plan.dollarRisk ??
+            0
         );
 
-    },
+    const trade = {
 
+        journalId: Date.now(),
 
-    /* =====================================================
-       CREATE JOURNAL TRADE FROM PLAN
-    ===================================================== */
+        planId:
+            plan.id ?? null,
 
-    addTrade() {
+        status: "OPEN",
 
-        const plan =
-            window.currentTradePlan;
+        createdDate:
+            new Date().toLocaleString(),
 
+        entryDate:
+            new Date().toLocaleString(),
 
-        if (!plan) {
+        exitDate: null,
 
-            alert(
-                "Create a Trade Plan first."
-            );
+        symbol:
+            plan.symbol || "UNKNOWN",
 
-            return;
+        instrument,
 
-        }
+        direction:
+            plan.direction || "Long",
 
+        accountSize:
+            Number(plan.accountSize ?? 0),
 
-        const trades =
-            this.getTrades();
+        riskPercent:
+            Number(plan.riskPercent ?? 0),
 
+        riskAmount:
+            plannedRisk,
 
-        /*
-           Prevent accidental duplicate
-           journal entries from the same plan.
-        */
-
-        const alreadyExists =
-            trades.some(
-
-                trade =>
-
-                    Number(trade.planId) ===
-                    Number(plan.id)
-
-            );
-
-
-        if (alreadyExists) {
-
-            const addAgain =
-                confirm(
-
-                    `${plan.symbol} is already in your Trade Journal.\n\nAdd another journal entry anyway?`
-
-                );
-
-
-            if (!addAgain) {
-
-                return;
-
-            }
-
-        }
-
-
-        const instrument =
-            String(
-
-                plan.instrument ||
-                "Stock"
-
-            ).toLowerCase();
-
-
-        /*
-           Position size priority:
-
-           1. Explicit position size
-           2. Shares
-           3. Contracts
-           4. Ladder position size
-        */
-
-        let positionSize =
+        dollarRisk:
             Number(
+                plan.dollarRisk ??
+                plannedRisk
+            ),
 
-                plan.positionSize ||
-                plan.shares ||
-                plan.contracts ||
-                0
-
-            );
-
-
-        if (
-
-            !positionSize &&
-
-            plan.ladderData &&
-
-            plan.ladderData.allocation
-
-        ) {
-
-            positionSize =
-                Number(
-
-                    plan.ladderData
-                        .allocation
-                        .positionSize
-
-                ) || 0;
-
-        }
-
-
-        /*
-           Determine multiplier.
-
-           Equity options normally use 100.
-
-           Stocks / crypto use 1.
-        */
-
-        let multiplier = 1;
-
-
-        if (
-
-            instrument.includes("option")
-
-        ) {
-
-            multiplier = 100;
-
-        }
-
-
-        /*
-           Risk amount.
-
-           Prefer actual calculated risk.
-
-           Fall back to planned risk budget.
-        */
-
-        const plannedRisk =
-
+        actualRisk:
             Number(
+                plan.actualRisk ??
+                plannedRisk
+            ),
 
-                plan.actualRisk ||
-                plan.estimatedTotalRisk ||
-                plan.totalMaximumRisk ||
-                plan.riskAmount ||
-                plan.dollarRisk ||
+        entry,
+
+        stop,
+
+        riskPerUnit:
+            Number(
+                plan.riskPerUnit ??
+                plan.stockRiskPerShare ??
                 0
+            ),
 
-            );
+        positionSize,
 
-
-        /*
-           Create journal record.
-        */
-
-        const trade = {
-
-            /* =============================
-               IDENTIFIERS
-            ============================= */
-
-            journalId:
-                Date.now(),
-
-
-            planId:
-                plan.id ||
-                null,
-
-
-            /* =============================
-               STATUS
-            ============================= */
-
-            status:
-                "OPEN",
-
-
-            /* =============================
-               TIME
-            ============================= */
-
-            createdDate:
-                new Date()
-                    .toLocaleString(),
-
-
-            entryDate:
-                new Date()
-                    .toLocaleString(),
-
-
-            exitDate:
-                null,
-
-
-            /* =============================
-               BASIC TRADE INFO
-            ============================= */
-
-            symbol:
-                plan.symbol ||
-                "UNKNOWN",
-
-
-            instrument:
-                plan.instrument ||
-                "Stock",
-
-
-            direction:
-                plan.direction ||
-                "Long",
-
-
-            /* =============================
-               ACCOUNT / RISK
-            ============================= */
-
-            accountSize:
-
-                Number(
-                    plan.accountSize
-                ) || 0,
-
-
-            riskPercent:
-
-                Number(
-                    plan.riskPercent
-                ) || 0,
-
-
-            riskAmount:
-                plannedRisk,
-
-
-            dollarRisk:
-
-                Number(
-                    plan.dollarRisk ||
-                    plannedRisk
-                ) || 0,
-
-
-            actualRisk:
-
-                Number(
-                    plan.actualRisk ||
-                    plannedRisk
-                ) || 0,
-
-
-            /* =============================
-               STOCK MAP
-            ============================= */
-
-            entry:
-
-                Number(
-                    plan.entry ||
-                    plan.stockEntry
-                ) || 0,
-
-
-            stop:
-
-                Number(
-                    plan.stop ||
-                    plan.stockStop
-                ) || 0,
-
-
-            target1:
-
-                plan.target1 ??
-                plan.stockTarget1 ??
-                null,
-
-
-            target2:
-
-                plan.target2 ??
-                plan.stockTarget2 ??
-                null,
-
-
-            target3:
-
-                plan.target3 ??
-                plan.stockTarget3 ??
-                null,
-
-
-            riskPerUnit:
-
-                Number(
-                    plan.riskPerUnit ||
-                    plan.stockRiskPerShare
-                ) || 0,
-
-
-            /* =============================
-               POSITION
-            ============================= */
-
+        remainingQuantity:
             positionSize,
 
+        shares:
+            Number(plan.shares ?? 0),
 
-            shares:
+        contracts:
+            Number(plan.contracts ?? 0),
 
-                Number(
-                    plan.shares
-                ) || 0,
+        multiplier:
+            isOption ? 100 : 1,
 
+        optionType:
+            plan.optionType ?? null,
 
-            contracts:
+        strike:
+            plan.strike ?? null,
 
-                Number(
-                    plan.contracts
-                ) || 0,
+        expiration:
+            plan.expiration ?? null,
 
+        optionEntry:
+            plan.optionEntry ??
+            plan.optionPremium ??
+            null,
 
-            multiplier,
+        optionPremium:
+            plan.optionPremium ??
+            plan.optionEntry ??
+            null,
 
+        ladderData,
 
-            /* =============================
-               OPTION INFORMATION
-            ============================= */
+        allocation,
 
-            optionType:
+        exits: [],
 
-                plan.optionType ||
-                null,
+        realizedProfitLoss: 0,
 
+        exitPrice: null,
 
-            strike:
+        exitQuantity: 0,
 
-                plan.strike ??
-                null,
+        profitLoss: null,
 
+        profitLossPercent: null,
 
-            expiration:
+        rMultiple: null,
 
-                plan.expiration ||
-                null,
+        protectionMode: "none",
 
+        protectedStop: null,
 
-            optionEntry:
+        tp1Hit: false,
 
-                plan.optionEntry ??
-                null,
+        tp2Hit: false,
 
+        tp3Hit: false,
 
-            optionPremium:
+        runnerActive: false,
 
-                plan.optionPremium ??
-                plan.optionEntry ??
-                null,
+        notes: "",
 
+        mistakes: "",
 
-            optionDelta:
+        lessons: "",
 
-                plan.optionDelta ??
-                null,
+        rating: null
 
+    };
 
-            optionTarget1:
+    trades.push(trade);
 
-                plan.optionTarget1 ??
-                null,
+    this.saveTrades(trades);
 
+    alert(
+        `🎯 ${trade.symbol} added to the RO'LYFE Trade Journal.`
+    );
 
-            optionTarget2:
+    this.renderJournal();
 
-                plan.optionTarget2 ??
-                null,
+},
 
+calculateExitProfit({
+    trade,
+    exitPrice,
+    quantity
+}) {
 
-            optionTarget3:
+    const instrument =
+        String(trade.instrument || "")
+            .toLowerCase();
 
-                plan.optionTarget3 ??
-                null,
+    const direction =
+        String(trade.direction || "long")
+            .toLowerCase();
 
+    const isOption =
+        instrument.includes("option");
 
-            /* =============================
-               LADDER
-            ============================= */
-
-            ladder:
-
-                plan.ladder ||
-                {
-
-                    target1Percent: 40,
-
-                    target2Percent: 30,
-
-                    target3Percent: 20,
-
-                    runnerPercent: 10
-
-                },
-
-
-            ladderData:
-
-                plan.ladderData ||
-                plan.stockLadder ||
-                plan.optionLadder ||
-                null,
-
-
-            /* =============================
-               PROBABILITY
-            ============================= */
-
-            probability:
-
-                plan.probability ??
-                null,
-
-
-            probabilityResult:
-
-                plan.probabilityResult ||
-                null,
-
-
-            impliedVolatility:
-
-                plan.impliedVolatility ??
-                null,
-
-
-            /* =============================
-               EXECUTION
-            ============================= */
-
-            exitPrice:
-                null,
-
-
-            exitQuantity:
-                positionSize,
-
-
-            profitLoss:
-                null,
-
-
-            profitLossPercent:
-                null,
-
-
-            rMultiple:
-                null,
-
-
-            /* =============================
-               MANAGEMENT
-            ============================= */
-
-            protectionMode:
-                "none",
-
-
-            protectedStop:
-                null,
-
-
-            tp1Hit:
-                false,
-
-
-            tp2Hit:
-                false,
-
-
-            tp3Hit:
-                false,
-
-
-            runnerActive:
-                false,
-
-
-            /* =============================
-               REVIEW
-            ============================= */
-
-            notes:
-                "",
-
-
-            mistakes:
-                "",
-
-
-            lessons:
-                "",
-
-
-            rating:
-                null
-
-
-        };
-
-
-        trades.push(
-            trade
-        );
-
-
-        this.saveTrades(
-            trades
-        );
-
-
-        alert(
-
-            `🎯 ${trade.symbol} added to your RO'LYFE Trade Journal.`
-
-        );
-
-
-        this.renderJournal();
-
-    },
-
-
-    /* =====================================================
-       CALCULATE P/L
-
-       STOCK:
-       Price Move × Shares
-
-       CRYPTO:
-       Price Move × Quantity
-
-       OPTIONS:
-       Premium Move × Contracts × 100
-    ===================================================== */
-
-    calculateProfitLoss({
-
-        trade,
-
-        exitPrice,
-
-        exitQuantity = null
-
-    }) {
-
-        const direction =
-            String(
-
-                trade.direction ||
-                "Long"
-
-            ).toLowerCase();
-
-
-        const instrument =
-            String(
-
-                trade.instrument ||
-                "Stock"
-
-            ).toLowerCase();
-
-
-        /*
-           Determine quantity.
-        */
-
-        let quantity =
-            Number(
-
-                exitQuantity ||
-                trade.exitQuantity ||
-                trade.positionSize ||
-                trade.shares ||
-                trade.contracts ||
-                1
-
-            );
-
-
-        /*
-           Prevent invalid quantity.
-        */
-
-        if (
-
-            !Number.isFinite(quantity) ||
-
-            quantity <= 0
-
-        ) {
-
-            quantity = 1;
-
-        }
-
-
-        /*
-           OPTIONS
-        */
-
-        if (
-
-            instrument.includes("option")
-
-        ) {
-
-            const entry =
-                Number(
-
-                    trade.optionEntry ||
-                    trade.optionPremium ||
-                    0
-
-                );
-
-
-            const exit =
-                Number(exitPrice);
-
-
-            if (
-
-                entry <= 0 ||
-
-                !Number.isFinite(exit)
-
-            ) {
-
-                return {
-
-                    valid:
-                        false,
-
-                    profitLoss:
-                        0,
-
-                    error:
-                        "Invalid option entry or exit price."
-
-                };
-
-            }
-
-
-            const priceMove =
-                exit - entry;
-
-
-            const profitLoss =
-                priceMove *
-                quantity *
-                100;
-
-
-            const percentReturn =
-                (
-
-                    priceMove /
-                    entry
-
-                ) * 100;
-
-
-            return {
-
-                valid:
-                    true,
-
-                quantity,
-
-                multiplier:
-                    100,
-
-                entry,
-
-                exit,
-
-                priceMove,
-
-                profitLoss,
-
-                percentReturn
-
-            };
-
-        }
-
-
-        /*
-           STOCK / CRYPTO
-        */
-
-        const entry =
-            Number(
-
-                trade.entry ||
-                trade.stockEntry ||
+    const entry =
+        isOption
+            ? Number(
+                trade.optionEntry ??
+                trade.optionPremium ??
                 0
+            )
+            : Number(trade.entry ?? 0);
 
-            );
+    const exit = Number(exitPrice);
 
+    quantity = Number(quantity);
 
-        const exit =
-            Number(exitPrice);
-
-
-        if (
-
-            entry <= 0 ||
-
-            !Number.isFinite(exit)
-
-        ) {
-
-            return {
-
-                valid:
-                    false,
-
-                profitLoss:
-                    0,
-
-                error:
-                    "Invalid trade entry or exit price."
-
-            };
-
-        }
-
-
-        let priceMove;
-
-
-        if (
-
-            direction === "short"
-
-        ) {
-
-            priceMove =
-                entry -
-                exit;
-
-        }
-
-        else {
-
-            priceMove =
-                exit -
-                entry;
-
-        }
-
-
-        const profitLoss =
-            priceMove *
-            quantity;
-
-
-        const percentReturn =
-            (
-
-                priceMove /
-                entry
-
-            ) * 100;
-
-
+    if (
+        entry <= 0 ||
+        !Number.isFinite(exit) ||
+        quantity <= 0
+    ) {
         return {
-
-            valid:
-                true,
-
-            quantity,
-
-            multiplier:
-                1,
-
-            entry,
-
-            exit,
-
-            priceMove,
-
-            profitLoss,
-
-            percentReturn
-
+            valid: false,
+            error: "Invalid entry, exit, or quantity."
         };
-
-    },
-
-
-    /* =====================================================
-       CLOSE TRADE
-    ===================================================== */
-
-    closeTrade(journalId) {
-
-        const trades =
-            this.getTrades();
-
-
-        const trade =
-            trades.find(
-
-                item =>
-
-                    Number(item.journalId) ===
-                    Number(journalId)
-
-            );
-
-
-        if (!trade) {
-
-            alert(
-                "Trade not found."
-            );
-
-            return;
-
-        }
-
-
-        const instrument =
-            String(
-                trade.instrument
-            ).toLowerCase();
-
-
-        const exitLabel =
-
-            instrument.includes("option")
-
-                ? "option exit premium"
-
-                : "exit price";
-
-
-        const exitPriceInput =
-            prompt(
-
-                `Enter ${exitLabel} for ${trade.symbol}:`
-
-            );
-
-
-        if (
-
-            exitPriceInput === null ||
-
-            exitPriceInput === "" ||
-
-            isNaN(exitPriceInput)
-
-        ) {
-
-            return;
-
-        }
-
-
-        const defaultQuantity =
-            Number(
-
-                trade.positionSize ||
-                trade.shares ||
-                trade.contracts ||
-                1
-
-            );
-
-
-        const quantityInput =
-            prompt(
-
-                `How many ${
-                    instrument.includes("option")
-
-                        ? "contracts"
-
-                        : "shares / units"
-
-                } are being closed?`,
-
-                defaultQuantity
-
-            );
-
-
-        if (
-
-            quantityInput === null ||
-
-            quantityInput === "" ||
-
-            isNaN(quantityInput)
-
-        ) {
-
-            return;
-
-        }
-
-
-        const exitPrice =
-            Number(exitPriceInput);
-
-
-        const exitQuantity =
-            Number(quantityInput);
-
-
-        const result =
-            this.calculateProfitLoss({
-
-                trade,
-
-                exitPrice,
-
-                exitQuantity
-
-            });
-
-
-        if (!result.valid) {
-
-            alert(
-                result.error ||
-                "Unable to calculate trade result."
-            );
-
-            return;
-
-        }
-
-
-        /*
-           R-MULTIPLE
-
-           Profit ÷ original planned risk.
-        */
-
-        const riskAmount =
-            Number(
-
-                trade.actualRisk ||
-                trade.riskAmount ||
-                trade.dollarRisk ||
-                0
-
-            );
-
-
-        let rMultiple =
-            null;
-
-
-        if (
-
-            riskAmount > 0
-
-        ) {
-
-            rMultiple =
-                result.profitLoss /
-                riskAmount;
-
-        }
-
-
-        /*
-           UPDATE TRADE
-        */
-
-        trade.exitPrice =
-            exitPrice;
-
-
-        trade.exitQuantity =
-            exitQuantity;
-
-
-        trade.profitLoss =
-            result.profitLoss;
-
-
-        trade.profitLossPercent =
-            result.percentReturn;
-
-
-        trade.rMultiple =
-            rMultiple;
-
+    }
+
+    const priceMove =
+        direction === "short"
+            ? entry - exit
+            : exit - entry;
+
+    const multiplier =
+        isOption ? 100 : 1;
+
+    const profitLoss =
+        priceMove *
+        quantity *
+        multiplier;
+
+    const percentReturn =
+        entry > 0
+            ? priceMove / entry * 100
+            : 0;
+
+    return {
+        valid: true,
+        entry,
+        exit,
+        quantity,
+        priceMove,
+        multiplier,
+        profitLoss,
+        percentReturn
+    };
+
+},
+
+recordExit(journalId, exitType) {
+
+    const trades = this.getTrades();
+
+    const trade = trades.find(
+        item =>
+            Number(item.journalId) ===
+            Number(journalId)
+    );
+
+    if (!trade) {
+        return;
+    }
+
+    if (trade.status !== "OPEN") {
+        alert("This trade is already closed.");
+        return;
+    }
+
+    const remaining =
+        Number(trade.remainingQuantity ?? 0);
+
+    if (remaining <= 0) {
+        alert("No position remaining.");
+        return;
+    }
+
+    const isOption =
+        String(trade.instrument)
+            .toLowerCase()
+            .includes("option");
+
+    const suggestedQuantity =
+        exitType === "TP1"
+            ? Number(trade.allocation?.tp1 ?? remaining)
+            : exitType === "TP2"
+                ? Number(trade.allocation?.tp2 ?? remaining)
+                : exitType === "TP3"
+                    ? Number(trade.allocation?.tp3 ?? remaining)
+                    : remaining;
+
+    const quantityInput =
+        prompt(
+            `How many ${
+                isOption
+                    ? "contracts"
+                    : "shares / units"
+            } are you closing at ${exitType}?`,
+            Math.min(
+                suggestedQuantity || remaining,
+                remaining
+            )
+        );
+
+    if (quantityInput === null) {
+        return;
+    }
+
+    const quantity =
+        Number(quantityInput);
+
+    if (
+        !Number.isFinite(quantity) ||
+        quantity <= 0 ||
+        quantity > remaining
+    ) {
+        alert(
+            `Enter a quantity between 1 and ${remaining}.`
+        );
+        return;
+    }
+
+    const priceInput =
+        prompt(
+            isOption
+                ? `Enter actual option exit premium for ${exitType}:`
+                : `Enter actual exit price for ${exitType}:`
+        );
+
+    if (
+        priceInput === null ||
+        priceInput === "" ||
+        !Number.isFinite(Number(priceInput))
+    ) {
+        return;
+    }
+
+    const result =
+        this.calculateExitProfit({
+            trade,
+            exitPrice: Number(priceInput),
+            quantity
+        });
+
+    if (!result.valid) {
+        alert(result.error);
+        return;
+    }
+
+    const exitRecord = {
+
+        id: Date.now(),
+
+        type: exitType,
+
+        price:
+            Number(priceInput),
+
+        quantity,
+
+        profitLoss:
+            result.profitLoss,
+
+        percentReturn:
+            result.percentReturn,
+
+        timestamp:
+            new Date().toLocaleString()
+
+    };
+
+    trade.exits =
+        Array.isArray(trade.exits)
+            ? trade.exits
+            : [];
+
+    trade.exits.push(exitRecord);
+
+    trade.remainingQuantity =
+        Math.max(
+            0,
+            remaining - quantity
+        );
+
+    trade.realizedProfitLoss =
+        trade.exits.reduce(
+            (total, exit) =>
+                total +
+                Number(exit.profitLoss || 0),
+            0
+        );
+
+    trade.profitLoss =
+        trade.realizedProfitLoss;
+
+    trade.exitPrice =
+        Number(priceInput);
+
+    trade.exitQuantity =
+        trade.exits.reduce(
+            (total, exit) =>
+                total +
+                Number(exit.quantity || 0),
+            0
+        );
+
+    if (exitType === "TP1") {
+        trade.tp1Hit = true;
+    }
+
+    if (exitType === "TP2") {
+        trade.tp2Hit = true;
+    }
+
+    if (exitType === "TP3") {
+        trade.tp3Hit = true;
+    }
+
+    if (exitType === "RUNNER") {
+        trade.runnerActive = true;
+    }
+
+    if (trade.remainingQuantity <= 0) {
 
         trade.exitDate =
-            new Date()
-                .toLocaleString();
+            new Date().toLocaleString();
 
+        trade.status =
+            trade.realizedProfitLoss > 0
+                ? "WIN"
+                : trade.realizedProfitLoss < 0
+                    ? "LOSS"
+                    : "BREAKEVEN";
 
-        /*
-           STATUS
-        */
+        const risk =
+            Number(
+                trade.actualRisk ??
+                trade.riskAmount ??
+                trade.dollarRisk ??
+                0
+            );
 
-        if (
-
-            result.profitLoss > 0
-
-        ) {
-
-            trade.status =
-                "WIN";
-
+        if (risk > 0) {
+            trade.rMultiple =
+                trade.realizedProfitLoss / risk;
         }
 
-        else if (
+    }
 
-            result.profitLoss < 0
+    this.saveTrades(trades);
 
-        ) {
+    this.renderJournal();
 
-            trade.status =
-                "LOSS";
+},
 
-        }
+closeTrade(journalId) {
 
-        else {
+    const trade =
+        this.findTrade(journalId);
 
-            trade.status =
-                "BREAKEVEN";
+    if (!trade) {
+        return;
+    }
 
-        }
-
-
-        this.saveTrades(
-            trades
-        );
-
-
-        this.renderJournal();
-
-    },
-
-
-    /* =====================================================
-       MARK TARGET HIT
-    ===================================================== */
-
-    markTargetHit(
-
+    this.recordExit(
         journalId,
+        "FINAL EXIT"
+    );
 
-        target
+},
 
-    ) {
+applyProtection(journalId) {
 
-        const trades =
-            this.getTrades();
+    const trade =
+        this.findTrade(journalId);
 
+    if (!trade) {
+        return;
+    }
 
-        const trade =
-            trades.find(
-
-                item =>
-
-                    Number(item.journalId) ===
-                    Number(journalId)
-
-            );
-
-
-        if (!trade) {
-
-            return;
-
-        }
-
-
-        if (
-
-            target === 1
-
-        ) {
-
-            trade.tp1Hit =
-                true;
-
-        }
-
-
-        if (
-
-            target === 2
-
-        ) {
-
-            trade.tp2Hit =
-                true;
-
-        }
-
-
-        if (
-
-            target === 3
-
-        ) {
-
-            trade.tp3Hit =
-                true;
-
-        }
-
-
-        if (
-
-            target === "runner"
-
-        ) {
-
-            trade.runnerActive =
-                true;
-
-        }
-
-
-        this.saveTrades(
-            trades
+    const mode =
+        prompt(
+            `Protection mode:\n\nnone\nbreakeven\nhalfR\noneR`,
+            trade.protectionMode || "breakeven"
         );
 
+    if (mode === null) {
+        return;
+    }
 
-        this.renderJournal();
+    const normalizedMode =
+        String(mode).trim();
 
-    },
+    if (
+        ![
+            "none",
+            "breakeven",
+            "halfR",
+            "oneR"
+        ].includes(normalizedMode)
+    ) {
+        alert("Invalid protection mode.");
+        return;
+    }
 
+    const trades = this.getTrades();
 
-    /* =====================================================
-       APPLY PROTECTION
-    ===================================================== */
+    const storedTrade = trades.find(
+        item =>
+            Number(item.journalId) ===
+            Number(journalId)
+    );
 
-    applyProtection(
+    storedTrade.protectionMode =
+        normalizedMode;
 
-        journalId
-
+    if (
+        normalizedMode !== "none" &&
+        window.ROLyfeLadderEngine
     ) {
 
-        const trade =
-            this.findTrade(
-                journalId
-            );
-
-
-        if (!trade) {
-
-            return;
-
-        }
-
-
-        const mode =
-            prompt(
-
-                `Protection mode for ${trade.symbol}:\n\nnone\nbreakeven\nhalfR\noneR`,
-
-                trade.protectionMode ||
-                "breakeven"
-
-            );
-
-
-        if (
-
-            mode === null
-
-        ) {
-
-            return;
-
-        }
-
-
-        const normalizedMode =
-            String(mode)
-                .trim();
-
-
-        if (
-
-            ![
-                "none",
-                "breakeven",
-                "halfR",
-                "oneR"
-            ].includes(
-                normalizedMode
-            )
-
-        ) {
-
-            alert(
-                "Invalid protection mode."
-            );
-
-            return;
-
-        }
-
-
-        let result;
-
-
-        if (
-
+        const result =
             window.ROLyfeLadderEngine
+                .calculateProtection({
+                    entry: storedTrade.entry,
+                    stop: storedTrade.stop,
+                    direction:
+                        String(
+                            storedTrade.direction
+                        ).toLowerCase(),
+                    mode: normalizedMode
+                });
 
-        ) {
-
-            result =
-                window.ROLyfeLadderEngine
-                    .calculateProtection({
-
-                        entry:
-                            trade.entry,
-
-
-                        stop:
-                            trade.stop,
-
-
-                        direction:
-                            String(
-                                trade.direction
-                            ).toLowerCase(),
-
-
-                        mode:
-                            normalizedMode
-
-                    });
-
-        }
-
-
-        const trades =
-            this.getTrades();
-
-
-        const storedTrade =
-            trades.find(
-
-                item =>
-
-                    Number(item.journalId) ===
-                    Number(journalId)
-
-            );
-
-
-        if (!storedTrade) {
-
-            return;
-
-        }
-
-
-        storedTrade.protectionMode =
-            normalizedMode;
-
-
-        if (
-
-            result &&
-            result.valid
-
-        ) {
-
+        if (result.valid) {
             storedTrade.protectedStop =
                 result.protectedStop;
-
         }
 
+    } else {
 
-        this.saveTrades(
-            trades
+        storedTrade.protectedStop = null;
+
+    }
+
+    this.saveTrades(trades);
+
+    this.renderJournal();
+
+},
+
+addField(journalId, field, label) {
+
+    const trades = this.getTrades();
+
+    const trade = trades.find(
+        item =>
+            Number(item.journalId) ===
+            Number(journalId)
+    );
+
+    if (!trade) {
+        return;
+    }
+
+    const value =
+        prompt(
+            `${label} for ${trade.symbol}:`,
+            trade[field] || ""
         );
 
+    if (value === null) {
+        return;
+    }
 
-        this.renderJournal();
+    trade[field] = value;
 
-    },
+    this.saveTrades(trades);
 
+    this.renderJournal();
 
-    /* =====================================================
-       ADD NOTES
-    ===================================================== */
+},
 
-    addNotes(journalId) {
+addNotes(journalId) {
+    this.addField(
+        journalId,
+        "notes",
+        "Trade notes"
+    );
+},
 
-        const trades =
-            this.getTrades();
+addMistakes(journalId) {
+    this.addField(
+        journalId,
+        "mistakes",
+        "Mistakes"
+    );
+},
 
+addLessons(journalId) {
+    this.addField(
+        journalId,
+        "lessons",
+        "Lessons"
+    );
+},
 
-        const trade =
-            trades.find(
+rateTrade(journalId) {
 
-                item =>
+    const trades = this.getTrades();
 
-                    Number(item.journalId) ===
-                    Number(journalId)
+    const trade = trades.find(
+        item =>
+            Number(item.journalId) ===
+            Number(journalId)
+    );
 
-            );
+    if (!trade) {
+        return;
+    }
 
-
-        if (!trade) {
-
-            return;
-
-        }
-
-
-        const notes =
+    const rating =
+        Number(
             prompt(
-
-                `Trade notes for ${trade.symbol}:`,
-
-                trade.notes || ""
-
-            );
-
-
-        if (
-
-            notes === null
-
-        ) {
-
-            return;
-
-        }
-
-
-        trade.notes =
-            notes;
-
-
-        this.saveTrades(
-            trades
-        );
-
-
-        this.renderJournal();
-
-    },
-
-
-    /* =====================================================
-       ADD MISTAKES
-    ===================================================== */
-
-    addMistakes(journalId) {
-
-        const trades =
-            this.getTrades();
-
-
-        const trade =
-            trades.find(
-
-                item =>
-
-                    Number(item.journalId) ===
-                    Number(journalId)
-
-            );
-
-
-        if (!trade) {
-
-            return;
-
-        }
-
-
-        const mistakes =
-            prompt(
-
-                `What mistakes were made on ${trade.symbol}?`,
-
-                trade.mistakes || ""
-
-            );
-
-
-        if (
-
-            mistakes === null
-
-        ) {
-
-            return;
-
-        }
-
-
-        trade.mistakes =
-            mistakes;
-
-
-        this.saveTrades(
-            trades
-        );
-
-
-        this.renderJournal();
-
-    },
-
-
-    /* =====================================================
-       ADD LESSONS
-    ===================================================== */
-
-    addLessons(journalId) {
-
-        const trades =
-            this.getTrades();
-
-
-        const trade =
-            trades.find(
-
-                item =>
-
-                    Number(item.journalId) ===
-                    Number(journalId)
-
-            );
-
-
-        if (!trade) {
-
-            return;
-
-        }
-
-
-        const lessons =
-            prompt(
-
-                `What did you learn from ${trade.symbol}?`,
-
-                trade.lessons || ""
-
-            );
-
-
-        if (
-
-            lessons === null
-
-        ) {
-
-            return;
-
-        }
-
-
-        trade.lessons =
-            lessons;
-
-
-        this.saveTrades(
-            trades
-        );
-
-
-        this.renderJournal();
-
-    },
-
-
-    /* =====================================================
-       RATE TRADE
-    ===================================================== */
-
-    rateTrade(journalId) {
-
-        const trades =
-            this.getTrades();
-
-
-        const trade =
-            trades.find(
-
-                item =>
-
-                    Number(item.journalId) ===
-                    Number(journalId)
-
-            );
-
-
-        if (!trade) {
-
-            return;
-
-        }
-
-
-        const rating =
-            prompt(
-
-                `Rate this trade from 1 to 5:`,
-
+                "Rate trade from 1 to 5:",
                 trade.rating || ""
-
-            );
-
-
-        if (
-
-            rating === null
-
-        ) {
-
-            return;
-
-        }
-
-
-        const numericRating =
-            Number(rating);
-
-
-        if (
-
-            numericRating < 1 ||
-
-            numericRating > 5 ||
-
-            !Number.isFinite(
-                numericRating
             )
-
-        ) {
-
-            alert(
-                "Rating must be between 1 and 5."
-            );
-
-            return;
-
-        }
-
-
-        trade.rating =
-            numericRating;
-
-
-        this.saveTrades(
-            trades
         );
 
+    if (
+        !Number.isFinite(rating) ||
+        rating < 1 ||
+        rating > 5
+    ) {
+        alert("Rating must be between 1 and 5.");
+        return;
+    }
 
-        this.renderJournal();
+    trade.rating = rating;
 
-    },
+    this.saveTrades(trades);
 
+    this.renderJournal();
 
-    /* =====================================================
-       DELETE TRADE
-    ===================================================== */
+},
 
-    deleteTrade(journalId) {
+deleteTrade(journalId) {
 
-        const confirmDelete =
-            confirm(
+    if (
+        !confirm(
+            "Delete this trade?"
+        )
+    ) {
+        return;
+    }
 
-                "Delete this trade from the RO'Lyfe Trade Journal?"
-
-            );
-
-
-        if (!confirmDelete) {
-
-            return;
-
-        }
-
-
-        let trades =
-            this.getTrades();
-
-
-        trades =
-            trades.filter(
-
-                trade =>
-
-                    Number(trade.journalId) !==
-                    Number(journalId)
-
-            );
-
-
-        this.saveTrades(
-            trades
+    const trades =
+        this.getTrades().filter(
+            trade =>
+                Number(trade.journalId) !==
+                Number(journalId)
         );
 
+    this.saveTrades(trades);
 
-        this.renderJournal();
+    this.renderJournal();
 
-    },
+},
 
+clearJournal() {
 
-    /* =====================================================
-       CLEAR JOURNAL
-    ===================================================== */
+    if (
+        !confirm(
+            "Clear the entire Trade Journal? This cannot be undone."
+        )
+    ) {
+        return;
+    }
 
-    clearJournal() {
+    localStorage.removeItem(this.storageKey);
 
-        const confirmClear =
-            confirm(
+    this.renderJournal();
 
-                "Clear the entire RO'Lyfe Trade Journal?\n\nThis cannot be undone."
+},
 
-            );
+calculateStats() {
 
+    const trades = this.getTrades();
 
-        if (!confirmClear) {
-
-            return;
-
-        }
-
-
-        localStorage.removeItem(
-            this.storageKey
-        );
-
-
-        this.renderJournal();
-
-    },
-
-
-    /* =====================================================
-       CALCULATE ADVANCED STATS
-    ===================================================== */
-
-    calculateStats() {
-
-        const trades =
-            this.getTrades();
-
-
-        const closedTrades =
-            trades.filter(
-
-                trade =>
-
-                    [
-
-                        "WIN",
-                        "LOSS",
-                        "BREAKEVEN"
-
-                    ].includes(
-                        trade.status
-                    )
-
-            );
-
-
-        const wins =
-            closedTrades.filter(
-
-                trade =>
-
-                    trade.status ===
-                    "WIN"
-
-            );
-
-
-        const losses =
-            closedTrades.filter(
-
-                trade =>
-
-                    trade.status ===
-                    "LOSS"
-
-            );
-
-
-        const breakevens =
-            closedTrades.filter(
-
-                trade =>
-
-                    trade.status ===
+    const closed =
+        trades.filter(
+            trade =>
+                [
+                    "WIN",
+                    "LOSS",
                     "BREAKEVEN"
+                ].includes(trade.status)
+        );
 
-            );
+    const wins =
+        closed.filter(
+            trade => trade.status === "WIN"
+        );
 
+    const losses =
+        closed.filter(
+            trade => trade.status === "LOSS"
+        );
 
-        const totalPL =
-            closedTrades.reduce(
+    const totalPL =
+        closed.reduce(
+            (total, trade) =>
+                total +
+                Number(trade.profitLoss || 0),
+            0
+        );
 
-                (
+    const grossProfit =
+        wins.reduce(
+            (total, trade) =>
+                total +
+                Number(trade.profitLoss || 0),
+            0
+        );
 
-                    total,
-
-                    trade
-
-                ) =>
-
+    const grossLoss =
+        Math.abs(
+            losses.reduce(
+                (total, trade) =>
                     total +
-
-                    (
-
-                        Number(
-                            trade.profitLoss
-                        ) || 0
-
-                    ),
-
+                    Number(trade.profitLoss || 0),
                 0
+            )
+        );
 
-            );
+    const totalR =
+        closed.reduce(
+            (total, trade) =>
+                total +
+                Number(trade.rMultiple || 0),
+            0
+        );
 
+    return {
 
-        const grossProfit =
-            wins.reduce(
+        totalTrades:
+            trades.length,
 
-                (
+        closedTrades:
+            closed.length,
 
-                    total,
+        openTrades:
+            trades.filter(
+                trade => trade.status === "OPEN"
+            ).length,
 
-                    trade
+        wins:
+            wins.length,
 
-                ) =>
+        losses:
+            losses.length,
 
-                    total +
+        breakevens:
+            closed.filter(
+                trade =>
+                    trade.status === "BREAKEVEN"
+            ).length,
 
-                    (
+        winRate:
+            closed.length
+                ? wins.length / closed.length * 100
+                : 0,
 
-                        Number(
-                            trade.profitLoss
-                        ) || 0
+        totalPL,
 
-                    ),
+        grossProfit,
 
-                0
+        grossLoss,
 
-            );
-
-
-        const grossLoss =
-            Math.abs(
-
-                losses.reduce(
-
-                    (
-
-                        total,
-
-                        trade
-
-                    ) =>
-
-                        total +
-
-                        (
-
-                            Number(
-                                trade.profitLoss
-                            ) || 0
-
-                        ),
-
-                    0
-
-                )
-
-            );
-
-
-        const winRate =
-            closedTrades.length > 0
-
-                ? (
-
-                    wins.length /
-                    closedTrades.length
-
-                ) * 100
-
-                : 0;
-
-
-        const averageWin =
-            wins.length
-
-                ? grossProfit /
-                  wins.length
-
-                : 0;
-
-
-        const averageLoss =
-            losses.length
-
-                ? grossLoss /
-                  losses.length
-
-                : 0;
-
-
-        const profitFactor =
-
+        profitFactor:
             grossLoss > 0
-
-                ? grossProfit /
-                  grossLoss
-
+                ? grossProfit / grossLoss
                 : grossProfit > 0
-
                     ? Infinity
+                    : 0,
 
-                    : 0;
+        totalR,
 
+        averageR:
+            closed.length
+                ? totalR / closed.length
+                : 0,
 
-        const totalR =
-            closedTrades.reduce(
+        expectancy:
+            closed.length
+                ? totalPL / closed.length
+                : 0
+    };
 
-                (
+},
 
-                    total,
+renderStats() {
 
-                    trade
+    const container =
+        document.getElementById("journalStats");
 
-                ) =>
+    if (!container) {
+        return;
+    }
 
-                    total +
+    const stats =
+        this.calculateStats();
 
-                    (
+    container.innerHTML = `
 
-                        Number(
-                            trade.rMultiple
-                        ) || 0
+        <div class="journal-stats-grid">
 
-                    ),
-
-                0
-
-            );
-
-
-        const averageR =
-            closedTrades.length
-
-                ? totalR /
-                  closedTrades.length
-
-                : 0;
-
-
-        const expectancy =
-
-            closedTrades.length
-
-                ? totalPL /
-                  closedTrades.length
-
-                : 0;
-
-
-        return {
-
-            totalTrades:
-                trades.length,
-
-
-            closedTrades:
-                closedTrades.length,
-
-
-            openTrades:
-
-                trades.filter(
-
-                    trade =>
-
-                        trade.status ===
-                        "OPEN"
-
-                ).length,
-
-
-            wins:
-                wins.length,
-
-
-            losses:
-                losses.length,
-
-
-            breakevens:
-                breakevens.length,
-
-
-            winRate,
-
-
-            totalPL,
-
-
-            grossProfit,
-
-
-            grossLoss,
-
-
-            averageWin,
-
-
-            averageLoss,
-
-
-            profitFactor,
-
-
-            totalR,
-
-
-            averageR,
-
-
-            expectancy
-
-        };
-
-    },
-
-
-    /* =====================================================
-       RENDER STATS
-    ===================================================== */
-
-    renderStats() {
-
-        const stats =
-            this.calculateStats();
-
-
-        const statsContainer =
-            document.getElementById(
-                "journalStats"
-            );
-
-
-        if (!statsContainer) {
-
-            return;
-
-        }
-
-
-        const profitFactorDisplay =
-
-            stats.profitFactor === Infinity
-
-                ? "∞"
-
-                : Number(
-                    stats.profitFactor
-                ).toFixed(2);
-
-
-        statsContainer.innerHTML = `
-
-            <div class="journal-stats-grid">
-
-                <div class="stat-card">
-                    <span>Total Trades</span>
-                    <strong>
-                        ${stats.totalTrades}
-                    </strong>
-                </div>
-
-
-                <div class="stat-card">
-                    <span>Open</span>
-                    <strong>
-                        ${stats.openTrades}
-                    </strong>
-                </div>
-
-
-                <div class="stat-card">
-                    <span>Wins</span>
-                    <strong>
-                        ${stats.wins}
-                    </strong>
-                </div>
-
-
-                <div class="stat-card">
-                    <span>Losses</span>
-                    <strong>
-                        ${stats.losses}
-                    </strong>
-                </div>
-
-
-                <div class="stat-card">
-                    <span>Breakeven</span>
-                    <strong>
-                        ${stats.breakevens}
-                    </strong>
-                </div>
-
-
-                <div class="stat-card">
-                    <span>Win Rate</span>
-                    <strong>
-                        ${stats.winRate.toFixed(1)}%
-                    </strong>
-                </div>
-
-
-                <div class="stat-card">
-                    <span>Net P/L</span>
-                    <strong>
-                        ${stats.totalPL >= 0 ? "+" : ""}
-                        ${this.money(stats.totalPL)}
-                    </strong>
-                </div>
-
-
-                <div class="stat-card">
-                    <span>Profit Factor</span>
-                    <strong>
-                        ${profitFactorDisplay}
-                    </strong>
-                </div>
-
-
-                <div class="stat-card">
-                    <span>Total R</span>
-                    <strong>
-                        ${stats.totalR >= 0 ? "+" : ""}
-                        ${stats.totalR.toFixed(2)}R
-                    </strong>
-                </div>
-
-
-                <div class="stat-card">
-                    <span>Average R</span>
-                    <strong>
-                        ${stats.averageR.toFixed(2)}R
-                    </strong>
-                </div>
-
-
-                <div class="stat-card">
-                    <span>Expectancy</span>
-                    <strong>
-                        ${this.money(stats.expectancy)}
-                    </strong>
-                </div>
-
+            <div class="stat-card">
+                <span>Total Trades</span>
+                <strong>${stats.totalTrades}</strong>
             </div>
 
-        `;
-
-    },
-
-
-    /* =====================================================
-       RENDER LADDER STATUS
-    ===================================================== */
-
-    renderLadderStatus(trade) {
-
-        return `
-
-            <div class="journal-ladder">
-
-                <div class="ladder-title">
-
-                    📊 TRADE LADDER
-
-                </div>
-
-
-                <div class="ladder-status-grid">
-
-                    <button
-
-                        class="ladder-status-button ${
-                            trade.tp1Hit
-                                ? "hit"
-                                : ""
-                        }"
-
-                        onclick="
-                            TradeJournal.markTargetHit(
-                                ${trade.journalId},
-                                1
-                            )
-                        "
-
-                    >
-
-                        TP1
-
-                        ${
-
-                            trade.tp1Hit
-
-                                ? " ✓"
-
-                                : ""
-
-                        }
-
-                    </button>
-
-
-                    <button
-
-                        class="ladder-status-button ${
-                            trade.tp2Hit
-                                ? "hit"
-                                : ""
-                        }"
-
-                        onclick="
-                            TradeJournal.markTargetHit(
-                                ${trade.journalId},
-                                2
-                            )
-                        "
-
-                    >
-
-                        TP2
-
-                        ${
-
-                            trade.tp2Hit
-
-                                ? " ✓"
-
-                                : ""
-
-                        }
-
-                    </button>
-
-
-                    <button
-
-                        class="ladder-status-button ${
-                            trade.tp3Hit
-                                ? "hit"
-                                : ""
-                        }"
-
-                        onclick="
-                            TradeJournal.markTargetHit(
-                                ${trade.journalId},
-                                3
-                            )
-                        "
-
-                    >
-
-                        TP3
-
-                        ${
-
-                            trade.tp3Hit
-
-                                ? " ✓"
-
-                                : ""
-
-                        }
-
-                    </button>
-
-
-                    <button
-
-                        class="ladder-status-button ${
-                            trade.runnerActive
-                                ? "hit"
-                                : ""
-                        }"
-
-                        onclick="
-                            TradeJournal.markTargetHit(
-                                ${trade.journalId},
-                                'runner'
-                            )
-                        "
-
-                    >
-
-                        RUNNER
-
-                        ${
-
-                            trade.runnerActive
-
-                                ? " 🏃"
-
-                                : ""
-
-                        }
-
-                    </button>
-
-                </div>
-
+            <div class="stat-card">
+                <span>Open</span>
+                <strong>${stats.openTrades}</strong>
             </div>
 
-        `;
-
-    },
-
-
-    /* =====================================================
-       RENDER JOURNAL
-    ===================================================== */
-
-    renderJournal() {
-
-        const container =
-            document.getElementById(
-                "tradeJournal"
-            );
-
-
-        if (!container) {
-
-            return;
-
-        }
-
-
-        const trades =
-            this.getTrades();
-
-
-        /*
-           EMPTY JOURNAL
-        */
-
-        if (
-
-            trades.length === 0
-
-        ) {
-
-            container.innerHTML = `
-
-                <div class="empty-journal">
-
-                    <h3>
-                        📓 RO'LYFE TRADE JOURNAL
-                    </h3>
-
-
-                    <p>
-                        No trades recorded yet.
-                    </p>
-
-
-                    <p>
-                        Plan the trade.
-                        Execute the trade.
-                        Review the trade.
-                        Improve the trader.
-                    </p>
-
-                </div>
-
-            `;
-
-
-            this.renderStats();
-
-
-            return;
-
-        }
-
-
-        /*
-           TRADE CARDS
-        */
-
-        container.innerHTML =
-
-            trades
-
-                .slice()
-
-                .reverse()
-
-                .map(
-
-                    trade => {
-
-                        const entry =
-                            Number(
-
-                                trade.entry
-
-                            );
-
-
-                        const stop =
-                            Number(
-
-                                trade.stop
-
-                            );
-
-
-                        const exit =
-                            trade.exitPrice !== null
-
-                                ? Number(
-                                    trade.exitPrice
-                                )
-
-                                : null;
-
-
-                        const pl =
-                            trade.profitLoss !== null
-
-                                ? Number(
-                                    trade.profitLoss
-                                )
-
-                                : null;
-
-
-                        return `
-
-                            <div class="
-                                journal-trade
-                                ${String(
-                                    trade.status
-                                ).toLowerCase()}
-                            ">
-
-
-                                <!-- HEADER -->
-
-                                <div class="journal-header">
-
-                                    <div>
-
-                                        <h3>
-
-                                            ${this.escapeHTML(
-                                                trade.symbol
-                                            )}
-
-                                        </h3>
-
-
-                                        <span>
-
-                                            ${this.escapeHTML(
-                                                trade.instrument
-                                            )}
-
-                                            •
-
-                                            ${this.escapeHTML(
-                                                trade.direction
-                                            )}
-
-                                        </span>
-
-                                    </div>
-
-
-                                    <div class="trade-status">
-
-                                        ${this.escapeHTML(
-                                            trade.status
-                                        )}
-
-                                    </div>
-
-                                </div>
-
-
-                                <!-- TRADE DETAILS -->
-
-                                <div class="journal-details">
-
-
-                                    <div>
-
-                                        <span>
-                                            Entry
-                                        </span>
-
-                                        <strong>
-
-                                            ${this.money(
-                                                entry
-                                            )}
-
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <span>
-                                            Stop
-                                        </span>
-
-                                        <strong>
-
-                                            ${this.money(
-                                                stop
-                                            )}
-
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <span>
-                                            Exit
-                                        </span>
-
-                                        <strong>
-
-                                            ${
-
-                                                exit !== null
-
-                                                    ? this.money(
-                                                        exit
-                                                    )
-
-                                                    : "OPEN"
-
-                                            }
-
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <span>
-                                            Position
-                                        </span>
-
-                                        <strong>
-
-                                            ${
-
-                                                trade.positionSize ||
-                                                trade.shares ||
-                                                trade.contracts ||
-                                                "—"
-
-                                            }
-
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <span>
-                                            P/L
-                                        </span>
-
-                                        <strong>
-
-                                            ${
-
-                                                pl !== null
-
-                                                    ? (
-
-                                                        pl >= 0
-                                                            ? "+"
-                                                            : ""
-
-                                                    )
-
-                                                    + this.money(pl)
-
-                                                    : "—"
-
-                                            }
-
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <span>
-                                            R Multiple
-                                        </span>
-
-                                        <strong>
-
-                                            ${
-
-                                                trade.rMultiple !== null
-
-                                                    ? Number(
-                                                        trade.rMultiple
-                                                    ).toFixed(2)
-
-                                                    + "R"
-
-                                                    : "—"
-
-                                            }
-
-                                        </strong>
-
-                                    </div>
-
-
-                                </div>
-
-
-                                <!-- RISK -->
-
-                                <div class="journal-risk-info">
-
-                                    <span>
-
-                                        Risk:
-
-                                        <strong>
-
-                                            ${this.money(
-
-                                                trade.actualRisk ||
-                                                trade.riskAmount ||
-                                                trade.dollarRisk
-
-                                            )}
-
-                                        </strong>
-
-                                    </span>
-
-
-                                    <span>
-
-                                        Risk %:
-
-                                        <strong>
-
-                                            ${this.percent(
-                                                trade.riskPercent
-                                            )}
-
-                                        </strong>
-
-                                    </span>
-
-                                </div>
-
-
-                                <!-- LADDER -->
-
-                                ${
-
-                                    trade.status === "OPEN"
-
-                                        ? this.renderLadderStatus(
-                                            trade
-                                        )
-
-                                        : ""
-
-                                }
-
-
-                                <!-- PROTECTION -->
-
-                                <div class="journal-protection">
-
-                                    <span>
-
-                                        🛡 Protection:
-
-                                        <strong>
-
-                                            ${
-
-                                                trade.protectionMode ||
-                                                "none"
-
-                                            }
-
-                                        </strong>
-
-                                    </span>
-
-
-                                    ${
-
-                                        trade.protectedStop !== null
-
-                                            ? `
-
-                                                <span>
-
-                                                    Protected Stop:
-
-                                                    <strong>
-
-                                                        ${this.money(
-                                                            trade.protectedStop
-                                                        )}
-
-                                                    </strong>
-
-                                                </span>
-
-                                            `
-
-                                            : ""
-
-                                    }
-
-                                </div>
-
-
-                                <!-- META -->
-
-                                <div class="journal-meta">
-
-                                    <small>
-
-                                        Entered:
-
-                                        ${this.escapeHTML(
-                                            trade.entryDate
-                                        )}
-
-                                    </small>
-
-
-                                    ${
-
-                                        trade.exitDate
-
-                                            ? `
-
-                                                <small>
-
-                                                    Closed:
-
-                                                    ${this.escapeHTML(
-                                                        trade.exitDate
-                                                    )}
-
-                                                </small>
-
-                                            `
-
-                                            : ""
-
-                                    }
-
-                                </div>
-
-
-                                <!-- NOTES -->
-
-                                ${
-
-                                    trade.notes
-
-                                        ? `
-
-                                            <div class="journal-notes">
-
-                                                <strong>
-
-                                                    📝 Notes:
-
-                                                </strong>
-
-                                                <p>
-
-                                                    ${this.escapeHTML(
-                                                        trade.notes
-                                                    )}
-
-                                                </p>
-
-                                            </div>
-
-                                        `
-
-                                        : ""
-
-                                }
-
-
-                                <!-- MISTAKES -->
-
-                                ${
-
-                                    trade.mistakes
-
-                                        ? `
-
-                                            <div class="journal-mistakes">
-
-                                                <strong>
-
-                                                    ⚠️ Mistakes:
-
-                                                </strong>
-
-                                                <p>
-
-                                                    ${this.escapeHTML(
-                                                        trade.mistakes
-                                                    )}
-
-                                                </p>
-
-                                            </div>
-
-                                        `
-
-                                        : ""
-
-                                }
-
-
-                                <!-- LESSONS -->
-
-                                ${
-
-                                    trade.lessons
-
-                                        ? `
-
-                                            <div class="journal-lessons">
-
-                                                <strong>
-
-                                                    💡 Lesson:
-
-                                                </strong>
-
-                                                <p>
-
-                                                    ${this.escapeHTML(
-                                                        trade.lessons
-                                                    )}
-
-                                                </p>
-
-                                            </div>
-
-                                        `
-
-                                        : ""
-
-                                }
-
-
-                                <!-- RATING -->
-
-                                ${
-
-                                    trade.rating
-
-                                        ? `
-
-                                            <div class="journal-rating">
-
-                                                ⭐ Trade Rating:
-
-                                                ${"⭐".repeat(
-                                                    Number(
-                                                        trade.rating
-                                                    )
-                                                )}
-
-                                            </div>
-
-                                        `
-
-                                        : ""
-
-                                }
-
-
-                                <!-- ACTIONS -->
-
-                                <div class="journal-actions">
-
-
-                                    ${
-
-                                        trade.status === "OPEN"
-
-                                            ? `
-
-                                                <button
-
-                                                    onclick="
-                                                        TradeJournal.closeTrade(
-                                                            ${trade.journalId}
-                                                        )
-                                                    "
-
-                                                >
-
-                                                    🔒 Close Trade
-
-                                                </button>
-
-
-                                                <button
-
-                                                    onclick="
-                                                        TradeJournal.applyProtection(
-                                                            ${trade.journalId}
-                                                        )
-                                                    "
-
-                                                >
-
-                                                    🛡 Protect
-
-                                                </button>
-
-                                            `
-
-                                            : ""
-
-                                    }
-
-
-                                    <button
-
-                                        onclick="
-                                            TradeJournal.addNotes(
-                                                ${trade.journalId}
-                                            )
-                                        "
-
-                                    >
-
-                                        📝 Notes
-
-                                    </button>
-
-
-                                    <button
-
-                                        onclick="
-                                            TradeJournal.addMistakes(
-                                                ${trade.journalId}
-                                            )
-                                        "
-
-                                    >
-
-                                        ⚠️ Mistakes
-
-                                    </button>
-
-
-                                    <button
-
-                                        onclick="
-                                            TradeJournal.addLessons(
-                                                ${trade.journalId}
-                                            )
-                                        "
-
-                                    >
-
-                                        💡 Lesson
-
-                                    </button>
-
-
-                                    <button
-
-                                        onclick="
-                                            TradeJournal.rateTrade(
-                                                ${trade.journalId}
-                                            )
-                                        "
-
-                                    >
-
-                                        ⭐ Rate
-
-                                    </button>
-
-
-                                    <button
-
-                                        onclick="
-                                            TradeJournal.deleteTrade(
-                                                ${trade.journalId}
-                                            )
-                                        "
-
-                                    >
-
-                                        🗑 Delete
-
-                                    </button>
-
-
-                                </div>
-
-
-                            </div>
-
-                        `;
-
+            <div class="stat-card">
+                <span>Wins</span>
+                <strong>${stats.wins}</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Losses</span>
+                <strong>${stats.losses}</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Win Rate</span>
+                <strong>${stats.winRate.toFixed(1)}%</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Net P/L</span>
+                <strong>
+                    ${stats.totalPL >= 0 ? "+" : ""}
+                    ${this.money(stats.totalPL)}
+                </strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Profit Factor</span>
+                <strong>
+                    ${
+                        stats.profitFactor === Infinity
+                            ? "∞"
+                            : stats.profitFactor.toFixed(2)
                     }
+                </strong>
+            </div>
 
-                )
+            <div class="stat-card">
+                <span>Total R</span>
+                <strong>${stats.totalR.toFixed(2)}R</strong>
+            </div>
 
-                .join("");
+            <div class="stat-card">
+                <span>Average R</span>
+                <strong>${stats.averageR.toFixed(2)}R</strong>
+            </div>
 
+            <div class="stat-card">
+                <span>Expectancy</span>
+                <strong>${this.money(stats.expectancy)}</strong>
+            </div>
+
+        </div>
+
+    `;
+
+},
+
+renderJournal() {
+
+    const container =
+        document.getElementById("tradeJournal");
+
+    if (!container) {
+        return;
+    }
+
+    const trades =
+        this.getTrades();
+
+    if (!trades.length) {
+
+        container.innerHTML = `
+            <div class="empty-journal">
+                <h3>📓 RO'LYFE TRADE JOURNAL</h3>
+                <p>No trades recorded yet.</p>
+            </div>
+        `;
 
         this.renderStats();
 
+        return;
     }
+
+    container.innerHTML =
+        trades
+            .slice()
+            .reverse()
+            .map(trade => {
+
+                const exits =
+                    Array.isArray(trade.exits)
+                        ? trade.exits
+                        : [];
+
+                const exitHistory =
+                    exits.length
+                        ? exits.map(exit => `
+                            <div class="journal-exit-row">
+                                <strong>${this.escapeHTML(exit.type)}</strong>
+                                <span>
+                                    Qty: ${exit.quantity}
+                                </span>
+                                <span>
+                                    Exit: ${this.money(exit.price)}
+                                </span>
+                                <span>
+                                    P/L:
+                                    ${exit.profitLoss >= 0 ? "+" : ""}
+                                    ${this.money(exit.profitLoss)}
+                                </span>
+                            </div>
+                        `).join("")
+                        : `<p>No exits recorded.</p>`;
+
+                return `
+
+                    <div class="journal-trade ${String(trade.status).toLowerCase()}">
+
+                        <div class="journal-header">
+
+                            <div>
+
+                                <h3>
+                                    ${this.escapeHTML(trade.symbol)}
+                                </h3>
+
+                                <span>
+                                    ${this.escapeHTML(trade.instrument)}
+                                    •
+                                    ${this.escapeHTML(trade.direction)}
+                                </span>
+
+                            </div>
+
+                            <div class="trade-status">
+                                ${this.escapeHTML(trade.status)}
+                            </div>
+
+                        </div>
+
+
+                        <div class="journal-details">
+
+                            <div>
+                                <span>Entry</span>
+                                <strong>
+                                    ${this.money(
+                                        String(trade.instrument)
+                                            .toLowerCase()
+                                            .includes("option")
+                                            ? trade.optionEntry
+                                            : trade.entry
+                                    )}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Stop</span>
+                                <strong>${this.money(trade.stop)}</strong>
+                            </div>
+
+                            <div>
+                                <span>Original Position</span>
+                                <strong>${trade.positionSize}</strong>
+                            </div>
+
+                            <div>
+                                <span>Remaining</span>
+                                <strong>${trade.remainingQuantity}</strong>
+                            </div>
+
+                            <div>
+                                <span>Realized P/L</span>
+                                <strong>
+                                    ${Number(trade.realizedProfitLoss || 0) >= 0 ? "+" : ""}
+                                    ${this.money(trade.realizedProfitLoss || 0)}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>R Multiple</span>
+                                <strong>
+                                    ${
+                                        trade.rMultiple !== null
+                                            ? Number(trade.rMultiple).toFixed(2) + "R"
+                                            : "OPEN"
+                                    }
+                                </strong>
+                            </div>
+
+                        </div>
+
+
+                        <div class="journal-risk-info">
+
+                            Risk:
+                            <strong>
+                                ${this.money(
+                                    trade.actualRisk ||
+                                    trade.riskAmount ||
+                                    trade.dollarRisk
+                                )}
+                            </strong>
+
+                            • Risk %:
+                            <strong>
+                                ${this.percent(trade.riskPercent)}
+                            </strong>
+
+                        </div>
+
+
+                        ${
+                            trade.status === "OPEN"
+                                ? `
+
+                                <div class="journal-ladder">
+
+                                    <div class="ladder-title">
+                                        📊 EXECUTION LADDER
+                                    </div>
+
+                                    <div class="ladder-status-grid">
+
+                                        <button
+                                            class="ladder-status-button ${trade.tp1Hit ? "hit" : ""}"
+                                            onclick="TradeJournal.recordExit(${trade.journalId}, 'TP1')"
+                                        >
+                                            TP1 ${trade.tp1Hit ? "✓" : ""}
+                                        </button>
+
+                                        <button
+                                            class="ladder-status-button ${trade.tp2Hit ? "hit" : ""}"
+                                            onclick="TradeJournal.recordExit(${trade.journalId}, 'TP2')"
+                                        >
+                                            TP2 ${trade.tp2Hit ? "✓" : ""}
+                                        </button>
+
+                                        <button
+                                            class="ladder-status-button ${trade.tp3Hit ? "hit" : ""}"
+                                            onclick="TradeJournal.recordExit(${trade.journalId}, 'TP3')"
+                                        >
+                                            TP3 ${trade.tp3Hit ? "✓" : ""}
+                                        </button>
+
+                                        <button
+                                            class="ladder-status-button ${trade.runnerActive ? "hit" : ""}"
+                                            onclick="TradeJournal.recordExit(${trade.journalId}, 'RUNNER')"
+                                        >
+                                            🏃 RUNNER
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                                `
+                                : ""
+                        }
+
+
+                        <div class="journal-protection">
+
+                            🛡 Protection:
+                            <strong>
+                                ${trade.protectionMode || "none"}
+                            </strong>
+
+                            ${
+                                trade.protectedStop !== null
+                                    ? `
+                                        • Protected Stop:
+                                        <strong>
+                                            ${this.money(trade.protectedStop)}
+                                        </strong>
+                                    `
+                                    : ""
+                            }
+
+                        </div>
+
+
+                        <div class="journal-exits">
+
+                            <h4>📈 EXECUTION HISTORY</h4>
+
+                            ${exitHistory}
+
+                        </div>
+
+
+                        ${
+                            trade.notes
+                                ? `
+                                    <div class="journal-notes">
+                                        📝 ${this.escapeHTML(trade.notes)}
+                                    </div>
+                                `
+                                : ""
+                        }
+
+
+                        ${
+                            trade.mistakes
+                                ? `
+                                    <div class="journal-mistakes">
+                                        ⚠️ ${this.escapeHTML(trade.mistakes)}
+                                    </div>
+                                `
+                                : ""
+                        }
+
+
+                        ${
+                            trade.lessons
+                                ? `
+                                    <div class="journal-lessons">
+                                        💡 ${this.escapeHTML(trade.lessons)}
+                                    </div>
+                                `
+                                : ""
+                        }
+
+
+                        <div class="journal-actions">
+
+                            ${
+                                trade.status === "OPEN"
+                                    ? `
+
+                                        <button onclick="TradeJournal.closeTrade(${trade.journalId})">
+                                            🔒 Close Remaining
+                                        </button>
+
+                                        <button onclick="TradeJournal.applyProtection(${trade.journalId})">
+                                            🛡 Protect
+                                        </button>
+
+                                    `
+                                    : ""
+                            }
+
+                            <button onclick="TradeJournal.addNotes(${trade.journalId})">
+                                📝 Notes
+                            </button>
+
+                            <button onclick="TradeJournal.addMistakes(${trade.journalId})">
+                                ⚠️ Mistakes
+                            </button>
+
+                            <button onclick="TradeJournal.addLessons(${trade.journalId})">
+                                💡 Lesson
+                            </button>
+
+                            <button onclick="TradeJournal.rateTrade(${trade.journalId})">
+                                ⭐ Rate
+                            </button>
+
+                            <button onclick="TradeJournal.deleteTrade(${trade.journalId})">
+                                🗑 Delete
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            })
+            .join("");
+
+    this.renderStats();
+
+}
 
 };
 
-
-/* =========================================================
-   AUTO LOAD JOURNAL
-========================================================= */
-
 document.addEventListener(
-
-    "DOMContentLoaded",
-
-    () => {
-
-        TradeJournal.renderJournal();
-
-    }
-
+"DOMContentLoaded",
+() => {
+TradeJournal.renderJournal();
+}
 );
 
-
-/* =========================================================
-   GLOBAL ACCESS
-========================================================= */
-
-window.TradeJournal =
-    TradeJournal;
+window.TradeJournal = TradeJournal;
