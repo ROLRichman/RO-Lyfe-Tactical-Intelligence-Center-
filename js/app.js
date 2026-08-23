@@ -2176,3 +2176,144 @@ document.addEventListener(
     }
 
 );
+
+/* =========================================================
+RO'LYFE ALERT POPUP
+========================================================= */
+
+.rolyfe-alert-popup {
+
+position: fixed;
+
+top: 20px;
+
+right: 20px;
+
+width: min(360px, calc(100vw - 40px));
+
+padding: 16px;
+
+border-radius: 16px;
+
+background: rgba(12, 18, 30, 0.98);
+
+border: 2px solid #38bdf8;
+
+box-shadow:
+    0 15px 45px
+    rgba(0, 0, 0, 0.45);
+
+color: white;
+
+z-index: 999999;
+
+animation:
+    roLyfeAlertSlideIn
+    0.35s ease;
+
+}
+
+.rolyfe-alert-popup.warning {
+
+border-color: #facc15;
+
+}
+
+.rolyfe-alert-popup.danger {
+
+border-color: #ef4444;
+
+}
+
+.rolyfe-alert-popup.success {
+
+border-color: #22c55e;
+
+}
+
+.rolyfe-alert-header {
+
+display: flex;
+
+justify-content: space-between;
+
+align-items: center;
+
+font-weight: 800;
+
+margin-bottom: 12px;
+
+}
+
+.rolyfe-alert-close {
+
+border: none;
+
+background: transparent;
+
+color: white;
+
+font-size: 28px;
+
+cursor: pointer;
+
+}
+
+.rolyfe-alert-symbol {
+
+font-size: 28px;
+
+font-weight: 900;
+
+margin-bottom: 8px;
+
+}
+
+.rolyfe-alert-message {
+
+line-height: 1.5;
+
+opacity: 0.9;
+
+margin-bottom: 14px;
+
+}
+
+.rolyfe-alert-chart {
+
+width: 100%;
+
+border: none;
+
+border-radius: 10px;
+
+padding: 12px;
+
+font-weight: 800;
+
+cursor: pointer;
+
+}
+
+@keyframes roLyfeAlertSlideIn {
+
+from {
+
+    opacity: 0;
+
+    transform:
+        translateX(100px);
+
+}
+
+
+to {
+
+    opacity: 1;
+
+    transform:
+        translateX(0);
+
+}
+
+   }
