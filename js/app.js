@@ -1,1239 +1,2178 @@
-/* =========================================================
+/* =====================================
    RO'LYFE TACTICAL INTELLIGENCE CENTER™
-   MAIN APPLICATION ENGINE
-   js/app.js
+   MASTER APPLICATION CONTROLLER
 
-   CENTRAL APPLICATION CONTROLLER
-
-   SYSTEMS:
-   • Market Status
-   • Option Expiration
-   • Trade Planner
-   • Risk Engine
-   • Ladder Engine
-   • Trade Journal
-   • Local Storage
-   • Dashboard Refresh
-   • System Health
-========================================================= */
+   FILE:
+   /js/app.js
+===================================== */
 
 
-const ROLyfeApp = {
+/* =====================================
+   GLOBAL APPLICATION STATE
+===================================== */
 
-    /* =====================================================
-       APPLICATION INFORMATION
-    ===================================================== */
-
-    name:
-        "RO'LYFE TACTICAL INTELLIGENCE CENTER™",
-
-    version:
-        "1.0",
-
-    initialized:
-        false,
+window.currentTradePlan = null;
 
 
-    /* =====================================================
-       INITIALIZE APPLICATION
-    ===================================================== */
+/* =====================================
+   PAGE NAVIGATION
+===================================== */
 
-    init() {
+function showSection(sectionId) {
 
-        if (this.initialized) {
+    document
+        .querySelectorAll(".dashboard-section")
+        .forEach(section => {
 
-            console.log(
-                "⚠️ RO'LYFE RTIC already initialized."
+            section.classList.remove(
+                "active-section"
             );
 
-            return;
-        }
+        });
 
 
-        console.log(
-            "🔥 INITIALIZING RO'LYFE TACTICAL INTELLIGENCE CENTER™"
+    const selected =
+        document.getElementById(sectionId);
+
+
+    if (!selected) {
+
+        console.error(
+            `Section not found: ${sectionId}`
         );
 
+        return;
 
-        this.checkSystems();
-
-
-        this.updateMarketStatus();
+    }
 
 
-        this.updateSystemStatus();
+    selected.classList.add(
+        "active-section"
+    );
 
 
-        this.bindGlobalEvents();
+    window.scrollTo({
+
+        top: 0,
+
+        behavior: "smooth"
+
+    });
+
+}
 
 
-        this.refreshDashboard();
+/* =====================================
+   MONEY FORMATTER
+===================================== */
+
+function formatMoney(value) {
+
+    const number =
+        Number(value);
 
 
-        this.initialized =
-            true;
+    if (!Number.isFinite(number)) {
+
+        return "$0.00";
+
+    }
 
 
-        console.log(
-            "🟢 RO'LYFE RTIC SYSTEM ONLINE"
-        );
+    return new Intl.NumberFormat(
 
-    },
+        "en-US",
 
+        {
 
-    /* =====================================================
-       SYSTEM HEALTH CHECK
-    ===================================================== */
+            style: "currency",
 
-    checkSystems() {
-
-        const systems = {
-
-            riskEngine:
-                !!window.ROLyfeRiskEngine,
-
-            ladderEngine:
-                !!window.ROLyfeLadderEngine,
-
-            tradePlanner:
-                !!window.TradePlanner,
-
-            tradeJournal:
-                !!window.TradeJournal
-
-        };
-
-
-        console.group(
-            "🧠 RO'LYFE RTIC SYSTEM CHECK"
-        );
-
-
-        Object.entries(systems)
-            .forEach(
-
-                ([name, online]) => {
-
-                    console.log(
-
-                        online
-                            ? `🟢 ${name} ONLINE`
-                            : `🔴 ${name} OFFLINE`
-
-                    );
-
-                }
-
-            );
-
-
-        console.groupEnd();
-
-
-        return systems;
-
-    },
-
-
-    /* =====================================================
-       DATE FORMATTER
-
-       Converts JavaScript Date into:
-
-       YYYY-MM-DD
-
-       Used by HTML date inputs.
-    ===================================================== */
-
-    formatDateForInput(date) {
-
-        if (!(date instanceof Date)) {
-
-            date =
-                new Date(date);
+            currency: "USD"
 
         }
 
+    ).format(number);
 
-        if (isNaN(date.getTime())) {
-
-            return "";
-
-        }
+}
 
 
-        const year =
-            date.getFullYear();
+/* =====================================
+   NUMBER FORMATTER
+===================================== */
+
+function formatNumber(value) {
+
+    const number =
+        Number(value);
 
 
-        const month =
-            String(
-                date.getMonth() + 1
-            ).padStart(
-                2,
-                "0"
-            );
+    if (!Number.isFinite(number)) {
+
+        return "0";
+
+    }
 
 
-        const day =
-            String(
-                date.getDate()
-            ).padStart(
-                2,
-                "0"
-            );
+    return number.toLocaleString();
+
+}
 
 
-        return `${year}-${month}-${day}`;
+/* =====================================
+   POSITION SIZING ENGINE
+===================================== */
 
-    },
+function calculatePositionSize(
+    plan,
+    riskResult
+) {
 
 
-    /* =====================================================
-       OPTION EXPIRATION ENGINE
+    const accountSize =
+        Number(plan.accountSize) || 0;
 
-       SUPPORTED TYPES:
 
-       0dte
-       friday
-       thisFriday
-       next
-       nextFriday
-       custom
-    ===================================================== */
+    const allocationPercent =
+        Math.min(
+            100,
+            Math.max(
+                1,
+                Number(
+                    document.getElementById(
+                        "capitalAllocationPercent"
+                    )?.value
+                ) || 25
+            )
+        );
 
-    setExpiration(type) {
 
-        const expirationInput =
+    const personalMax =
+        Number(
             document.getElementById(
-                "expiration"
-            );
+                "personalMaxPosition"
+            )?.value
+        ) || 0;
 
 
-        if (!expirationInput) {
-
-            console.warn(
-                "⚠️ Expiration input not found."
-            );
-
-            return null;
-
-        }
-
-
-        const today =
-            new Date();
-
-
-        /*
-           Remove time for clean date calculations.
-        */
-
-        today.setHours(
-            0,
-            0,
-            0,
-            0
+    const allocatedCapital =
+        accountSize *
+        (
+            allocationPercent / 100
         );
 
 
-        let selectedDate =
-            new Date(today);
+    let desiredPosition = 1;
+
+    let unitCost = 0;
+
+    let unitLabel = "Units";
+
+    let riskLimit = Infinity;
+
+    let maxAffordable = 0;
+
+    let maxAllocation = 0;
 
 
-        const normalizedType =
-            String(type || "")
-                .trim()
-                .toLowerCase();
+
+    /* =====================================
+       OPTION
+    ====================================== */
+
+    if (
+        plan.instrument === "Option"
+    ) {
 
 
-        /* =============================================
-           0DTE — TODAY
-        ============================================= */
+        desiredPosition =
+            Math.max(
 
-        if (
-            normalizedType === "0dte" ||
-            normalizedType === "today"
-        ) {
+                1,
 
-            selectedDate =
-                new Date(today);
-
-        }
-
-
-        /* =============================================
-           THIS FRIDAY
-
-           If today is Friday:
-           selects today.
-        ============================================= */
-
-        else if (
-
-            normalizedType === "friday" ||
-            normalizedType === "thisfriday"
-
-        ) {
-
-            const day =
-                today.getDay();
-
-
-            const daysUntilFriday =
-                (5 - day + 7) % 7;
-
-
-            selectedDate =
-                new Date(today);
-
-
-            selectedDate.setDate(
-
-                today.getDate() +
-                daysUntilFriday
-
-            );
-
-        }
-
-
-        /* =============================================
-           NEXT EXPIRATION
-
-           Next Friday.
-
-           If today is Friday:
-           selects next week's Friday.
-        ============================================= */
-
-        else if (
-
-            normalizedType === "next" ||
-            normalizedType === "nextexpiration"
-
-        ) {
-
-            const day =
-                today.getDay();
-
-
-            let daysUntilFriday =
-                (5 - day + 7) % 7;
-
-
-            if (
-                daysUntilFriday === 0
-            ) {
-
-                daysUntilFriday =
-                    7;
-
-            }
-
-
-            selectedDate =
-                new Date(today);
-
-
-            selectedDate.setDate(
-
-                today.getDate() +
-                daysUntilFriday
-
-            );
-
-        }
-
-
-        /* =============================================
-           NEXT FRIDAY
-
-           Always skips the current Friday.
-        ============================================= */
-
-        else if (
-
-            normalizedType === "nextfriday"
-
-        ) {
-
-            const day =
-                today.getDay();
-
-
-            let daysUntilFriday =
-                (5 - day + 7) % 7;
-
-
-            if (
-                daysUntilFriday === 0
-            ) {
-
-                daysUntilFriday =
-                    7;
-
-            }
-
-
-            /*
-               If next Friday calculation gives
-               this week's Friday, move forward
-               another 7 days.
-            */
-
-            selectedDate =
-                new Date(today);
-
-
-            selectedDate.setDate(
-
-                today.getDate() +
-                daysUntilFriday +
-                (
-                    day < 5
-                        ? 7
-                        : 0
+                Math.floor(
+                    Number(
+                        document.getElementById(
+                            "desiredContracts"
+                        )?.value
+                    ) || 1
                 )
 
             );
 
+
+        const premium =
+            Number(plan.optionEntry) || 0;
+
+
+        unitCost =
+            premium * 100;
+
+
+        unitLabel =
+            "Contracts";
+
+
+        maxAffordable =
+            unitCost > 0
+
+                ? Math.floor(
+                    accountSize /
+                    unitCost
+                )
+
+                : 0;
+
+
+        maxAllocation =
+            unitCost > 0
+
+                ? Math.floor(
+                    allocatedCapital /
+                    unitCost
+                )
+
+                : 0;
+
+
+        riskLimit =
+            Number(riskResult?.contracts) > 0
+
+                ? Math.floor(
+                    Number(
+                        riskResult.contracts
+                    )
+                )
+
+                : Infinity;
+
+    }
+
+
+
+    /* =====================================
+       STOCK
+    ====================================== */
+
+    else if (
+        plan.instrument === "Stock"
+    ) {
+
+
+        unitCost =
+            Number(plan.stockEntry) || 0;
+
+
+        unitLabel =
+            "Shares";
+
+
+        desiredPosition =
+            Math.max(
+
+                1,
+
+                Math.floor(
+                    Number(
+                        document.getElementById(
+                            "desiredContracts"
+                        )?.value
+                    ) || 1
+                )
+
+            );
+
+
+        maxAffordable =
+            unitCost > 0
+
+                ? Math.floor(
+                    accountSize /
+                    unitCost
+                )
+
+                : 0;
+
+
+        maxAllocation =
+            unitCost > 0
+
+                ? Math.floor(
+                    allocatedCapital /
+                    unitCost
+                )
+
+                : 0;
+
+
+        riskLimit =
+            Number(riskResult?.shares) > 0
+
+                ? Math.floor(
+                    Number(
+                        riskResult.shares
+                    )
+                )
+
+                : Infinity;
+
+    }
+
+
+
+    /* =====================================
+       CRYPTO
+    ====================================== */
+
+    else if (
+        plan.instrument === "Crypto"
+    ) {
+
+
+        unitCost =
+            Number(plan.stockEntry) || 0;
+
+
+        unitLabel =
+            "Units";
+
+
+        desiredPosition =
+            Math.max(
+
+                1,
+
+                Number(
+                    document.getElementById(
+                        "desiredContracts"
+                    )?.value
+                ) || 1
+
+            );
+
+
+        maxAffordable =
+            unitCost > 0
+
+                ? accountSize /
+                    unitCost
+
+                : 0;
+
+
+        maxAllocation =
+            unitCost > 0
+
+                ? allocatedCapital /
+                    unitCost
+
+                : 0;
+
+
+        riskLimit =
+            Number(riskResult?.quantity) > 0
+
+                ? Number(
+                    riskResult.quantity
+                )
+
+                : Infinity;
+
+    }
+
+
+
+    /* =====================================
+       FUTURES
+    ====================================== */
+
+    else if (
+        plan.instrument === "Futures"
+    ) {
+
+
+        unitCost =
+            Number(plan.stockEntry) || 0;
+
+
+        unitLabel =
+            "Contracts";
+
+
+        desiredPosition =
+            Math.max(
+
+                1,
+
+                Math.floor(
+                    Number(
+                        document.getElementById(
+                            "desiredContracts"
+                        )?.value
+                    ) || 1
+                )
+
+            );
+
+
+        maxAffordable =
+            unitCost > 0
+
+                ? Math.floor(
+                    accountSize /
+                    unitCost
+                )
+
+                : 0;
+
+
+        maxAllocation =
+            unitCost > 0
+
+                ? Math.floor(
+                    allocatedCapital /
+                    unitCost
+                )
+
+                : 0;
+
+
+        riskLimit =
+            Number(riskResult?.contracts) > 0
+
+                ? Math.floor(
+                    Number(
+                        riskResult.contracts
+                    )
+                )
+
+                : Infinity;
+
+    }
+
+
+
+    /* =====================================
+       PERSONAL LIMIT
+    ====================================== */
+
+    const personalLimit =
+        personalMax > 0
+
+            ? personalMax
+
+            : Infinity;
+
+
+
+    /* =====================================
+       LOWEST SAFE NUMBER WINS
+    ====================================== */
+
+    const recommendedPosition =
+        Math.max(
+
+            0,
+
+            Math.min(
+
+                maxAffordable,
+
+                maxAllocation,
+
+                riskLimit,
+
+                personalLimit
+
+            )
+
+        );
+
+
+
+    /* =====================================
+       POSITION COST
+    ====================================== */
+
+    const desiredPositionCost =
+        desiredPosition *
+        unitCost;
+
+
+    const recommendedPositionCost =
+        recommendedPosition *
+        unitCost;
+
+
+
+    /* =====================================
+       CASH REMAINING
+    ====================================== */
+
+    const remainingCash =
+        accountSize -
+        recommendedPositionCost;
+
+
+
+    /* =====================================
+       ACCOUNT USAGE
+    ====================================== */
+
+    const desiredAccountUsage =
+        accountSize > 0
+
+            ? (
+                desiredPositionCost /
+                accountSize
+            ) * 100
+
+            : 0;
+
+
+    const recommendedAccountUsage =
+        accountSize > 0
+
+            ? (
+                recommendedPositionCost /
+                accountSize
+            ) * 100
+
+            : 0;
+
+
+
+    /* =====================================
+       WARNINGS
+    ====================================== */
+
+    const warnings = [];
+
+
+    if (
+        desiredPosition >
+        maxAffordable
+    ) {
+
+        warnings.push({
+
+            level: "danger",
+
+            message:
+                `🚨 INSUFFICIENT CAPITAL: You requested ${formatNumber(desiredPosition)} ${unitLabel}, but your account can only afford ${formatNumber(maxAffordable)}.`
+
+        });
+
+    }
+
+
+    if (
+        desiredPosition >
+        maxAllocation
+    ) {
+
+        warnings.push({
+
+            level: "warning",
+
+            message:
+                `⚠️ CAPITAL ALLOCATION LIMIT: Your ${allocationPercent}% account allocation allows approximately ${formatNumber(maxAllocation)} ${unitLabel}.`
+
+        });
+
+    }
+
+
+    if (
+        desiredPosition >
+        riskLimit
+    ) {
+
+        warnings.push({
+
+            level: "danger",
+
+            message:
+                `🛡 RISK LIMIT EXCEEDED: The RO'Lyfe Risk Engine allows approximately ${formatNumber(riskLimit)} ${unitLabel}.`
+
+        });
+
+    }
+
+
+    if (
+        desiredPosition >
+        personalLimit
+    ) {
+
+        warnings.push({
+
+            level: "warning",
+
+            message:
+                `⚠️ PERSONAL LIMIT EXCEEDED: Your maximum position setting is ${formatNumber(personalLimit)} ${unitLabel}.`
+
+        });
+
+    }
+
+
+    if (
+        recommendedPosition <= 0
+    ) {
+
+        warnings.push({
+
+            level: "danger",
+
+            message:
+                "🚨 NO SAFE POSITION SIZE AVAILABLE. Review your account size, entry price, premium, stop, and risk settings."
+
+        });
+
+    }
+
+
+    if (
+        warnings.length === 0
+    ) {
+
+        warnings.push({
+
+            level: "safe",
+
+            message:
+                "🟢 POSITION SIZE IS WITHIN YOUR CURRENT RO'LYFE ACCOUNT, CAPITAL, RISK, AND PERSONAL LIMITS."
+
+        });
+
+    }
+
+
+
+    /* =====================================
+       STATUS
+    ====================================== */
+
+    let status =
+        "SAFE 🟢";
+
+
+    if (
+        desiredPosition >
+        recommendedPosition
+    ) {
+
+        status =
+            "LIMIT EXCEEDED ⚠️";
+
+    }
+
+
+    if (
+        desiredPosition >
+        maxAffordable
+    ) {
+
+        status =
+            "DO NOT ENTER 🚨";
+
+    }
+
+
+
+    return {
+
+        valid:
+            accountSize > 0 &&
+            unitCost > 0,
+
+        status,
+
+        instrument:
+            plan.instrument,
+
+        unitLabel,
+
+        accountSize,
+
+        allocationPercent,
+
+        allocatedCapital,
+
+        unitCost,
+
+        desiredPosition,
+
+        desiredPositionCost,
+
+        desiredAccountUsage,
+
+        maxAffordable,
+
+        maxAllocation,
+
+        riskLimit,
+
+        personalLimit,
+
+        recommendedPosition,
+
+        recommendedPositionCost,
+
+        recommendedAccountUsage,
+
+        remainingCash,
+
+        warnings
+
+    };
+
+}
+
+
+/* =====================================
+   BUILD COMPLETE TRADE PLAN
+===================================== */
+
+function buildTradePlan() {
+
+
+    if (
+        typeof TradePlanner ===
+        "undefined"
+    ) {
+
+        alert(
+            "Trade Planner engine not loaded."
+        );
+
+        return;
+
+    }
+
+
+    const plan =
+        TradePlanner.createPlan();
+
+
+    if (!plan) {
+
+        return;
+
+    }
+
+
+    const direction =
+        plan.direction === "Short"
+            ? "short"
+            : "long";
+
+
+    let riskResult =
+        null;
+
+
+    let ladderResult =
+        null;
+
+
+    let positionResult =
+        null;
+
+
+
+    /* =====================================
+       RUN RISK ENGINE
+    ====================================== */
+
+    if (
+
+        typeof ROLyfeRiskEngine ===
+        "undefined"
+
+    ) {
+
+        console.error(
+            "ROLyfeRiskEngine not loaded."
+        );
+
+    }
+
+    else {
+
+
+        if (
+            plan.instrument === "Option"
+        ) {
+
+            riskResult =
+                ROLyfeRiskEngine
+                    .calculateOption({
+
+                        accountBalance:
+                            plan.accountSize,
+
+                        riskPercent:
+                            plan.riskPercent,
+
+                        stockEntry:
+                            plan.stockEntry,
+
+                        stockStop:
+                            plan.stockStop,
+
+                        optionPremium:
+                            plan.optionEntry,
+
+                        optionDelta:
+                            0,
+
+                        direction:
+                            direction,
+
+                        maxPremiumRisk:
+                            true
+
+                    });
+
         }
 
 
-        /* =============================================
-           CUSTOM DATE
-        ============================================= */
-
         else if (
-
-            normalizedType === "custom"
-
+            plan.instrument === "Crypto"
         ) {
 
-            expirationInput.focus();
+            riskResult =
+                ROLyfeRiskEngine
+                    .calculateCrypto({
 
+                        accountBalance:
+                            plan.accountSize,
 
-            if (
+                        riskPercent:
+                            plan.riskPercent,
 
-                typeof expirationInput.showPicker ===
-                "function"
+                        entry:
+                            plan.stockEntry,
 
-            ) {
+                        stop:
+                            plan.stockStop,
 
-                expirationInput.showPicker();
+                        direction:
+                            direction
 
-            }
-
-
-            return null;
+                    });
 
         }
 
 
         else {
 
-            console.warn(
+            riskResult =
+                ROLyfeRiskEngine
+                    .calculateStock({
 
-                "⚠️ Unknown expiration type:",
+                        accountBalance:
+                            plan.accountSize,
 
-                type
+                        riskPercent:
+                            plan.riskPercent,
 
-            );
+                        entry:
+                            plan.stockEntry,
 
+                        stop:
+                            plan.stockStop,
 
-            return null;
+                        direction:
+                            direction
+
+                    });
 
         }
-
-
-        const formattedDate =
-            this.formatDateForInput(
-                selectedDate
-            );
-
-
-        expirationInput.value =
-            formattedDate;
-
-
-        /*
-           Trigger change event so any future
-           systems can react automatically.
-        */
-
-        expirationInput.dispatchEvent(
-
-            new Event(
-                "change",
-                {
-                    bubbles:
-                        true
-                }
-            )
-
-        );
 
 
         console.log(
+            "🛡 RO'LYFE Risk Engine:",
+            riskResult
+        );
 
-            "📅 RO'LYFE Expiration Selected:",
+    }
 
-            normalizedType,
 
-            formattedDate
+
+    /* =====================================
+       RUN POSITION SIZING ENGINE
+    ====================================== */
+
+    positionResult =
+        calculatePositionSize(
+
+            plan,
+
+            riskResult
 
         );
 
 
-        return formattedDate;
-
-    },
-
-
-    /* =====================================================
-       MARKET STATUS SYSTEM
-
-       CURRENT VERSION:
-       UI STATUS ONLY
-
-       FUTURE:
-       • Live SPY price
-       • Live QQQ price
-       • VIX
-       • Market open / closed
-       • Pre-market
-       • After-hours
-       • Economic events
-    ===================================================== */
-
-    updateMarketStatus() {
-
-        const spyStatus =
-            document.getElementById(
-                "spyStatus"
-            );
+    console.log(
+        "🎯 RO'LYFE Position Sizing Engine:",
+        positionResult
+    );
 
 
-        const qqqStatus =
-            document.getElementById(
-                "qqqStatus"
-            );
+
+    /* =====================================
+       RUN LADDER ENGINE
+    ====================================== */
+
+    if (
+
+        typeof ROLyfeLadderEngine ===
+        "undefined"
+
+    ) {
+
+        console.error(
+            "ROLyfeLadderEngine not loaded."
+        );
+
+    }
+
+    else if (
+
+        riskResult &&
+        riskResult.valid
+
+    ) {
 
 
-        const vixStatus =
-            document.getElementById(
-                "vixStatus"
-            );
+        if (
+            plan.instrument === "Option"
+        ) {
 
+            ladderResult =
+                ROLyfeLadderEngine
+                    .buildOptionLadder({
 
-        const marketStatus =
-            document.getElementById(
-                "marketStatus"
-            );
+                        stockEntry:
+                            plan.stockEntry,
 
+                        stockStop:
+                            plan.stockStop,
 
-        if (spyStatus) {
+                        contracts:
+                            positionResult
+                                .recommendedPosition,
 
-            spyStatus.textContent =
-                "SCANNING 📡";
+                        direction:
+                            direction
 
-        }
-
-
-        if (qqqStatus) {
-
-            qqqStatus.textContent =
-                "SCANNING 📡";
+                    });
 
         }
 
 
-        if (vixStatus) {
+        else if (
+            plan.instrument === "Crypto"
+        ) {
 
-            vixStatus.textContent =
-                "MONITORING ⚡";
+            ladderResult =
+                ROLyfeLadderEngine
+                    .buildStockLadder({
+
+                        entry:
+                            plan.stockEntry,
+
+                        stop:
+                            plan.stockStop,
+
+                        positionSize:
+                            positionResult
+                                .recommendedPosition,
+
+                        direction:
+                            direction,
+
+                        instrument:
+                            "crypto"
+
+                    });
 
         }
 
 
-        if (marketStatus) {
+        else {
 
-            marketStatus.textContent =
-                this.getMarketSession();
+            ladderResult =
+                ROLyfeLadderEngine
+                    .buildStockLadder({
+
+                        entry:
+                            plan.stockEntry,
+
+                        stop:
+                            plan.stockStop,
+
+                        positionSize:
+                            positionResult
+                                .recommendedPosition,
+
+                        direction:
+                            direction,
+
+                        instrument:
+                            plan.instrument
+                                .toLowerCase()
+
+                    });
 
         }
 
-    },
+
+        console.log(
+            "🪜 RO'LYFE Ladder Engine:",
+            ladderResult
+        );
+
+    }
 
 
-    /* =====================================================
-       MARKET SESSION ESTIMATOR
 
-       Eastern Time approximation.
+    /* =====================================
+       ATTACH ENGINE RESULTS
+    ====================================== */
 
-       Future version can be replaced
-       with real exchange data.
-    ===================================================== */
-
-    getMarketSession() {
-
-        const now =
-            new Date();
+    plan.riskEngine =
+        riskResult;
 
 
-        /*
-           Convert to New York time.
-        */
+    plan.positionSizing =
+        positionResult;
 
-        const nyTimeString =
-            now.toLocaleString(
 
-                "en-US",
+    plan.ladderEngine =
+        ladderResult;
 
-                {
-                    timeZone:
-                        "America/New_York"
+
+    window.currentTradePlan =
+        plan;
+
+
+
+    /* =====================================
+       UPDATE DISPLAYS
+    ====================================== */
+
+    updateTradePlanDisplay(
+        plan
+    );
+
+
+    updatePositionSizingDisplay(
+        plan,
+        positionResult
+    );
+
+
+    updateRiskDisplay(
+        plan,
+        riskResult
+    );
+
+
+    updateLadderDisplay(
+        plan,
+        ladderResult
+    );
+
+
+    console.log(
+        "🎯 COMPLETE RO'LYFE TRADE PLAN:",
+        plan
+    );
+
+
+    alert(
+        "RO'Lyfe Complete Trade Plan Built! 🎯"
+    );
+
+}
+
+
+/* =====================================
+   TRADE PLAN DISPLAY
+===================================== */
+
+function updateTradePlanDisplay(plan) {
+
+    const output =
+        document.getElementById(
+            "tradePlanOutput"
+        );
+
+
+    if (!output) {
+
+        return;
+
+    }
+
+
+    const targets = [];
+
+
+    if (plan.stockTarget1) {
+
+        targets.push(
+            `TP1: ${formatMoney(plan.stockTarget1)}`
+        );
+
+    }
+
+
+    if (plan.stockTarget2) {
+
+        targets.push(
+            `TP2: ${formatMoney(plan.stockTarget2)}`
+        );
+
+    }
+
+
+    if (plan.stockTarget3) {
+
+        targets.push(
+            `TP3: ${formatMoney(plan.stockTarget3)}`
+        );
+
+    }
+
+
+    const sizing =
+        plan.positionSizing;
+
+
+    output.innerHTML = `
+
+        <div class="trade-plan-card">
+
+            <h3>
+                🎯 RO'LYFE COMPLETE TRADE PLAN
+            </h3>
+
+            <p>
+                <strong>Symbol:</strong>
+                ${plan.symbol}
+            </p>
+
+            <p>
+                <strong>Instrument:</strong>
+                ${plan.instrument}
+            </p>
+
+            <p>
+                <strong>Direction:</strong>
+                ${plan.direction}
+            </p>
+
+            <hr>
+
+            <p>
+                <strong>Account Size:</strong>
+                ${formatMoney(plan.accountSize)}
+            </p>
+
+            <p>
+                <strong>Risk Budget:</strong>
+                ${formatMoney(plan.riskAmount)}
+            </p>
+
+            <p>
+                <strong>Position Status:</strong>
+                ${sizing?.status || "CALCULATING"}
+            </p>
+
+            <hr>
+
+            <p>
+                <strong>Entry:</strong>
+                ${formatMoney(plan.stockEntry)}
+            </p>
+
+            <p>
+                <strong>Stop:</strong>
+                ${formatMoney(plan.stockStop)}
+            </p>
+
+            <p>
+                <strong>Targets:</strong>
+                ${targets.length
+                    ? targets.join(" • ")
+                    : "Engine Generated"
+                }
+            </p>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================
+   POSITION SIZING DISPLAY
+===================================== */
+
+function updatePositionSizingDisplay(
+    plan,
+    sizing
+) {
+
+
+    const output =
+        document.getElementById(
+            "positionSizingOutput"
+        );
+
+
+    if (!output) {
+
+        return;
+
+    }
+
+
+    if (
+        !sizing ||
+        !sizing.valid
+    ) {
+
+        output.innerHTML = `
+
+            <div class="risk-error">
+
+                <h3>
+                    ⚠️ Position Sizing Engine
+                </h3>
+
+                <p>
+                    Unable to calculate
+                    a safe position size.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    output.innerHTML = `
+
+        <div class="position-sizing-card">
+
+            <h3>
+                🎯 RO'LYFE POSITION SIZING ENGINE
+            </h3>
+
+            <div class="risk-status">
+                ${sizing.status}
+            </div>
+
+            <div class="risk-grid">
+
+                <div class="risk-item">
+                    <span>Account Size</span>
+                    <strong>
+                        ${formatMoney(sizing.accountSize)}
+                    </strong>
+                </div>
+
+                <div class="risk-item">
+                    <span>Unit Cost</span>
+                    <strong>
+                        ${formatMoney(sizing.unitCost)}
+                    </strong>
+                </div>
+
+                <div class="risk-item">
+                    <span>Account Can Afford</span>
+                    <strong>
+                        ${formatNumber(sizing.maxAffordable)}
+                        ${sizing.unitLabel}
+                    </strong>
+                </div>
+
+                <div class="risk-item">
+                    <span>
+                        ${sizing.allocationPercent}% Capital Limit
+                    </span>
+                    <strong>
+                        ${formatNumber(sizing.maxAllocation)}
+                        ${sizing.unitLabel}
+                    </strong>
+                </div>
+
+                <div class="risk-item highlight">
+                    <span>
+                        RO'Lyfe Recommends
+                    </span>
+                    <strong>
+                        ${formatNumber(sizing.recommendedPosition)}
+                        ${sizing.unitLabel}
+                    </strong>
+                </div>
+
+                <div class="risk-item">
+                    <span>
+                        Position Cost
+                    </span>
+                    <strong>
+                        ${formatMoney(sizing.recommendedPositionCost)}
+                    </strong>
+                </div>
+
+                <div class="risk-item">
+                    <span>
+                        Cash Remaining
+                    </span>
+                    <strong>
+                        ${formatMoney(sizing.remainingCash)}
+                    </strong>
+                </div>
+
+            </div>
+
+            <div class="contract-warnings">
+
+                ${sizing.warnings
+                    .map(warning => `
+
+                        <p class="warning-${warning.level}">
+                            ${warning.message}
+                        </p>
+
+                    `)
+                    .join("")
                 }
 
-            );
+            </div>
+
+        </div>
+
+    `;
+
+}
 
 
-        const nyTime =
-            new Date(
-                nyTimeString
-            );
+/* =====================================
+   RISK ENGINE DISPLAY
+===================================== */
 
+function updateRiskDisplay(
+    plan,
+    riskResult
+) {
+
+
+    const output =
+        document.getElementById(
+            "riskEngineOutput"
+        );
+
+
+    if (!output) {
+
+        return;
+
+    }
+
+
+    if (
+        !riskResult ||
+        !riskResult.valid
+    ) {
+
+        output.innerHTML = `
+
+            <div class="risk-error">
+
+                <h3>
+                    ⚠️ Risk Engine
+                </h3>
+
+                <p>
+                    Unable to calculate
+                    position sizing.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    let positionLabel =
+        "Position Size";
+
+
+    let positionSize =
+        0;
+
+
+    if (
+        plan.instrument === "Option"
+    ) {
+
+        positionLabel =
+            "Risk-Based Contracts";
+
+        positionSize =
+            riskResult.contracts || 0;
+
+    }
+
+    else if (
+        plan.instrument === "Crypto"
+    ) {
+
+        positionLabel =
+            "Risk-Based Quantity";
+
+        positionSize =
+            riskResult.quantity || 0;
+
+    }
+
+    else {
+
+        positionLabel =
+            "Risk-Based Shares";
+
+        positionSize =
+            riskResult.shares || 0;
+
+    }
+
+
+    const maxLoss =
+        riskResult.maxLoss ||
+        riskResult.totalRisk ||
+        riskResult.riskAmount ||
+        plan.riskAmount ||
+        0;
+
+
+    output.innerHTML = `
+
+        <div class="risk-engine-card">
+
+            <h3>
+                🛡 RO'LYFE RISK ENGINE
+            </h3>
+
+            <div class="risk-grid">
+
+                <div class="risk-item">
+                    <span>Symbol</span>
+                    <strong>${plan.symbol}</strong>
+                </div>
+
+                <div class="risk-item">
+                    <span>Instrument</span>
+                    <strong>${plan.instrument}</strong>
+                </div>
+
+                <div class="risk-item">
+                    <span>Risk Budget</span>
+                    <strong>
+                        ${formatMoney(plan.riskAmount)}
+                    </strong>
+                </div>
+
+                <div class="risk-item highlight">
+                    <span>${positionLabel}</span>
+                    <strong>
+                        ${formatNumber(positionSize)}
+                    </strong>
+                </div>
+
+                <div class="risk-item danger">
+                    <span>Maximum Loss</span>
+                    <strong>
+                        ${formatMoney(maxLoss)}
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================
+   LADDER ENGINE DISPLAY
+===================================== */
+
+function updateLadderDisplay(
+    plan,
+    ladderResult
+) {
+
+
+    const output =
+        document.getElementById(
+            "ladderOutput"
+        );
+
+
+    if (!output) {
+
+        return;
+
+    }
+
+
+    if (
+        !ladderResult ||
+        !ladderResult.valid
+    ) {
+
+        output.innerHTML = `
+
+            <div class="ladder-error">
+
+                <h3>
+                    🪜 RO'LYFE TRADE LADDER
+                </h3>
+
+                <p>
+                    Ladder could not be generated.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    const targets =
+        ladderResult.targets || {};
+
+
+    const getTargetPrice =
+        target =>
+
+            target?.price ||
+            target?.stockPrice ||
+            target?.target ||
+            0;
+
+
+    const getQuantity =
+        target =>
+
+            target?.quantity ||
+            target?.contracts ||
+            0;
+
+
+    const getR =
+        target =>
+
+            target?.r || 0;
+
+
+    const tp1 =
+        targets.tp1 || {};
+
+
+    const tp2 =
+        targets.tp2 || {};
+
+
+    const tp3 =
+        targets.tp3 || {};
+
+
+    const runner =
+        targets.runner || {};
+
+
+    output.innerHTML = `
+
+        <div class="ladder-card">
+
+            <h3>
+                🪜 RO'LYFE PROFIT LADDER
+            </h3>
+
+            <p>
+                <strong>${plan.symbol}</strong>
+                • ${plan.instrument}
+                • ${plan.direction}
+            </p>
+
+            <hr>
+
+            <div class="ladder-level">
+
+                <strong>
+                    🟢 TAKE PROFIT 1
+                </strong>
+
+                <p>
+                    Target:
+                    ${formatMoney(getTargetPrice(tp1))}
+                </p>
+
+                <p>
+                    ${getR(tp1)}R
+                </p>
+
+                <p>
+                    Sell:
+                    ${getQuantity(tp1)}
+                </p>
+
+            </div>
+
+            <div class="ladder-level">
+
+                <strong>
+                    🟢 TAKE PROFIT 2
+                </strong>
+
+                <p>
+                    Target:
+                    ${formatMoney(getTargetPrice(tp2))}
+                </p>
+
+                <p>
+                    ${getR(tp2)}R
+                </p>
+
+                <p>
+                    Sell:
+                    ${getQuantity(tp2)}
+                </p>
+
+            </div>
+
+            <div class="ladder-level">
+
+                <strong>
+                    🚀 TAKE PROFIT 3
+                </strong>
+
+                <p>
+                    Target:
+                    ${formatMoney(getTargetPrice(tp3))}
+                </p>
+
+                <p>
+                    ${getR(tp3)}R
+                </p>
+
+                <p>
+                    Sell:
+                    ${getQuantity(tp3)}
+                </p>
+
+            </div>
+
+            <div class="ladder-level runner">
+
+                <strong>
+                    🏃 RUNNER
+                </strong>
+
+                <p>
+                    Target:
+                    ${formatMoney(getTargetPrice(runner))}
+                </p>
+
+                <p>
+                    ${getR(runner)}R
+                </p>
+
+                <p>
+                    Keep:
+                    ${getQuantity(runner)}
+                </p>
+
+                <p>
+                    Trail With Structure
+                </p>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================
+   ADD PLAN TO JOURNAL
+===================================== */
+
+function addPlanToJournal() {
+
+
+    if (!window.currentTradePlan) {
+
+        alert(
+            "Build a trade plan first."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        typeof TradeJournal ===
+        "undefined"
+    ) {
+
+        alert(
+            "Journal engine not loaded."
+        );
+
+        return;
+
+    }
+
+
+    TradeJournal.addTrade();
+
+
+    showSection(
+        "journal-section"
+    );
+
+}
+
+
+/* =====================================
+   INSTRUMENT UI CONTROL
+===================================== */
+
+function updateInstrumentUI() {
+
+
+    const instrument =
+        document.getElementById(
+            "instrument"
+        )?.value;
+
+
+    const optionSection =
+        document.getElementById(
+            "optionExecutionSection"
+        );
+
+
+    const expirationSection =
+        document.getElementById(
+            "expirationSection"
+        );
+
+
+    const isOption =
+        instrument === "Option";
+
+
+    if (optionSection) {
+
+        optionSection.style.display =
+            isOption
+                ? "block"
+                : "none";
+
+    }
+
+
+    if (expirationSection) {
+
+        expirationSection.style.display =
+            isOption
+                ? "block"
+                : "none";
+
+    }
+
+}
+
+
+/* =====================================
+   TRADINGVIEW MAIN CHART
+===================================== */
+
+function loadMainChart() {
+
+
+    const symbolElement =
+        document.getElementById(
+            "marketSymbol"
+        );
+
+
+    const timeframeElement =
+        document.getElementById(
+            "timeframe"
+        );
+
+
+    const chartContainer =
+        document.getElementById(
+            "tradingview_chart"
+        );
+
+
+    if (
+        !symbolElement ||
+        !timeframeElement ||
+        !chartContainer
+    ) {
+
+        return;
+
+    }
+
+
+    const symbol =
+        symbolElement.value;
+
+
+    const interval =
+        timeframeElement.value;
+
+
+    chartContainer.innerHTML =
+        "";
+
+
+    if (
+        typeof TradingView ===
+        "undefined"
+    ) {
+
+        chartContainer.innerHTML = `
+
+            <p>
+                TradingView is loading...
+            </p>
+
+        `;
+
+        return;
+
+    }
+
+
+    new TradingView.widget({
+
+        container_id:
+            "tradingview_chart",
+
+        width:
+            "100%",
+
+        height:
+            550,
+
+        symbol:
+            symbol,
+
+        interval:
+            interval,
+
+        theme:
+            "dark",
+
+        style:
+            "1",
+
+        locale:
+            "en",
+
+        toolbar_bg:
+            "#0b0f1a",
+
+        allow_symbol_change:
+            true,
+
+        studies: [
+
+            "MASimple@tv-basicstudies",
+
+            "MASimple@tv-basicstudies",
+
+            "RSI@tv-basicstudies",
+
+            "MACD@tv-basicstudies",
+
+            "Stochastic@tv-basicstudies"
+
+        ]
+
+    });
+
+}
+
+
+/* =====================================
+   DATE FORMATTER
+===================================== */
+
+function formatDateForInput(date) {
+
+
+    const year =
+        date.getFullYear();
+
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    return `${year}-${month}-${day}`;
+
+}
+
+
+/* =====================================
+   EXPIRATION SHORTCUTS
+===================================== */
+
+function setExpiration(type) {
+
+
+    const input =
+        document.getElementById(
+            "expiration"
+        );
+
+
+    if (!input) {
+
+        return;
+
+    }
+
+
+    const today =
+        new Date();
+
+
+    let selectedDate =
+        new Date(today);
+
+
+    if (
+        type === "tomorrow"
+    ) {
+
+        selectedDate.setDate(
+            selectedDate.getDate() + 1
+        );
+
+    }
+
+
+    else if (
+        type === "thisFriday"
+    ) {
 
         const day =
-            nyTime.getDay();
+            today.getDay();
 
 
-        const hours =
-            nyTime.getHours();
+        const daysUntilFriday =
+            (5 - day + 7) % 7;
 
 
-        const minutes =
-            nyTime.getMinutes();
+        selectedDate.setDate(
 
-
-        const totalMinutes =
-            (hours * 60) +
-            minutes;
-
-
-        /*
-           Weekend
-        */
-
-        if (
-
-            day === 0 ||
-            day === 6
-
-        ) {
-
-            return "MARKET CLOSED 💤";
-
-        }
-
-
-        /*
-           Pre-market
-           4:00 AM – 9:30 AM
-        */
-
-        if (
-
-            totalMinutes >= 240 &&
-            totalMinutes < 570
-
-        ) {
-
-            return "PRE-MARKET ⚡";
-
-        }
-
-
-        /*
-           Regular Market
-           9:30 AM – 4:00 PM
-        */
-
-        if (
-
-            totalMinutes >= 570 &&
-            totalMinutes < 960
-
-        ) {
-
-            return "MARKET OPEN 🟢";
-
-        }
-
-
-        /*
-           After Hours
-           4:00 PM – 8:00 PM
-        */
-
-        if (
-
-            totalMinutes >= 960 &&
-            totalMinutes < 1200
-
-        ) {
-
-            return "AFTER HOURS 🌙";
-
-        }
-
-
-        return "MARKET CLOSED 🔴";
-
-    },
-
-
-    /* =====================================================
-       SYSTEM STATUS
-    ===================================================== */
-
-    updateSystemStatus() {
-
-        const systemStatus =
-            document.getElementById(
-                "systemStatus"
-            );
-
-
-        const statusText =
-            "SYSTEM ONLINE 🟢";
-
-
-        if (systemStatus) {
-
-            systemStatus.textContent =
-                statusText;
-
-        }
-
-
-        console.log(
-
-            "🧠 RO'LYFE RTIC:",
-            statusText
-
-        );
-
-
-        return statusText;
-
-    },
-
-
-    /* =====================================================
-       REFRESH DASHBOARD
-
-       Central refresh command.
-
-       Updates:
-
-       • Journal
-       • Journal Stats
-       • Market Status
-       • System Status
-    ===================================================== */
-
-    refreshDashboard() {
-
-        console.log(
-            "🔄 Refreshing RO'LYFE Dashboard..."
-        );
-
-
-        this.updateMarketStatus();
-
-
-        this.updateSystemStatus();
-
-
-        /*
-           Trade Journal
-        */
-
-        if (
-
-            window.TradeJournal &&
-            typeof window.TradeJournal.renderJournal ===
-            "function"
-
-        ) {
-
-            window.TradeJournal.renderJournal();
-
-        }
-
-
-        /*
-           Future dashboard modules can be
-           connected here.
-        */
-
-        document.dispatchEvent(
-
-            new CustomEvent(
-
-                "roLyfeDashboardRefresh",
-
-                {
-
-                    detail: {
-
-                        timestamp:
-                            Date.now()
-
-                    }
-
-                }
-
-            )
-
-        );
-
-    },
-
-
-    /* =====================================================
-       CREATE TRADE PLAN
-
-       Central shortcut.
-    ===================================================== */
-
-    createTradePlan() {
-
-        if (
-
-            !window.TradePlanner ||
-            typeof window.TradePlanner.createPlan !==
-            "function"
-
-        ) {
-
-            console.error(
-                "🔴 Trade Planner Engine unavailable."
-            );
-
-            alert(
-                "Trade Planner Engine is not loaded."
-            );
-
-            return null;
-
-        }
-
-
-        const plan =
-            window.TradePlanner.createPlan();
-
-
-        if (plan) {
-
-            this.refreshDashboard();
-
-        }
-
-
-        return plan;
-
-    },
-
-
-    /* =====================================================
-       SAVE CURRENT TRADE PLAN
-    ===================================================== */
-
-    saveTradePlan() {
-
-        if (
-
-            !window.TradePlanner ||
-            typeof window.TradePlanner.savePlan !==
-            "function"
-
-        ) {
-
-            alert(
-                "Trade Planner Engine is not loaded."
-            );
-
-            return false;
-
-        }
-
-
-        const result =
-            window.TradePlanner.savePlan();
-
-
-        this.refreshDashboard();
-
-
-        return result;
-
-    },
-
-
-    /* =====================================================
-       ADD CURRENT PLAN TO JOURNAL
-    ===================================================== */
-
-    addTradeToJournal() {
-
-        if (
-
-            !window.TradeJournal ||
-            typeof window.TradeJournal.addTrade !==
-            "function"
-
-        ) {
-
-            alert(
-                "Trade Journal Engine is not loaded."
-            );
-
-            return false;
-
-        }
-
-
-        const result =
-            window.TradeJournal.addTrade();
-
-
-        this.refreshDashboard();
-
-
-        return result;
-
-    },
-
-
-    /* =====================================================
-       GET SAVED TRADE PLANS
-    ===================================================== */
-
-    getSavedPlans() {
-
-        if (
-
-            window.TradePlanner &&
-            typeof window.TradePlanner.loadPlans ===
-            "function"
-
-        ) {
-
-            return window.TradePlanner.loadPlans();
-
-        }
-
-
-        return [];
-
-    },
-
-
-    /* =====================================================
-       GET JOURNAL TRADES
-    ===================================================== */
-
-    getJournalTrades() {
-
-        if (
-
-            window.TradeJournal &&
-            typeof window.TradeJournal.getTrades ===
-            "function"
-
-        ) {
-
-            return window.TradeJournal.getTrades();
-
-        }
-
-
-        return [];
-
-    },
-
-
-    /* =====================================================
-       APPLICATION STORAGE SUMMARY
-    ===================================================== */
-
-    getStorageSummary() {
-
-        const plans =
-            this.getSavedPlans();
-
-
-        const trades =
-            this.getJournalTrades();
-
-
-        const openTrades =
-            trades.filter(
-
-                trade =>
-                    trade.status === "OPEN"
-
-            ).length;
-
-
-        const closedTrades =
-            trades.filter(
-
-                trade =>
-
-                    trade.status === "WIN" ||
-                    trade.status === "LOSS"
-
-            ).length;
-
-
-        return {
-
-            savedPlans:
-                plans.length,
-
-            totalTrades:
-                trades.length,
-
-            openTrades,
-
-            closedTrades,
-
-            currentPlan:
-                window.currentTradePlan ||
-                null
-
-        };
-
-    },
-
-
-    /* =====================================================
-       GLOBAL EVENTS
-    ===================================================== */
-
-    bindGlobalEvents() {
-
-        /*
-           Listen for journal updates.
-        */
-
-        document.addEventListener(
-
-            "roLyfeJournalUpdated",
-
-            () => {
-
-                console.log(
-                    "📓 Journal Updated"
-                );
-
-                this.refreshDashboard();
-
-            }
-
-        );
-
-
-        /*
-           Listen for trade plan creation.
-        */
-
-        document.addEventListener(
-
-            "roLyfeTradePlanCreated",
-
-            event => {
-
-                console.log(
-
-                    "🎯 Trade Plan Created Event:",
-
-                    event.detail
-
-                );
-
-            }
-
-        );
-
-    },
-
-
-    /* =====================================================
-       AUTO REFRESH
-
-       Refresh market/system status every minute.
-    ===================================================== */
-
-    startAutoRefresh() {
-
-        setInterval(
-
-            () => {
-
-                this.updateMarketStatus();
-
-
-                this.updateSystemStatus();
-
-            },
-
-            60000
+            today.getDate() +
+            daysUntilFriday
 
         );
 
     }
 
-};
+
+    else if (
+        type === "nextFriday"
+    ) {
+
+        const day =
+            today.getDay();
 
 
-/* =========================================================
-   DOM READY
-========================================================= */
+        let daysUntilFriday =
+            (5 - day + 7) % 7;
+
+
+        if (
+            daysUntilFriday === 0
+        ) {
+
+            daysUntilFriday =
+                7;
+
+        }
+
+        else {
+
+            daysUntilFriday +=
+                7;
+
+        }
+
+
+        selectedDate.setDate(
+
+            today.getDate() +
+            daysUntilFriday
+
+        );
+
+    }
+
+
+    input.value =
+        formatDateForInput(
+            selectedDate
+        );
+
+}
+
+
+/* =====================================
+   APPLICATION STARTUP
+===================================== */
 
 document.addEventListener(
 
     "DOMContentLoaded",
 
-    () => {
+    function () {
 
-        console.log(
-            "🔥 RO'LYFE TACTICAL INTELLIGENCE CENTER™ LOADED"
+
+        updateInstrumentUI();
+
+
+        setTimeout(
+            loadMainChart,
+            300
         );
 
 
-        ROLyfeApp.init();
+        console.log(
+            "🔥 RO'LYFE RTIC ONLINE"
+        );
 
 
-        ROLyfeApp.startAutoRefresh();
+        console.log(
+            "Risk Engine:",
+            typeof ROLyfeRiskEngine !==
+            "undefined"
+
+                ? "ONLINE 🟢"
+
+                : "OFFLINE 🔴"
+        );
 
 
-        /*
-           Make sure journal renders after
-           all engines are available.
-        */
+        console.log(
+            "Ladder Engine:",
+            typeof ROLyfeLadderEngine !==
+            "undefined"
 
-        if (
+                ? "ONLINE 🟢"
 
-            window.TradeJournal &&
-            typeof window.TradeJournal.renderJournal ===
-            "function"
+                : "OFFLINE 🔴"
+        );
 
-        ) {
 
-            window.TradeJournal.renderJournal();
+        console.log(
+            "Trade Planner:",
+            typeof TradePlanner !==
+            "undefined"
 
-        }
+                ? "ONLINE 🟢"
+
+                : "OFFLINE 🔴"
+        );
+
+
+        console.log(
+            "Trade Controller:",
+            typeof TradeController !==
+            "undefined"
+
+                ? "ONLINE 🟢"
+
+                : "OFFLINE 🔴"
+        );
+
+
+        console.log(
+            "Trade Journal:",
+            typeof TradeJournal !==
+            "undefined"
+
+                ? "ONLINE 🟢"
+
+                : "OFFLINE 🔴"
+        );
+
+
+        console.log(
+            "Watchlist:",
+            typeof ROLyfeWatchlist !==
+            "undefined"
+
+                ? "ONLINE 🟢"
+
+                : "OFFLINE 🔴"
+        );
+
+
+        console.log(
+            "🎯 Position Sizing Engine: ONLINE 🟢"
+        );
 
     }
 
-);
-
-
-/* =========================================================
-   GLOBAL APP ACCESS
-========================================================= */
-
-window.ROLyfeApp =
-    ROLyfeApp;
-
-
-/* =========================================================
-   BACKWARD COMPATIBILITY
-
-   Your existing HTML can continue using:
-
-   setExpiration()
-   updateMarketStatus()
-   updateSystemStatus()
-========================================================= */
-
-window.setExpiration =
-    function (type) {
-
-        return ROLyfeApp.setExpiration(
-            type
-        );
-
-    };
-
-
-window.formatDateForInput =
-    function (date) {
-
-        return ROLyfeApp.formatDateForInput(
-            date
-        );
-
-    };
-
-
-window.updateMarketStatus =
-    function () {
-
-        return ROLyfeApp.updateMarketStatus();
-
-    };
-
-
-window.updateSystemStatus =
-    function () {
-
-        return ROLyfeApp.updateSystemStatus();
-
-    };
-
-
-/* =========================================================
-   TRADE PLANNER SHORTCUTS
-========================================================= */
-
-window.createTradePlan =
-    function () {
-
-        return ROLyfeApp.createTradePlan();
-
-    };
-
-
-window.saveTradePlan =
-    function () {
-
-        return ROLyfeApp.saveTradePlan();
-
-    };
-
-
-window.addTradeToJournal =
-    function () {
-
-        return ROLyfeApp.addTradeToJournal();
-
-    };
-
-
-window.refreshROLyfeDashboard =
-    function () {
-
-        return ROLyfeApp.refreshDashboard();
-
-    };
-
-
-console.log(
-    "🧠 RO'LYFE APP ENGINE READY"
 );
