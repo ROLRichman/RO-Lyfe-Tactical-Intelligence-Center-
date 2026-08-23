@@ -1,401 +1,668 @@
-<!DOCTYPE html>
-<html lang="en">
-
+<!DOCTYPE html><html lang="en">
 <head>
+    <meta charset="UTF-8"><meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        RO'Lyfe Tactical Intelligence Center™
-    </title>
+<title>
+    RO'LYFE Tactical Intelligence Center™
+</title>
 
 
-    <!-- =====================================
-         MAIN STYLESHEET
-    ====================================== -->
+<style>
 
-    <link
-        rel="stylesheet"
-        href="css/styles.css"
-    >
+    /* ============================================
+       RO'LYFE TACTICAL INTELLIGENCE CENTER
+    ============================================ */
 
-
-    <!-- =====================================
-         TRADINGVIEW
-    ====================================== -->
-
-    <script
-        src="https://s3.tradingview.com/tv.js"
-    ></script>
-
-</head>
+    * {
+        box-sizing: border-box;
+    }
 
 
-<body>
+    :root {
+
+        --bg:
+            #08110c;
+
+        --panel:
+            #101b14;
+
+        --panel-2:
+            #15231a;
+
+        --border:
+            #294234;
+
+        --green:
+            #00e676;
+
+        --green-dark:
+            #00a854;
+
+        --text:
+            #f2f7f3;
+
+        --muted:
+            #9aa89f;
+
+        --danger:
+            #ff5c5c;
+
+        --gold:
+            #ffd54f;
+
+    }
 
 
-<div id="app">
+    body {
+
+        margin: 0;
+
+        background:
+            var(--bg);
+
+        color:
+            var(--text);
+
+        font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+    }
 
 
-    <!-- =====================================
-         HEADER
-    ====================================== -->
+    /* ============================================
+       HEADER
+    ============================================ */
 
-    <header class="main-header">
+    .app-header {
 
-        <div class="brand">
+        padding:
+            20px;
 
-            <h1>
-                🔥 RO'LYFE
-            </h1>
+        text-align:
+            center;
 
-            <h2>
-                Tactical Intelligence Center™
-            </h2>
+        border-bottom:
+            1px solid var(--border);
 
-        </div>
+        background:
+            #0b130e;
 
-
-        <p class="creed">
-
-            Trade Smart.
-            Stay Disciplined.
-            Protect Your Capital.
-            Trust the Process.
-
-        </p>
+    }
 
 
-        <div class="system-flow">
+    .app-header h1 {
 
-            SCAN → MAP → SIZE → STOP → RISK →
-            VEHICLE → ENTER → LADDER →
-            PROTECT → RUNNER
+        margin:
+            0;
 
-        </div>
+        font-size:
+            clamp(
+                22px,
+                5vw,
+                34px
+            );
 
-    </header>
+        color:
+            var(--green);
 
-
-
-    <!-- =====================================
-         NAVIGATION
-    ====================================== -->
-
-    <nav class="main-nav">
-
-
-        <button
-            type="button"
-            onclick="showSection('command-center')"
-        >
-            🎯 Command Center
-        </button>
+    }
 
 
-        <button
-            type="button"
-            onclick="showSection('trade-planner-section')"
-        >
-            📝 Trade Planner
-        </button>
+    .app-header p {
+
+        margin:
+            8px 0 0;
+
+        color:
+            var(--muted);
+
+        font-size:
+            14px;
+
+    }
 
 
-        <button
-            type="button"
-            onclick="showSection('position-sizing-section')"
-        >
-            🎯 Position Sizing
-        </button>
+    /* ============================================
+       MAIN
+    ============================================ */
+
+    .container {
+
+        width:
+            min(
+                1200px,
+                100%
+            );
+
+        margin:
+            auto;
+
+        padding:
+            20px;
+
+    }
 
 
-        <button
-            type="button"
-            onclick="showSection('risk-section')"
-        >
-            🛡 Risk Engine
-        </button>
+    /* ============================================
+       CARDS
+    ============================================ */
+
+    .card {
+
+        background:
+            var(--panel);
+
+        border:
+            1px solid var(--border);
+
+        border-radius:
+            14px;
+
+        padding:
+            20px;
+
+        margin-bottom:
+            20px;
+
+    }
 
 
-        <button
-            type="button"
-            onclick="showSection('ladder-section')"
-        >
-            🪜 RO'Lyfe Ladder
-        </button>
+    .card h2 {
+
+        margin-top:
+            0;
+
+        color:
+            var(--green);
+
+    }
 
 
-        <button
-            type="button"
-            onclick="showSection('journal-section')"
-        >
-            📓 Trade Journal
-        </button>
+    /* ============================================
+       FORM GRID
+    ============================================ */
+
+    .form-grid {
+
+        display:
+            grid;
+
+        grid-template-columns:
+            repeat(
+                auto-fit,
+                minmax(
+                    220px,
+                    1fr
+                )
+            );
+
+        gap:
+            15px;
+
+    }
 
 
-    </nav>
+    .full-width {
+
+        grid-column:
+            1 / -1;
+
+    }
 
 
+    /* ============================================
+       INPUTS
+    ============================================ */
 
-    <!-- =====================================
-         MARKET COMMAND CENTER
-    ====================================== -->
+    label {
 
-    <section
-        id="command-center"
-        class="dashboard-section active-section"
-    >
+        display:
+            block;
 
+        margin-bottom:
+            7px;
+
+        color:
+            var(--muted);
+
+        font-size:
+            13px;
+
+        font-weight:
+            bold;
+
+    }
+
+
+    input,
+    select {
+
+        width:
+            100%;
+
+        padding:
+            13px;
+
+        background:
+            #08110c;
+
+        border:
+            1px solid var(--border);
+
+        border-radius:
+            8px;
+
+        color:
+            white;
+
+        font-size:
+            16px;
+
+        outline:
+            none;
+
+    }
+
+
+    input:focus,
+    select:focus {
+
+        border-color:
+            var(--green);
+
+    }
+
+
+    /* ============================================
+       BUTTONS
+    ============================================ */
+
+    button {
+
+        border:
+            none;
+
+        border-radius:
+            10px;
+
+        padding:
+            15px 20px;
+
+        font-size:
+            16px;
+
+        font-weight:
+            bold;
+
+        cursor:
+            pointer;
+
+        background:
+            var(--green);
+
+        color:
+            #061009;
+
+        width:
+            100%;
+
+        margin-top:
+            15px;
+
+    }
+
+
+    button:hover {
+
+        opacity:
+            .85;
+
+    }
+
+
+    /* ============================================
+       OUTPUT
+    ============================================ */
+
+    #tradePlanOutput {
+
+        min-height:
+            100px;
+
+    }
+
+
+    .trade-plan-card {
+
+        background:
+            var(--panel);
+
+        border:
+            1px solid var(--green-dark);
+
+        border-radius:
+            14px;
+
+        padding:
+            20px;
+
+        margin-top:
+            20px;
+
+    }
+
+
+    .trade-plan-card h3 {
+
+        margin-top:
+            0;
+
+        color:
+            var(--green);
+
+        text-align:
+            center;
+
+    }
+
+
+    .plan-status {
+
+        text-align:
+            center;
+
+        padding:
+            8px;
+
+        background:
+            rgba(
+                0,
+                230,
+                118,
+                .12
+            );
+
+        color:
+            var(--green);
+
+        border-radius:
+            8px;
+
+        font-weight:
+            bold;
+
+        margin-bottom:
+            20px;
+
+    }
+
+
+    .plan-section {
+
+        background:
+            var(--panel-2);
+
+        border:
+            1px solid var(--border);
+
+        border-radius:
+            10px;
+
+        padding:
+            15px;
+
+        margin-bottom:
+            15px;
+
+    }
+
+
+    .plan-section h4 {
+
+        margin-top:
+            0;
+
+        color:
+            var(--green);
+
+    }
+
+
+    .plan-section p {
+
+        padding:
+            8px 0;
+
+        margin:
+            0;
+
+        border-bottom:
+            1px solid rgba(
+                255,
+                255,
+                255,
+                .06
+            );
+
+    }
+
+
+    .target-result {
+
+        padding:
+            15px;
+
+        margin:
+            10px 0;
+
+        background:
+            #0b130e;
+
+        border-radius:
+            8px;
+
+    }
+
+
+    .result-line {
+
+        display:
+            flex;
+
+        flex-wrap:
+            wrap;
+
+        gap:
+            10px;
+
+        margin-top:
+            10px;
+
+        color:
+            var(--muted);
+
+    }
+
+
+    .runner-box {
+
+        padding:
+            15px;
+
+        background:
+            rgba(
+                255,
+                213,
+                79,
+                .08
+            );
+
+        border:
+            1px solid rgba(
+                255,
+                213,
+                79,
+                .25
+            );
+
+        border-radius:
+            10px;
+
+        color:
+            var(--gold);
+
+        margin-top:
+            15px;
+
+    }
+
+
+    .trade-plan-actions {
+
+        display:
+            grid;
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap:
+            10px;
+
+    }
+
+
+    .trade-plan-actions button {
+
+        background:
+            var(--green-dark);
+
+        color:
+            white;
+
+    }
+
+
+    .plan-date {
+
+        color:
+            var(--muted);
+
+        text-align:
+            center;
+
+        font-size:
+            12px;
+
+    }
+
+
+    /* ============================================
+       MOBILE
+    ============================================ */
+
+    @media (
+        max-width:
+        600px
+    ) {
+
+        .container {
+
+            padding:
+                12px;
+
+        }
+
+
+        .card {
+
+            padding:
+                15px;
+
+        }
+
+
+        .trade-plan-actions {
+
+            grid-template-columns:
+                1fr;
+
+        }
+
+    }
+
+</style>
+
+</head><body><!-- ============================================
+     HEADER
+============================================= -->
+
+<header class="app-header">
+
+    <h1>
+        🎯 RO'LYFE TACTICAL INTELLIGENCE CENTER™
+    </h1>
+
+    <p>
+        PLAN → SIZE → LADDER → EXECUTE → JOURNAL → REVIEW
+    </p>
+
+</header>
+
+
+<main class="container">
+
+
+    <!-- ========================================
+         MASTER TRADE PLANNER
+    ========================================= -->
+
+    <section class="card">
 
         <h2>
-            🎯 MARKET COMMAND CENTER
+            📋 MASTER TRADE PLANNER
         </h2>
 
 
-        <!-- MARKET CONTROLS -->
+        <div class="form-grid">
 
-        <div class="market-controls">
 
+            <!-- SYMBOL -->
 
-            <label>
+            <div>
 
-                Symbol
-
-                <select id="marketSymbol">
-
-                    <option value="AMEX:SPY">
-                        SPY
-                    </option>
-
-                    <option value="NASDAQ:QQQ">
-                        QQQ
-                    </option>
-
-                    <option value="NASDAQ:AAPL">
-                        AAPL
-                    </option>
-
-                    <option value="NASDAQ:NVDA">
-                        NVDA
-                    </option>
-
-                    <option value="NASDAQ:TSLA">
-                        TSLA
-                    </option>
-
-                    <option value="NASDAQ:MSFT">
-                        MSFT
-                    </option>
-
-                    <option value="NASDAQ:AMZN">
-                        AMZN
-                    </option>
-
-                    <option value="NASDAQ:META">
-                        META
-                    </option>
-
-                </select>
-
-            </label>
-
-
-
-            <label>
-
-                Timeframe
-
-                <select id="timeframe">
-
-                    <option value="5">
-                        5 Minute
-                    </option>
-
-                    <option
-                        value="15"
-                        selected
-                    >
-                        15 Minute
-                    </option>
-
-                    <option value="60">
-                        1 Hour
-                    </option>
-
-                    <option value="240">
-                        4 Hour
-                    </option>
-
-                    <option value="D">
-                        Daily
-                    </option>
-
-                </select>
-
-            </label>
-
-
-
-            <button
-                type="button"
-                onclick="loadMainChart()"
-            >
-                📈 LOAD CHART
-            </button>
-
-
-        </div>
-
-
-
-        <!-- TRADINGVIEW CHART -->
-
-        <div class="chart-card">
-
-            <div id="tradingview_chart"></div>
-
-        </div>
-
-
-
-        <!-- MARKET STATUS -->
-
-        <div class="market-grid">
-
-
-            <div class="market-card">
-
-                <span>SPY</span>
-
-                <strong>
-                    MARKET TREND
-                </strong>
-
-                <div id="spyStatus">
-                    ANALYZING
-                </div>
-
-            </div>
-
-
-
-            <div class="market-card">
-
-                <span>QQQ</span>
-
-                <strong>
-                    TECH TREND
-                </strong>
-
-                <div id="qqqStatus">
-                    ANALYZING
-                </div>
-
-            </div>
-
-
-
-            <div class="market-card">
-
-                <span>VIX</span>
-
-                <strong>
-                    VOLATILITY
-                </strong>
-
-                <div id="vixStatus">
-                    ANALYZING
-                </div>
-
-            </div>
-
-
-
-            <div class="market-card">
-
-                <span>RTIC</span>
-
-                <strong>
-                    SYSTEM STATUS
-                </strong>
-
-                <div id="systemStatus">
-                    ONLINE 🟢
-                </div>
-
-            </div>
-
-
-        </div>
-
-
-    </section>
-
-
-
-    <!-- =====================================
-         TRADE PLANNER
-    ====================================== -->
-
-    <section
-        id="trade-planner-section"
-        class="dashboard-section"
-    >
-
-
-        <h2>
-            📝 RO'LYFE TRADE PLANNER™
-        </h2>
-
-
-
-        <!-- TRADE SETUP -->
-
-        <h3 class="planner-title">
-            🎯 TRADE SETUP
-        </h3>
-
-
-        <div class="trade-form">
-
-
-            <label>
-
-                Symbol
+                <label>
+                    Symbol
+                </label>
 
                 <input
                     id="symbol"
                     type="text"
-                    value="SPY"
-                    placeholder="Example: AAPL"
+                    placeholder="Example: NVDA"
                 >
 
-            </label>
+            </div>
 
 
+            <!-- INSTRUMENT -->
 
-            <label>
+            <div>
 
-                Instrument
+                <label>
+                    Instrument
+                </label>
 
-                <select
-                    id="instrument"
-                    onchange="updateInstrumentUI()"
-                >
+                <select id="instrument">
 
                     <option value="Stock">
                         Stock
                     </option>
 
-                    <option
-                        value="Option"
-                        selected
-                    >
+                    <option value="Option">
                         Option
                     </option>
 
@@ -403,19 +670,18 @@
                         Crypto
                     </option>
 
-                    <option value="Futures">
-                        Futures
-                    </option>
-
                 </select>
 
-            </label>
+            </div>
 
 
+            <!-- DIRECTION -->
 
-            <label>
+            <div>
 
-                Direction
+                <label>
+                    Direction
+                </label>
 
                 <select id="direction">
 
@@ -429,373 +695,344 @@
 
                 </select>
 
-            </label>
+            </div>
 
 
+            <!-- ACCOUNT SIZE -->
 
-            <label>
+            <div>
 
-                Account Size
+                <label>
+                    Account Size
+                </label>
 
                 <input
                     id="accountSize"
                     type="number"
-                    min="0"
                     step="0.01"
-                    value="1000"
+                    placeholder="10000"
                 >
 
-            </label>
+            </div>
 
 
+            <!-- RISK PERCENT -->
 
-            <label>
+            <div>
 
-                Risk %
+                <label>
+                    Risk Percentage
+                </label>
 
                 <input
                     id="riskPercent"
                     type="number"
-                    min="0"
-                    max="100"
-                    step="0.1"
-                    value="1"
+                    step="0.01"
+                    placeholder="1"
                 >
 
-            </label>
+            </div>
 
 
-        </div>
+            <!-- PROBABILITY -->
 
+            <div>
 
-
-        <!-- CAPITAL CONTROL -->
-
-        <h3 class="planner-title">
-            💰 CAPITAL CONTROL
-        </h3>
-
-
-        <div class="trade-form">
-
-
-            <label>
-
-                Maximum Account Allocation %
-
-                <input
-                    id="capitalAllocationPercent"
-                    type="number"
-                    min="1"
-                    max="100"
-                    step="1"
-                    value="25"
-                >
-
-            </label>
-
-
-
-            <label>
-
-                Personal Maximum Position
-
-                <input
-                    id="personalMaxPosition"
-                    type="number"
-                    min="1"
-                    step="1"
-                    placeholder="Example: 100"
-                >
-
-            </label>
-
-
-        </div>
-
-
-
-        <p class="input-help">
-
-            Set your personal limits.
-            RO'Lyfe will warn you if your desired
-            position exceeds your account, capital,
-            or risk limits.
-
-        </p>
-
-
-
-        <!-- TRADE PROBABILITY -->
-
-        <h3 class="planner-title">
-            🧠 TRADE PROBABILITY
-        </h3>
-
-
-        <div class="trade-form">
-
-
-            <label>
-
-                Probability % (Optional)
+                <label>
+                    Trade Probability %
+                </label>
 
                 <input
                     id="probability"
                     type="number"
                     min="0"
                     max="100"
-                    step="0.1"
-                    placeholder="Example: 65"
+                    step="0.01"
+                    placeholder="70"
                 >
 
-            </label>
+            </div>
 
 
+            <!-- IMPLIED VOLATILITY -->
 
-            <label>
+            <div>
 
-                Implied Volatility % (Optional)
+                <label>
+                    Implied Volatility %
+                </label>
 
                 <input
                     id="impliedVolatility"
                     type="number"
-                    min="0"
-                    step="0.1"
-                    placeholder="Example: 32.5"
+                    step="0.01"
+                    placeholder="35"
                 >
 
-            </label>
+            </div>
 
 
-        </div>
+            <!-- ====================================
+                 STOCK MAP
+            ===================================== -->
+
+            <div class="full-width">
+
+                <h3>
+                    📈 STOCK / ASSET MAP
+                </h3>
+
+            </div>
 
 
+            <!-- ENTRY -->
 
-        <!-- STOCK MAP -->
+            <div>
 
-        <h3 class="planner-title">
-            📈 STOCK MAP
-        </h3>
-
-
-        <div class="trade-form stock-map">
-
-
-            <label>
-
-                Stock Entry
+                <label>
+                    Entry Price
+                </label>
 
                 <input
                     id="entry"
                     type="number"
                     step="0.01"
-                    value="100"
+                    placeholder="150"
                 >
 
-            </label>
+            </div>
 
 
+            <!-- STOP -->
 
-            <label>
+            <div>
 
-                Stock Stop
+                <label>
+                    Stop Price
+                </label>
 
                 <input
                     id="stop"
                     type="number"
                     step="0.01"
-                    value="98"
+                    placeholder="145"
                 >
 
-            </label>
+            </div>
 
 
+            <!-- TARGET 1 -->
 
-            <label>
+            <div>
 
-                Stock Target 1
+                <label>
+                    Manual Target 1 (Optional)
+                </label>
 
                 <input
                     id="target1"
                     type="number"
                     step="0.01"
-                    placeholder="Example: 102"
+                    placeholder="Auto 1R if blank"
                 >
 
-            </label>
+            </div>
 
 
+            <!-- TARGET 2 -->
 
-            <label>
+            <div>
 
-                Stock Target 2
+                <label>
+                    Manual Target 2 (Optional)
+                </label>
 
                 <input
                     id="target2"
                     type="number"
                     step="0.01"
-                    placeholder="Example: 104"
+                    placeholder="Auto 2R if blank"
                 >
 
-            </label>
+            </div>
 
 
+            <!-- TARGET 3 -->
 
-            <label>
+            <div>
 
-                Stock Target 3
+                <label>
+                    Manual Target 3 (Optional)
+                </label>
 
                 <input
                     id="target3"
                     type="number"
                     step="0.01"
-                    placeholder="Example: 106"
+                    placeholder="Auto 3R if blank"
                 >
 
-            </label>
+            </div>
 
 
-        </div>
+            <!-- ====================================
+                 OPTION EXECUTION
+            ===================================== -->
+
+            <div class="full-width">
+
+                <h3>
+                    🎯 OPTION EXECUTION
+                </h3>
+
+            </div>
 
 
+            <!-- OPTION TYPE -->
 
-        <!-- OPTION EXECUTION -->
-
-        <div id="optionExecutionSection">
-
-
-            <h3 class="planner-title">
-                🎯 OPTION EXECUTION
-            </h3>
-
-
-            <div class="trade-form option-execution">
-
+            <div>
 
                 <label>
-
-                    Call / Put
-
-                    <select id="optionType">
-
-                        <option value="Call">
-                            📈 Call
-                        </option>
-
-                        <option value="Put">
-                            📉 Put
-                        </option>
-
-                    </select>
-
+                    Option Type
                 </label>
 
+                <select id="optionType">
 
+                    <option value="Call">
+                        Call
+                    </option>
+
+                    <option value="Put">
+                        Put
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- STRIKE -->
+
+            <div>
 
                 <label>
-
-                    Option Strike
-
-                    <input
-                        id="strike"
-                        type="number"
-                        step="0.01"
-                        placeholder="Example: 100"
-                    >
-
+                    Strike Price
                 </label>
 
+                <input
+                    id="strike"
+                    type="number"
+                    step="0.01"
+                    placeholder="150"
+                >
 
+            </div>
+
+
+            <!-- EXPIRATION -->
+
+            <div>
 
                 <label>
-
-                    Expiration Date
-
-                    <input
-                        id="expiration"
-                        type="date"
-                    >
-
+                    Expiration
                 </label>
 
+                <input
+                    id="expiration"
+                    type="date"
+                >
 
+            </div>
+
+
+            <!-- OPTION ENTRY -->
+
+            <div>
 
                 <label>
-
                     Option Premium Entry
-
-                    <input
-                        id="optionEntry"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value="1"
-                    >
-
                 </label>
 
+                <input
+                    id="optionEntry"
+                    type="number"
+                    step="0.01"
+                    placeholder="2.53"
+                >
 
+            </div>
+
+
+            <!-- OPTION DELTA -->
+
+            <div>
 
                 <label>
-
-                    Desired Contracts
-
-                    <input
-                        id="desiredContracts"
-                        type="number"
-                        min="1"
-                        step="1"
-                        value="1"
-                    >
-
+                    Option Delta
                 </label>
 
+                <input
+                    id="optionDelta"
+                    type="number"
+                    step="0.01"
+                    min="-1"
+                    max="1"
+                    placeholder="0.50"
+                >
 
+            </div>
+
+
+            <!-- OPTION TARGET 1 -->
+
+            <div>
 
                 <label>
-
-                    Take Profit 1
-
-                    <input
-                        id="optionTarget1"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                    >
-
+                    Option Target 1
                 </label>
 
+                <input
+                    id="optionTarget1"
+                    type="number"
+                    step="0.01"
+                    placeholder="3.00"
+                >
 
+            </div>
+
+
+            <!-- OPTION TARGET 2 -->
+
+            <div>
 
                 <label>
-
-                    Take Profit 2
-
-                    <input
-                        id="optionTarget2"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                    >
-
+                    Option Target 2
                 </label>
 
+                <input
+                    id="optionTarget2"
+                    type="number"
+                    step="0.01"
+                    placeholder="3.50"
+                >
 
+            </div>
+
+
+            <!-- OPTION TARGET 3 -->
+
+            <div>
 
                 <label>
-
-                    Take Profit 3
-
-                    <input
-                        id="optionTarget3"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                    >
-
+                    Option Target 3
                 </label>
 
+                <input
+                    id="optionTarget3"
+                    type="number"
+                    step="0.01"
+                    placeholder="4.00"
+                >
 
             </div>
 
@@ -803,92 +1040,16 @@
         </div>
 
 
-
-        <!-- EXPIRATION SHORTCUTS -->
-
-        <div id="expirationSection">
-
-
-            <h3 class="planner-title">
-                ⚡ EXPIRATION SHORTCUTS
-            </h3>
-
-
-            <div class="expiration-buttons">
-
-
-                <button
-                    type="button"
-                    onclick="setExpiration('0dte')"
-                >
-                    ⚡ 0DTE
-                </button>
-
-
-                <button
-                    type="button"
-                    onclick="setExpiration('tomorrow')"
-                >
-                    🔥 TOMORROW
-                </button>
-
-
-                <button
-                    type="button"
-                    onclick="setExpiration('thisFriday')"
-                >
-                    📅 THIS FRIDAY
-                </button>
-
-
-                <button
-                    type="button"
-                    onclick="setExpiration('nextFriday')"
-                >
-                    📆 NEXT FRIDAY
-                </button>
-
-
-            </div>
-
-
-        </div>
-
-
-
-        <!-- BUILD PLAN -->
+        <!-- ========================================
+             CREATE BUTTON
+        ========================================= -->
 
         <button
             type="button"
-            class="primary-button"
-            onclick="buildTradePlan()"
+            onclick="createTradePlan()"
         >
 
-            🚀 BUILD COMPLETE TRADE PLAN
-
-        </button>
-
-
-
-        <div
-            id="tradePlanOutput"
-            class="output-card"
-        >
-
-            Configure your trade and build
-            your RO'Lyfe plan.
-
-        </div>
-
-
-
-        <button
-            type="button"
-            class="secondary-button"
-            onclick="addPlanToJournal()"
-        >
-
-            📓 ADD TO JOURNAL
+            🎯 CREATE MASTER TRADE PLAN
 
         </button>
 
@@ -896,194 +1057,122 @@
     </section>
 
 
-
-    <!-- POSITION SIZING ENGINE -->
+    <!-- ============================================
+         OUTPUT
+    ============================================= -->
 
     <section
-        id="position-sizing-section"
-        class="dashboard-section"
+        id="tradePlanOutput"
     >
 
-
-        <h2>
-            🎯 RO'LYFE POSITION SIZING ENGINE™
-        </h2>
-
-
-        <p class="section-description">
-
-            Your position size is controlled by
-            capital, account allocation, risk,
-            and your personal trading limits.
-
-        </p>
-
-
-        <div
-            id="positionSizingOutput"
-            class="output-card"
-        >
-
-            Build a trade plan to calculate
-            your recommended position size.
-
-        </div>
-
+        <!-- TRADE PLAN APPEARS HERE -->
 
     </section>
 
 
-
-    <!-- RISK ENGINE -->
-
-    <section
-        id="risk-section"
-        class="dashboard-section"
-    >
+</main>
 
 
-        <h2>
-            🛡 RO'LYFE RISK ENGINE™
-        </h2>
-
-
-        <div
-            id="riskEngineOutput"
-            class="output-card"
-        >
-
-            Build a trade plan to calculate risk.
-
-        </div>
-
-
-    </section>
-
-
-
-    <!-- RO'LYFE LADDER -->
-
-    <section
-        id="ladder-section"
-        class="dashboard-section"
-    >
-
-
-        <h2>
-            🪜 RO'LYFE TRADE LADDER™
-        </h2>
-
-
-        <div
-            id="ladderOutput"
-            class="output-card"
-        >
-
-            Build a trade plan to generate
-            your ladder.
-
-        </div>
-
-
-    </section>
-
-
-
-    <!-- TRADE JOURNAL -->
-
-    <section
-        id="journal-section"
-        class="dashboard-section"
-    >
-
-
-        <h2>
-            📓 RO'LYFE TRADE JOURNAL™
-        </h2>
-
-
-        <div id="journalStats"></div>
-
-
-        <button
-            type="button"
-            class="danger-button"
-            onclick="TradeJournal.clearJournal()"
-        >
-
-            🗑 CLEAR JOURNAL
-
-        </button>
-
-
-        <div id="tradeJournal"></div>
-
-
-    </section>
-
-
-
-    <!-- FOOTER -->
-
-    <footer>
-
-
-        <h3>
-            RO'Lyfe Tactical Intelligence Center™
-        </h3>
-
-
-        <p>
-            Trade the Stock.
-            Size the Position.
-            Execute with Discipline.
-        </p>
-
-
-        <p class="footer-creed">
-
-            Trade Smart • Stay Disciplined •
-            Protect Your Capital • Trust the Process
-
-        </p>
-
-
-        <small>
-
-            Educational and informational use only.
-            Not financial advice.
-            Markets involve substantial risk.
-
-        </small>
-
-
-    </footer>
-
-
-</div>
-
-
-
-<!-- =====================================
-     JAVASCRIPT ENGINES
-     ORDER MATTERS
-===================================== -->
+<!-- ================================================
+     LOAD ENGINES
+     
+     ORDER IS IMPORTANT!
+     
+     1. Risk Engine
+     2. Ladder Engine
+     3. Journal
+     4. Trade Planner
+================================================= -->
 
 <script src="js/risk-engine.js"></script>
 
 <script src="js/ladder-engine.js"></script>
 
+<script src="js/trade-journal.js"></script>
+
 <script src="js/trade-planner.js"></script>
 
-<script src="js/trade-controller.js"></script>
 
-<script src="js/journal.js"></script>
+<!-- ================================================
+     SAFE BUTTON FUNCTION
+================================================= -->
 
-<script src="js/watchlist.js"></script>
+<script>
 
-<script src="js/app.js"></script>
+    function createTradePlan() {
 
+        console.log(
+            "CREATE PLAN BUTTON CLICKED"
+        );
+
+
+        if (
+            !window.TradePlanner
+        ) {
+
+            console.error(
+                "TradePlanner is not loaded."
+            );
+
+
+            alert(
+                "ERROR: Trade Planner is not loaded. Check the Console."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            typeof
+            window.TradePlanner.createPlan
+            !==
+            "function"
+        ) {
+
+            console.error(
+                "TradePlanner.createPlan() is missing."
+            );
+
+
+            alert(
+                "ERROR: createPlan() function is missing."
+            );
+
+            return;
+
+        }
+
+
+        window.TradePlanner.createPlan();
+
+    }
+
+
+    window.addEventListener(
+
+        "error",
+
+        function(event) {
+
+            console.error(
+                "RO'LYFE SYSTEM ERROR:",
+                event.message,
+                event.filename,
+                event.lineno
+            );
+
+        }
+
+    );
+
+
+    console.log(
+        "🔥 RO'LYFE TACTICAL INTELLIGENCE CENTER ONLINE"
+    );
+
+</script>
 
 </body>
-
     </html>
