@@ -1,36 +1,35 @@
 /* =========================================================
 RO'LYFE TACTICAL INTELLIGENCE CENTER™
-MASTER TRADE PLANNER
+TRADE PLANNER ENGINE
+
+FILE:
+/js/trade-planner.js
 
 PURPOSE:
 
-THE INTELLIGENCE BRIDGE BETWEEN:
-
-• User Trade Inputs
-• RO'LYFE Risk Engine
-• RO'LYFE Ladder Engine
-• Trade Controller
-• Trade Journal
+Collect trade inputs and create ONE standardized trade plan.
 
 FLOW:
 
-SYMBOL
+INPUTS
 ↓
-ENTRY + STOP
+VALIDATE
 ↓
-RISK ENGINE
+CALCULATE RISK BUDGET
 ↓
-CAPITAL AFFORDABILITY
+CALCULATE OPTIONAL MANUAL TARGETS
 ↓
-USER DESIRED POSITION
+RETURN STANDARDIZED PLAN
 ↓
-POSITION LIMIT CHECK
+app.js
 ↓
-LADDER ENGINE
+Risk Engine
 ↓
-MASTER TRADE PLAN
+Position Sizing
 ↓
-JOURNAL
+Ladder Engine
+↓
+Journal
 
 ========================================================= */
 
@@ -42,349 +41,177 @@ const TradePlanner = {
 
 config: {
 
-    defaultInstrument:
-        "stock",
+    defaultRiskPercent: 2,
 
-    defaultDirection:
-        "long",
-
-    defaultRiskPercent:
-        2,
-
-    defaultOptionDelta:
-        0,
-
-    defaultCapitalAllocationPercent:
-        100,
-
-    defaultReserveCashPercent:
-        0,
-
-    autoUseRecommendedSize:
-        true
+    maxRiskPercent: 100
 
 },
 
 
 /* =====================================================
-   STATE
+   HELPERS
 ===================================================== */
 
-state: {
+getElementValue(id, fallback = "") {
 
-    activePlan:
-        null,
+    const element =
+        document.getElementById(id);
 
-    lastPlan:
-        null,
+    if (!element) {
+        return fallback;
+    }
 
-    planHistory:
-        []
+    return element.value;
 
 },
 
 
-/* =====================================================
-   SAFE NUMBER
-===================================================== */
+getNumber(id, fallback = 0) {
 
-safeNumber(
-    value,
-    fallback = 0
-) {
+    const value =
+        Number(
+            this.getElementValue(
+                id,
+                fallback
+            )
+        );
 
-    const number =
-        Number(value);
-
-    return Number.isFinite(number)
-        ? number
-        : fallback;
+    return Number.isFinite(value)
+        ? value
+        : Number(fallback) || 0;
 
 },
 
 
-/* =====================================================
-   NORMALIZE INSTRUMENT
-===================================================== */
+getText(id, fallback = "") {
 
-normalizeInstrument(
-    instrument = "stock"
-) {
+    return String(
+        this.getElementValue(
+            id,
+            fallback
+        ) || fallback
+    ).trim();
 
-    instrument =
+},
+
+
+normalizeInstrument(instrument = "Stock") {
+
+    const value =
         String(instrument)
             .trim()
             .toLowerCase();
 
-
-    if (
-        instrument.includes("crypto")
-    ) {
-
-        return "crypto";
-
+    if (value === "option" || value === "options") {
+        return "Option";
     }
 
-
-    if (
-        instrument.includes("spread")
-    ) {
-
-        return "option_spread";
-
+    if (value === "crypto" || value === "cryptocurrency") {
+        return "Crypto";
     }
 
-
-    if (
-        instrument.includes("option")
-    ) {
-
-        return "option";
-
+    if (value === "future" || value === "futures") {
+        return "Futures";
     }
 
-
-    return "stock";
+    return "Stock";
 
 },
 
 
-/* =====================================================
-   NORMALIZE DIRECTION
-===================================================== */
-
-normalizeDirection(
-    direction = "long"
-) {
+normalizeDirection(direction = "Long") {
 
     return String(direction)
-        .toLowerCase()
-        .trim() === "short"
+        .trim()
+        .toLowerCase() === "short"
 
-            ? "short"
+        ? "Short"
 
-            : "long";
-
-},
-
-
-/* =====================================================
-   GENERATE TRADE ID
-===================================================== */
-
-generateTradeId(
-    symbol = "TRADE"
-) {
-
-    const timestamp =
-        Date.now();
-
-
-    const random =
-        Math.random()
-            .toString(36)
-            .slice(2, 7)
-            .toUpperCase();
-
-
-    return `ROLYFE-${symbol}-${timestamp}-${random}`;
+        : "Long";
 
 },
 
 
 /* =====================================================
-   READ INPUT
+   FIND INPUT VALUE
 
-   Supports:
+   Supports multiple possible IDs.
 
-   <input id="accountBalance">
-
-   OR:
-
-   <input data-field="accountBalance">
-
+   This makes the planner more flexible while we
+   finish connecting the dashboard.
 ===================================================== */
 
-getInputValue(
-    ids = [],
-    fallback = null
-) {
+getFirstValue(ids = [], fallback = "") {
 
-    if (
-        !Array.isArray(ids)
-    ) {
-
-        ids =
-            [ids];
-
-    }
-
-
-    for (
-        const id of ids
-    ) {
+    for (const id of ids) {
 
         const element =
-
-            document.getElementById(id) ||
-
-            document.querySelector(
-                `[data-field="${id}"]`
-            );
-
+            document.getElementById(id);
 
         if (!element) {
             continue;
         }
 
+        const value =
+            String(
+                element.value ?? ""
+            ).trim();
 
-        if (
-            element.type === "checkbox"
-        ) {
-
-            return element.checked;
-
-        }
-
-
-        if (
-            element.type === "radio"
-        ) {
-
-            const selected =
-                document.querySelector(
-                    `input[name="${element.name}"]:checked`
-                );
-
-
-            if (selected) {
-
-                return selected.value;
-
-            }
-
-        }
-
-
-        if (
-            element.value !== undefined
-        ) {
-
-            return element.value;
-
+        if (value !== "") {
+            return value;
         }
 
     }
-
 
     return fallback;
 
 },
 
 
-/* =====================================================
-   READ CHECKBOX
-===================================================== */
+getFirstNumber(ids = [], fallback = 0) {
 
-getCheckboxValue(
-    ids = [],
-    fallback = false
-) {
+    const value =
+        Number(
+            this.getFirstValue(
+                ids,
+                fallback
+            )
+        );
 
-    if (
-        !Array.isArray(ids)
-    ) {
-
-        ids =
-            [ids];
-
-    }
-
-
-    for (
-        const id of ids
-    ) {
-
-        const element =
-
-            document.getElementById(id) ||
-
-            document.querySelector(
-                `[data-field="${id}"]`
-            );
-
-
-        if (
-            element &&
-            element.type === "checkbox"
-        ) {
-
-            return element.checked;
-
-        }
-
-    }
-
-
-    return fallback;
+    return Number.isFinite(value)
+        ? value
+        : Number(fallback) || 0;
 
 },
 
 
 /* =====================================================
-   COLLECT TRADE INPUTS
-
-   THIS SUPPORTS MULTIPLE ID NAMES
-   SO IT IS MORE FLEXIBLE WITH YOUR UI.
-
+   READ ALL TRADE INPUTS
 ===================================================== */
 
-collectInputs() {
-
-    const currentSymbol =
-
-        window.TradeController?.state
-            ?.currentSymbol ||
-
-        window.activeTradePlan
-            ?.symbol ||
-
-        null;
-
+getInputs() {
 
     const symbol =
-        String(
-
-            this.getInputValue(
-
-                [
-                    "symbol",
-                    "tradeSymbol",
-                    "ticker"
-                ],
-
-                currentSymbol || ""
-
-            )
-
+        this.getFirstValue(
+            [
+                "symbol",
+                "tradeSymbol",
+                "marketSymbol"
+            ],
+            ""
         )
-        .trim()
         .toUpperCase();
 
 
     const instrument =
         this.normalizeInstrument(
 
-            this.getInputValue(
-
+            this.getFirstValue(
                 [
                     "instrument",
-                    "tradeInstrument",
-                    "instrumentType"
+                    "tradeInstrument"
                 ],
-
-                this.config.defaultInstrument
-
+                "Stock"
             )
 
         );
@@ -393,226 +220,152 @@ collectInputs() {
     const direction =
         this.normalizeDirection(
 
-            this.getInputValue(
-
+            this.getFirstValue(
                 [
                     "direction",
                     "tradeDirection"
                 ],
-
-                this.config.defaultDirection
-
+                "Long"
             )
 
         );
 
 
-    const accountBalance =
-        this.safeNumber(
-
-            this.getInputValue(
-
-                [
-                    "accountBalance",
-                    "accountSize",
-                    "balance"
-                ],
-
-                0
-
-            )
-
+    const accountSize =
+        this.getFirstNumber(
+            [
+                "accountSize",
+                "accountBalance"
+            ],
+            0
         );
 
 
     const riskPercent =
-        this.safeNumber(
-
-            this.getInputValue(
-
-                [
-                    "riskPercent",
-                    "risk",
-                    "riskPercentage"
-                ],
-
-                this.config.defaultRiskPercent
-
-            )
-
+        this.getFirstNumber(
+            [
+                "riskPercent",
+                "riskPercentage"
+            ],
+            this.config.defaultRiskPercent
         );
 
 
-    const entry =
-        this.safeNumber(
-
-            this.getInputValue(
-
-                [
-                    "entry",
-                    "entryPrice",
-                    "stockEntry"
-                ],
-
-                0
-
-            )
-
+    const stockEntry =
+        this.getFirstNumber(
+            [
+                "stockEntry",
+                "entry",
+                "entryPrice"
+            ],
+            0
         );
 
 
-    const stop =
-        this.safeNumber(
-
-            this.getInputValue(
-
-                [
-                    "stop",
-                    "stopPrice",
-                    "stockStop"
-                ],
-
-                0
-
-            )
-
+    const stockStop =
+        this.getFirstNumber(
+            [
+                "stockStop",
+                "stop",
+                "stopPrice"
+            ],
+            0
         );
 
 
-    const target =
-        this.safeNumber(
-
-            this.getInputValue(
-
-                [
-                    "target",
-                    "targetPrice",
-                    "stockTarget"
-                ],
-
-                0
-
-            )
-
-        );
-
-
-    const optionPremium =
-        this.safeNumber(
-
-            this.getInputValue(
-
-                [
-                    "optionPremium",
-                    "premium",
-                    "optionEntry"
-                ],
-
-                0
-
-            )
-
+    const optionEntry =
+        this.getFirstNumber(
+            [
+                "optionEntry",
+                "optionPremium",
+                "premium"
+            ],
+            0
         );
 
 
     const optionDelta =
-        Math.abs(
-
-            this.safeNumber(
-
-                this.getInputValue(
-
-                    [
-                        "optionDelta",
-                        "delta"
-                    ],
-
-                    this.config.defaultOptionDelta
-
-                )
-
-            )
-
-        );
-
-
-    const desiredContracts =
-        Math.max(
-
-            0,
-
-            Math.floor(
-
-                this.safeNumber(
-
-                    this.getInputValue(
-
-                        [
-                            "desiredContracts",
-                            "contracts",
-                            "positionSize",
-                            "quantity"
-                        ],
-
-                        0
-
-                    )
-
-                )
-
-            )
-
-        );
-
-
-    const capitalAllocationPercent =
-        this.safeNumber(
-
-            this.getInputValue(
-
-                [
-                    "capitalAllocationPercent",
-                    "capitalAllocation",
-                    "allocationPercent"
-                ],
-
-                this.config
-                    .defaultCapitalAllocationPercent
-
-            )
-
-        );
-
-
-    const reserveCashPercent =
-        this.safeNumber(
-
-            this.getInputValue(
-
-                [
-                    "reserveCashPercent",
-                    "reservePercent",
-                    "cashReserve"
-                ],
-
-                this.config
-                    .defaultReserveCashPercent
-
-            )
-
-        );
-
-
-    const maxPremiumRisk =
-        this.getCheckboxValue(
-
+        this.getFirstNumber(
             [
-                "maxPremiumRisk",
-                "premiumRisk"
+                "optionDelta",
+                "delta"
             ],
+            0
+        );
 
-            false
 
+    const desiredPosition =
+        this.getFirstNumber(
+            [
+                "desiredContracts",
+                "desiredPosition",
+                "positionSize"
+            ],
+            1
+        );
+
+
+    const stockTarget1 =
+        this.getFirstNumber(
+            [
+                "stockTarget1",
+                "target1",
+                "tp1"
+            ],
+            0
+        );
+
+
+    const stockTarget2 =
+        this.getFirstNumber(
+            [
+                "stockTarget2",
+                "target2",
+                "tp2"
+            ],
+            0
+        );
+
+
+    const stockTarget3 =
+        this.getFirstNumber(
+            [
+                "stockTarget3",
+                "target3",
+                "tp3"
+            ],
+            0
+        );
+
+
+    const expiration =
+        this.getFirstValue(
+            [
+                "expiration",
+                "optionExpiration"
+            ],
+            ""
+        );
+
+
+    const timeframe =
+        this.getFirstValue(
+            [
+                "timeframe",
+                "tradeTimeframe"
+            ],
+            ""
+        );
+
+
+    const notes =
+        this.getFirstValue(
+            [
+                "tradeNotes",
+                "notes",
+                "journalNotes"
+            ],
+            ""
         );
 
 
@@ -624,27 +377,31 @@ collectInputs() {
 
         direction,
 
-        accountBalance,
+        accountSize,
 
         riskPercent,
 
-        entry,
+        stockEntry,
 
-        stop,
+        stockStop,
 
-        target,
-
-        optionPremium,
+        optionEntry,
 
         optionDelta,
 
-        desiredContracts,
+        desiredPosition,
 
-        capitalAllocationPercent,
+        stockTarget1,
 
-        reserveCashPercent,
+        stockTarget2,
 
-        maxPremiumRisk
+        stockTarget3,
+
+        expiration,
+
+        timeframe,
+
+        notes
 
     };
 
@@ -652,43 +409,30 @@ collectInputs() {
 
 
 /* =====================================================
-   VALIDATE BASE TRADE
+   VALIDATE INPUTS
 ===================================================== */
 
-validateInputs(
-    inputs
-) {
+validate(inputs) {
 
-    if (
-        !inputs.symbol
-    ) {
+    const errors = [];
 
-        return {
 
-            valid:
-                false,
+    if (!inputs.symbol) {
 
-            error:
-                "Enter a stock or crypto symbol."
-
-        };
+        errors.push(
+            "Enter a trading symbol."
+        );
 
     }
 
 
     if (
-        inputs.accountBalance <= 0
+        inputs.accountSize <= 0
     ) {
 
-        return {
-
-            valid:
-                false,
-
-            error:
-                "Enter a valid account balance."
-
-        };
+        errors.push(
+            "Account size must be greater than zero."
+        );
 
     }
 
@@ -697,633 +441,218 @@ validateInputs(
         inputs.riskPercent <= 0
     ) {
 
-        return {
-
-            valid:
-                false,
-
-            error:
-                "Enter a valid risk percentage."
-
-        };
-
-    }
-
-
-    if (
-        inputs.entry <= 0
-    ) {
-
-        return {
-
-            valid:
-                false,
-
-            error:
-                "Enter a valid entry price."
-
-        };
-
-    }
-
-
-    if (
-        inputs.stop <= 0
-    ) {
-
-        return {
-
-            valid:
-                false,
-
-            error:
-                "Enter a valid stop price."
-
-        };
-
-    }
-
-
-    return {
-
-        valid:
-            true,
-
-        error:
-            null
-
-    };
-
-},
-
-
-/* =====================================================
-   CALCULATE STOCK PLAN
-===================================================== */
-
-calculateStockPlan(
-    inputs
-) {
-
-    if (
-        !window.ROLyfeRiskEngine
-    ) {
-
-        return {
-
-            valid:
-                false,
-
-            error:
-                "RO'LYFE Risk Engine is not loaded."
-
-        };
-
-    }
-
-
-    const risk =
-
-        window.ROLyfeRiskEngine
-            .calculateStock({
-
-                accountBalance:
-                    inputs.accountBalance,
-
-                riskPercent:
-                    inputs.riskPercent,
-
-                entry:
-                    inputs.entry,
-
-                stop:
-                    inputs.stop,
-
-                direction:
-                    inputs.direction
-
-            });
-
-
-    if (
-        !risk.valid
-    ) {
-
-        return risk;
-
-    }
-
-
-    return {
-
-        valid:
-            true,
-
-        risk,
-
-        recommendedSize:
-            risk.recommendedShares,
-
-        selectedSize:
-
-            inputs.desiredContracts > 0
-
-                ? inputs.desiredContracts
-
-                : risk.recommendedShares
-
-    };
-
-},
-
-
-/* =====================================================
-   CALCULATE CRYPTO PLAN
-===================================================== */
-
-calculateCryptoPlan(
-    inputs
-) {
-
-    if (
-        !window.ROLyfeRiskEngine
-    ) {
-
-        return {
-
-            valid:
-                false,
-
-            error:
-                "RO'LYFE Risk Engine is not loaded."
-
-        };
-
-    }
-
-
-    const risk =
-
-        window.ROLyfeRiskEngine
-            .calculateCrypto({
-
-                accountBalance:
-                    inputs.accountBalance,
-
-                riskPercent:
-                    inputs.riskPercent,
-
-                entry:
-                    inputs.entry,
-
-                stop:
-                    inputs.stop,
-
-                direction:
-                    inputs.direction
-
-            });
-
-
-    if (
-        !risk.valid
-    ) {
-
-        return risk;
-
-    }
-
-
-    return {
-
-        valid:
-            true,
-
-        risk,
-
-        recommendedSize:
-            risk.quantity,
-
-        selectedSize:
-
-            inputs.desiredContracts > 0
-
-                ? inputs.desiredContracts
-
-                : risk.quantity
-
-    };
-
-},
-
-
-/* =====================================================
-   CALCULATE OPTION PLAN
-===================================================== */
-
-calculateOptionPlan(
-    inputs
-) {
-
-    if (
-        !window.ROLyfeRiskEngine
-    ) {
-
-        return {
-
-            valid:
-                false,
-
-            error:
-                "RO'LYFE Risk Engine is not loaded."
-
-        };
-
-    }
-
-
-    if (
-        inputs.optionPremium <= 0
-    ) {
-
-        return {
-
-            valid:
-                false,
-
-            error:
-                "Enter a valid option premium."
-
-        };
-
-    }
-
-
-    const risk =
-
-        window.ROLyfeRiskEngine
-            .calculateOption({
-
-                accountBalance:
-                    inputs.accountBalance,
-
-                riskPercent:
-                    inputs.riskPercent,
-
-                stockEntry:
-                    inputs.entry,
-
-                stockStop:
-                    inputs.stop,
-
-                optionPremium:
-                    inputs.optionPremium,
-
-                optionDelta:
-                    inputs.optionDelta,
-
-                direction:
-                    inputs.direction,
-
-                maxPremiumRisk:
-                    inputs.maxPremiumRisk,
-
-                desiredContracts:
-                    inputs.desiredContracts,
-
-                capitalAllocationPercent:
-                    inputs.capitalAllocationPercent,
-
-                reserveCashPercent:
-                    inputs.reserveCashPercent
-
-            });
-
-
-    if (
-        !risk.valid
-    ) {
-
-        return risk;
-
-    }
-
-
-    return {
-
-        valid:
-            true,
-
-        risk,
-
-        recommendedSize:
-            risk.recommendedContracts,
-
-        selectedSize:
-
-            inputs.desiredContracts > 0
-
-                ? inputs.desiredContracts
-
-                : risk.recommendedContracts
-
-    };
-
-},
-
-
-/* =====================================================
-   BUILD LADDER
-===================================================== */
-
-buildLadder(
-    inputs,
-    positionData
-) {
-
-    if (
-        !window.ROLyfeLadderEngine
-    ) {
-
-        return {
-
-            valid:
-                false,
-
-            error:
-                "RO'LYFE Ladder Engine is not loaded."
-
-        };
-
-    }
-
-
-    const size =
-        positionData.selectedSize;
-
-
-    if (
-        inputs.instrument === "option"
-    ) {
-
-        return window
-            .ROLyfeLadderEngine
-            .buildOptionLadder({
-
-                stockEntry:
-                    inputs.entry,
-
-                stockStop:
-                    inputs.stop,
-
-                contracts:
-                    size,
-
-                optionPremium:
-                    inputs.optionPremium,
-
-                accountBalance:
-                    inputs.accountBalance,
-
-                direction:
-                    inputs.direction
-
-            });
-
-    }
-
-
-    if (
-        inputs.instrument === "stock"
-    ) {
-
-        return window
-            .ROLyfeLadderEngine
-            .buildStockLadder({
-
-                entry:
-                    inputs.entry,
-
-                stop:
-                    inputs.stop,
-
-                positionSize:
-                    size,
-
-                direction:
-                    inputs.direction,
-
-                instrument:
-                    "stock",
-
-                accountBalance:
-                    inputs.accountBalance
-
-            });
-
-    }
-
-
-    return {
-
-        valid:
-            false,
-
-        error:
-            "Ladder is currently supported for stock and options."
-
-    };
-
-},
-
-
-/* =====================================================
-   CALCULATE TRADE QUALITY
-===================================================== */
-
-calculateTradeQuality(
-    inputs,
-    risk,
-    ladder
-) {
-
-    let score =
-        100;
-
-
-    const warnings =
-        [];
-
-
-    /*
-       RISK PERCENTAGE
-    */
-
-    if (
-        inputs.riskPercent > 5
-    ) {
-
-        score -=
-            30;
-
-
-        warnings.push(
-            "High account risk percentage."
+        errors.push(
+            "Risk percentage must be greater than zero."
         );
 
     }
 
-    else if (
-        inputs.riskPercent > 3
+
+    if (
+        inputs.riskPercent >
+        this.config.maxRiskPercent
     ) {
 
-        score -=
-            15;
+        errors.push(
+            `Risk percentage cannot exceed ${this.config.maxRiskPercent}%.`
+        );
+
+    }
 
 
-        warnings.push(
-            "Elevated account risk percentage."
+    if (
+        inputs.stockEntry <= 0
+    ) {
+
+        errors.push(
+            "Enter a valid stock entry price."
+        );
+
+    }
+
+
+    if (
+        inputs.stockStop <= 0
+    ) {
+
+        errors.push(
+            "Enter a valid stop price."
         );
 
     }
 
 
     /*
-       POSITION CHECK
+       LONG:
+       Stop must be BELOW entry.
+
+       SHORT:
+       Stop must be ABOVE entry.
     */
 
     if (
-        risk?.positionCheck
-            ?.exceedsRisk
+
+        inputs.direction === "Long" &&
+
+        inputs.stockStop >=
+        inputs.stockEntry
+
     ) {
 
-        score -=
-            35;
-
-
-        warnings.push(
-            "Selected position exceeds risk limit."
+        errors.push(
+            "For a Long trade, the stop must be below the entry."
         );
 
     }
 
 
     if (
-        risk?.positionCheck
-            ?.exceedsCapital
+
+        inputs.direction === "Short" &&
+
+        inputs.stockStop <=
+        inputs.stockEntry
+
     ) {
 
-        score -=
-            40;
-
-
-        warnings.push(
-            "Selected position exceeds available capital."
+        errors.push(
+            "For a Short trade, the stop must be above the entry."
         );
 
     }
 
 
     /*
-       LADDER CHECK
+       OPTIONS REQUIRE PREMIUM
     */
 
     if (
-        !ladder ||
-        !ladder.valid
+
+        inputs.instrument === "Option" &&
+
+        inputs.optionEntry <= 0
+
     ) {
 
-        score -=
-            20;
-
-
-        warnings.push(
-            "Profit ladder could not be built."
+        errors.push(
+            "Enter a valid option premium."
         );
 
     }
 
 
-    score =
-        Math.max(
-            0,
-            Math.min(
-                100,
-                score
+    return {
+
+        valid:
+            errors.length === 0,
+
+        errors
+
+    };
+
+},
+
+
+/* =====================================================
+   CALCULATE BASIC TRADE METRICS
+===================================================== */
+
+calculateMetrics(inputs) {
+
+    const direction =
+        inputs.direction === "Short"
+            ? "short"
+            : "long";
+
+
+    const riskPerShare =
+        direction === "short"
+
+            ? (
+                inputs.stockStop -
+                inputs.stockEntry
             )
+
+            : (
+                inputs.stockEntry -
+                inputs.stockStop
+            );
+
+
+    const riskAmount =
+        inputs.accountSize *
+        (
+            inputs.riskPercent / 100
         );
 
 
-    let grade =
-        "A";
+    /*
+       Basic manual target calculation.
+
+       These are fallback targets.
+
+       The Ladder Engine remains the
+       official ladder generator.
+    */
+
+    const target1 =
+        inputs.stockTarget1 > 0
+
+            ? inputs.stockTarget1
+
+            : direction === "short"
+
+                ? inputs.stockEntry -
+                  riskPerShare
+
+                : inputs.stockEntry +
+                  riskPerShare;
 
 
-    let level =
-        "safe";
+    const target2 =
+        inputs.stockTarget2 > 0
+
+            ? inputs.stockTarget2
+
+            : direction === "short"
+
+                ? inputs.stockEntry -
+                  (riskPerShare * 2)
+
+                : inputs.stockEntry +
+                  (riskPerShare * 2);
 
 
-    if (
-        score < 50
-    ) {
+    const target3 =
+        inputs.stockTarget3 > 0
 
-        grade =
-            "F";
+            ? inputs.stockTarget3
 
+            : direction === "short"
 
-        level =
-            "danger";
+                ? inputs.stockEntry -
+                  (riskPerShare * 3)
 
-    }
-
-    else if (
-        score < 65
-    ) {
-
-        grade =
-            "D";
-
-
-        level =
-            "danger";
-
-    }
-
-    else if (
-        score < 75
-    ) {
-
-        grade =
-            "C";
-
-
-        level =
-            "warning";
-
-    }
-
-    else if (
-        score < 90
-    ) {
-
-        grade =
-            "B";
-
-
-        level =
-            "good";
-
-    }
+                : inputs.stockEntry +
+                  (riskPerShare * 3);
 
 
     return {
 
-        score,
+        direction,
 
-        grade,
+        riskPerShare,
 
-        level,
+        riskAmount,
 
-        warnings
+        stockTarget1:
+            target1,
+
+        stockTarget2:
+            target2,
+
+        stockTarget3:
+            target3
 
     };
 
@@ -1331,71 +660,87 @@ calculateTradeQuality(
 
 
 /* =====================================================
-   BUILD MASTER TRADE PLAN
+   CREATE PLAN
 ===================================================== */
 
-buildMasterPlan(
-    inputs,
-    positionData,
-    ladder
-) {
+createPlan() {
 
-    const risk =
-        positionData.risk;
+    console.log(
+        "🎯 RO'LYFE TRADE PLANNER: Reading inputs..."
+    );
 
 
-    const tradeId =
-        this.generateTradeId(
-            inputs.symbol
+    const inputs =
+        this.getInputs();
+
+
+    console.log(
+        "📥 Trade Inputs:",
+        inputs
+    );
+
+
+    const validation =
+        this.validate(
+            inputs
         );
 
 
-    const stockRiskPerUnit =
-        Math.abs(
-            inputs.entry -
-            inputs.stop
+    if (!validation.valid) {
+
+        console.warn(
+            "⚠️ Trade Plan Validation Failed:",
+            validation.errors
         );
 
 
-    const riskReward =
-        inputs.target > 0 &&
-        window.ROLyfeRiskEngine
+        alert(
 
-            ? window
-                .ROLyfeRiskEngine
-                .calculateRiskReward(
+            "Please fix the following:\n\n• " +
 
-                    inputs.entry,
-
-                    inputs.stop,
-
-                    inputs.target
-
-                )
-
-            : null;
-
-
-    const quality =
-        this.calculateTradeQuality(
-
-            inputs,
-
-            risk,
-
-            ladder
+            validation.errors.join(
+                "\n• "
+            )
 
         );
 
+
+        return null;
+
+    }
+
+
+    const metrics =
+        this.calculateMetrics(
+            inputs
+        );
+
+
+    /* =================================================
+       STANDARDIZED MASTER PLAN
+
+       IMPORTANT:
+
+       These property names match app.js:
+
+       plan.symbol
+       plan.instrument
+       plan.direction
+       plan.accountSize
+       plan.riskPercent
+       plan.riskAmount
+       plan.stockEntry
+       plan.stockStop
+       plan.optionEntry
+       plan.stockTarget1
+       plan.stockTarget2
+       plan.stockTarget3
+    ================================================= */
 
     const plan = {
 
-        /* =============================================
-           IDENTITY
-        ============================================= */
-
         id:
-            tradeId,
+            `ROLYFE-${Date.now()}`,
 
 
         createdAt:
@@ -1406,10 +751,6 @@ buildMasterPlan(
         status:
             "PLANNED",
 
-
-        /* =============================================
-           TRADE
-        ============================================= */
 
         symbol:
             inputs.symbol,
@@ -1423,368 +764,118 @@ buildMasterPlan(
             inputs.direction,
 
 
-        /* =============================================
-           SETUP
-        ============================================= */
-
-        setup: {
-
-            entry:
-                inputs.entry,
-
-            stop:
-                inputs.stop,
-
-            target:
-                inputs.target || null,
-
-            riskPerUnit:
-                stockRiskPerUnit,
-
-            riskReward
-
-        },
+        accountSize:
+            inputs.accountSize,
 
 
-        /* =============================================
-           ACCOUNT
-        ============================================= */
+        riskPercent:
+            inputs.riskPercent,
 
-        account: {
 
-            balance:
-                inputs.accountBalance,
+        riskAmount:
+            metrics.riskAmount,
 
-            riskPercent:
-                inputs.riskPercent,
 
-            dollarRisk:
-                risk.dollarRisk ||
+        stockEntry:
+            inputs.stockEntry,
 
-                (
-                    inputs.accountBalance *
-                    inputs.riskPercent /
-                    100
-                ),
 
-            capitalAllocationPercent:
-                inputs.capitalAllocationPercent,
+        stockStop:
+            inputs.stockStop,
 
-            reserveCashPercent:
-                inputs.reserveCashPercent
 
-        },
+        riskPerShare:
+            metrics.riskPerShare,
+
+
+        optionEntry:
+            inputs.optionEntry,
+
+
+        optionDelta:
+            inputs.optionDelta,
+
+
+        desiredPosition:
+            inputs.desiredPosition,
+
+
+        expiration:
+            inputs.expiration,
+
+
+        timeframe:
+            inputs.timeframe,
+
+
+        notes:
+            inputs.notes,
 
 
         /* =============================================
-           POSITION
+           INITIAL TARGETS
+
+           These are fallback/manual targets.
+
+           The Ladder Engine will later attach:
+
+           plan.ladderEngine
         ============================================= */
 
-        position: {
-
-            recommendedSize:
-                positionData.recommendedSize,
+        stockTarget1:
+            metrics.stockTarget1,
 
 
-            desiredSize:
-                inputs.desiredContracts,
+        stockTarget2:
+            metrics.stockTarget2,
 
 
-            selectedSize:
-                positionData.selectedSize,
-
-
-            status:
-
-                risk.positionCheck
-                    ?.status ||
-
-                "RISK_CALCULATED",
-
-
-            level:
-
-                risk.positionCheck
-                    ?.level ||
-
-                "neutral"
-
-        },
+        stockTarget3:
+            metrics.stockTarget3,
 
 
         /* =============================================
-           FULL RISK ENGINE OUTPUT
+           ENGINE PLACEHOLDERS
         ============================================= */
 
-        risk,
+        riskEngine:
+            null,
 
 
-        /* =============================================
-           LADDER
-        ============================================= */
-
-        ladder,
+        positionSizing:
+            null,
 
 
-        /* =============================================
-           QUALITY SCORE
-        ============================================= */
-
-        quality,
-
-
-        /* =============================================
-           JOURNAL DATA
-        ============================================= */
-
-        journal: {
-
-            status:
-                "PLANNED",
-
-            openedAt:
-                null,
-
-            closedAt:
-                null,
-
-            notes:
-                "",
-
-            realizedProfit:
-                0,
-
-            realizedLoss:
-                0
-
-        }
+        ladderEngine:
+            null
 
     };
 
 
-    return plan;
-
-},
-
-
-/* =====================================================
-   CREATE TRADE PLAN
-
-   MAIN FUNCTION CALLED BY:
-
-   TradeController.createTradePlan()
-
-===================================================== */
-
-createPlan(
-    suppliedInputs = null
-) {
-
-    console.log(
-        "🧠 RO'LYFE MASTER TRADE PLANNER STARTING..."
-    );
-
-
-    const inputs =
-
-        suppliedInputs ||
-
-        this.collectInputs();
-
-
-    console.log(
-        "📥 TRADE INPUTS:",
-        inputs
-    );
-
-
     /*
-       VALIDATE
+       SAVE GLOBAL ACTIVE PLAN
     */
 
-    const validation =
-        this.validateInputs(
-            inputs
-        );
-
-
-    if (
-        !validation.valid
-    ) {
-
-        console.error(
-            "❌ TRADE PLAN ERROR:",
-            validation.error
-        );
-
-
-        this.showMessage(
-            validation.error,
-            "danger"
-        );
-
-
-        return null;
-
-    }
-
-
-    /*
-       SELECT RISK MODEL
-    */
-
-    let positionData;
-
-
-    if (
-        inputs.instrument === "crypto"
-    ) {
-
-        positionData =
-            this.calculateCryptoPlan(
-                inputs
-            );
-
-    }
-
-
-    else if (
-        inputs.instrument === "option"
-    ) {
-
-        positionData =
-            this.calculateOptionPlan(
-                inputs
-            );
-
-    }
-
-
-    else {
-
-        positionData =
-            this.calculateStockPlan(
-                inputs
-            );
-
-    }
-
-
-    /*
-       CHECK RISK RESULT
-    */
-
-    if (
-        !positionData.valid
-    ) {
-
-        console.error(
-            "❌ POSITION CALCULATION ERROR:",
-            positionData.error
-        );
-
-
-        this.showMessage(
-            positionData.error ||
-            "Unable to calculate position.",
-            "danger"
-        );
-
-
-        return null;
-
-    }
-
-
-    /*
-       BUILD LADDER
-    */
-
-    const ladder =
-        this.buildLadder(
-
-            inputs,
-
-            positionData
-
-        );
-
-
-    /*
-       BUILD MASTER PLAN
-    */
-
-    const plan =
-        this.buildMasterPlan(
-
-            inputs,
-
-            positionData,
-
-            ladder
-
-        );
-
-
-    /*
-       SAVE STATE
-    */
-
-    this.state.activePlan =
+    window.currentTradePlan =
         plan;
 
-
-    this.state.lastPlan =
-        plan;
-
-
-    this.state.planHistory.push(
-        plan
-    );
-
-
-    /*
-       GLOBAL ACTIVE PLAN
-    */
 
     window.activeTradePlan =
         plan;
 
 
     /*
-       UPDATE CURRENT SYMBOL
-    */
+       BROADCAST EVENT
 
-    if (
-        window.TradeController
-    ) {
-
-        window.TradeController
-            .state
-            .currentSymbol =
-                plan.symbol;
-
-    }
-
-
-    /*
-       UPDATE UI
-    */
-
-    this.renderPlan(
-        plan
-    );
-
-
-    /*
-       DISPATCH EVENT
+       TradeController and other systems
+       can listen for this.
     */
 
     window.dispatchEvent(
 
         new CustomEvent(
 
-            "roLyfeTradePlanBuilt",
+            "roLyfeTradePlanCreated",
 
             {
 
@@ -1798,21 +889,8 @@ createPlan(
     );
 
 
-    /*
-       SUCCESS MESSAGE
-    */
-
-    this.showMessage(
-
-        `🧠 MASTER TRADE PLAN CREATED: ${plan.symbol}`,
-
-        "success"
-
-    );
-
-
     console.log(
-        "✅ RO'LYFE MASTER TRADE PLAN:",
+        "✅ RO'LYFE TRADE PLAN CREATED:",
         plan
     );
 
@@ -1823,345 +901,27 @@ createPlan(
 
 
 /* =====================================================
-   RENDER PLAN TO UI
-
-   Optional containers:
-
-   #tradePlanOutput
-   #tradePlanResults
-   #planResults
-
+   GET CURRENT PLAN
 ===================================================== */
 
-renderPlan(
-    plan
-) {
-
-    const container =
-
-        document.getElementById(
-            "tradePlanOutput"
-        ) ||
-
-        document.getElementById(
-            "tradePlanResults"
-        ) ||
-
-        document.getElementById(
-            "planResults"
-        );
-
-
-    if (
-        !container
-    ) {
-
-        return;
-
-    }
-
-
-    const positionCheck =
-        plan.risk
-            ?.positionCheck;
-
-
-    const ladder =
-        plan.ladder;
-
-
-    container.innerHTML = `
-
-        <div class="rolyfe-master-plan">
-
-            <h3>
-                🎯 RO'LYFE MASTER TRADE PLAN
-            </h3>
-
-            <div>
-                <strong>Symbol:</strong>
-                ${plan.symbol}
-            </div>
-
-            <div>
-                <strong>Instrument:</strong>
-                ${plan.instrument}
-            </div>
-
-            <div>
-                <strong>Direction:</strong>
-                ${plan.direction.toUpperCase()}
-            </div>
-
-            <hr>
-
-            <div>
-                <strong>Entry:</strong>
-                ${this.formatMoney(plan.setup.entry)}
-            </div>
-
-            <div>
-                <strong>Stop:</strong>
-                ${this.formatMoney(plan.setup.stop)}
-            </div>
-
-            <div>
-                <strong>Risk Per Unit:</strong>
-                ${this.formatMoney(plan.setup.riskPerUnit)}
-            </div>
-
-            <div>
-                <strong>Account Risk:</strong>
-                ${this.formatMoney(plan.account.dollarRisk)}
-            </div>
-
-            <hr>
-
-            <div>
-                <strong>Recommended Size:</strong>
-                ${this.formatSize(plan.position.recommendedSize)}
-            </div>
-
-            <div>
-                <strong>Selected Size:</strong>
-                ${this.formatSize(plan.position.selectedSize)}
-            </div>
-
-            <div>
-                <strong>Position Status:</strong>
-                ${plan.position.status}
-            </div>
-
-            <hr>
-
-            <div>
-                <strong>Trade Quality:</strong>
-                ${plan.quality.score}/100
-                (${plan.quality.grade})
-            </div>
-
-            ${this.renderLadderHTML(ladder)}
-
-            <hr>
-
-            <div>
-                ${positionCheck?.message || ""}
-            </div>
-
-        </div>
-
-    `;
-
-},
-
-
-/* =====================================================
-   RENDER LADDER HTML
-===================================================== */
-
-renderLadderHTML(
-    ladder
-) {
-
-    if (
-        !ladder ||
-        !ladder.valid
-    ) {
-
-        return `
-
-            <div>
-                ⚠️ Ladder unavailable.
-            </div>
-
-        `;
-
-    }
-
-
-    /*
-       OPTION LADDER
-    */
-
-    if (
-        ladder.instrument === "option"
-    ) {
-
-        return `
-
-            <h4>
-                🪜 EXIT LADDER
-            </h4>
-
-            <div>
-                TP1:
-                ${this.formatMoney(
-                    ladder.targets.tp1.stockPrice
-                )}
-                •
-                ${ladder.targets.tp1.contracts}
-                Contract(s)
-            </div>
-
-            <div>
-                TP2:
-                ${this.formatMoney(
-                    ladder.targets.tp2.stockPrice
-                )}
-                •
-                ${ladder.targets.tp2.contracts}
-                Contract(s)
-            </div>
-
-            <div>
-                TP3:
-                ${this.formatMoney(
-                    ladder.targets.tp3.stockPrice
-                )}
-                •
-                ${ladder.targets.tp3.contracts}
-                Contract(s)
-            </div>
-
-            <div>
-                RUNNER:
-                ${this.formatMoney(
-                    ladder.targets.runner.stockPrice
-                )}
-                •
-                ${ladder.targets.runner.contracts}
-                Contract(s)
-            </div>
-
-        `;
-
-    }
-
-
-    /*
-       STOCK LADDER
-    */
-
-    if (
-        ladder.targets
-    ) {
-
-        return `
-
-            <h4>
-                🪜 EXIT LADDER
-            </h4>
-
-            <div>
-                TP1:
-                ${this.formatMoney(
-                    ladder.targets.tp1.price
-                )}
-                •
-                ${ladder.targets.tp1.quantity}
-                Units
-            </div>
-
-            <div>
-                TP2:
-                ${this.formatMoney(
-                    ladder.targets.tp2.price
-                )}
-                •
-                ${ladder.targets.tp2.quantity}
-                Units
-            </div>
-
-            <div>
-                TP3:
-                ${this.formatMoney(
-                    ladder.targets.tp3.price
-                )}
-                •
-                ${ladder.targets.tp3.quantity}
-                Units
-            </div>
-
-            <div>
-                RUNNER:
-                ${this.formatMoney(
-                    ladder.targets.runner.price
-                )}
-                •
-                ${ladder.targets.runner.quantity}
-                Units
-            </div>
-
-        `;
-
-    }
-
-
-    return "";
-
-},
-
-
-/* =====================================================
-   SHOW MESSAGE
-===================================================== */
-
-showMessage(
-    message,
-    level = "info"
-) {
-
-    const element =
-
-        document.getElementById(
-            "tradePlanMessage"
-        ) ||
-
-        document.querySelector(
-            "[data-role='trade-plan-message']"
-        );
-
-
-    if (
-        element
-    ) {
-
-        element.textContent =
-            message;
-
-
-        element.className =
-            `rolyfe-message ${level}`;
-
-    }
-
-
-    console.log(
-        `RO'LYFE ${level.toUpperCase()}:`,
-        message
+getCurrentPlan() {
+
+    return (
+        window.currentTradePlan ||
+        window.activeTradePlan ||
+        null
     );
 
 },
 
 
 /* =====================================================
-   GET ACTIVE PLAN
-===================================================== */
-
-getActivePlan() {
-
-    return this.state.activePlan;
-
-},
-
-
-/* =====================================================
-   CLEAR ACTIVE PLAN
+   CLEAR PLAN
 ===================================================== */
 
 clearPlan() {
 
-    this.state.activePlan =
+    window.currentTradePlan =
         null;
 
 
@@ -2170,79 +930,18 @@ clearPlan() {
 
 
     console.log(
-        "🗑 RO'LYFE active trade plan cleared."
+        "🗑 RO'LYFE Trade Plan cleared."
     );
 
-},
 
-
-/* =====================================================
-   FORMAT MONEY
-===================================================== */
-
-formatMoney(
-    value
-) {
-
-    return new Intl.NumberFormat(
-
-        "en-US",
-
-        {
-
-            style:
-                "currency",
-
-            currency:
-                "USD"
-
-        }
-
-    ).format(
-
-        this.safeNumber(
-            value
-        )
-
-    );
-
-},
-
-
-/* =====================================================
-   FORMAT SIZE
-===================================================== */
-
-formatSize(
-    value
-) {
-
-    const number =
-        this.safeNumber(
-            value
-        );
-
-
-    return number
-        .toLocaleString(
-
-            "en-US",
-
-            {
-
-                maximumFractionDigits:
-                    4
-
-            }
-
-        );
+    return true;
 
 }
 
 };
 
 /* =========================================================
-GLOBAL EXPORT
+GLOBAL EXPORTS
 ========================================================= */
 
 window.TradePlanner =
@@ -2253,5 +952,5 @@ SYSTEM READY
 ========================================================= */
 
 console.log(
-"🧠 RO'LYFE MASTER TRADE PLANNER ONLINE"
+"🎯 RO'LYFE TRADE PLANNER ONLINE"
 );
