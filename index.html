@@ -561,6 +561,275 @@
     }
 
 
+/* ============================================
+   RISK / REWARD TRADE MAP
+============================================ */
+
+.rr-chart {
+
+    width:
+        100%;
+
+    padding:
+        20px 10px 10px;
+
+    overflow:
+        hidden;
+
+}
+
+
+.rr-chart-header {
+
+    text-align:
+        center;
+
+    color:
+        var(--green);
+
+    font-weight:
+        bold;
+
+    margin-bottom:
+        35px;
+
+}
+
+
+.rr-chart-track {
+
+    position:
+        relative;
+
+    height:
+        90px;
+
+    width:
+        100%;
+
+    border-top:
+        3px solid var(--border);
+
+    margin:
+        35px 0 15px;
+
+}
+
+
+.rr-risk-zone {
+
+    position:
+        absolute;
+
+    top:
+        -8px;
+
+    height:
+        16px;
+
+    background:
+        rgba(
+            255,
+            92,
+            92,
+            .35
+        );
+
+    border:
+        1px solid var(--danger);
+
+    border-radius:
+        10px;
+
+}
+
+
+.rr-reward-zone {
+
+    position:
+        absolute;
+
+    top:
+        -8px;
+
+    height:
+        16px;
+
+    background:
+        rgba(
+            0,
+            230,
+            118,
+            .25
+        );
+
+    border:
+        1px solid var(--green);
+
+    border-radius:
+        10px;
+
+}
+
+
+.rr-marker {
+
+    position:
+        absolute;
+
+    top:
+        -25px;
+
+    transform:
+        translateX(
+            -50%
+        );
+
+    text-align:
+        center;
+
+    font-size:
+        11px;
+
+    min-width:
+        60px;
+
+}
+
+
+.rr-marker::after {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        38px;
+
+    width:
+        2px;
+
+    height:
+        48px;
+
+    transform:
+        translateX(
+            -50%
+        );
+
+    background:
+        var(--muted);
+
+}
+
+
+.rr-marker span {
+
+    display:
+        block;
+
+    font-weight:
+        bold;
+
+}
+
+
+.rr-marker strong {
+
+    display:
+        block;
+
+    margin-top:
+        4px;
+
+}
+
+
+.rr-stop {
+
+    color:
+        var(--danger);
+
+}
+
+
+.rr-entry {
+
+    color:
+        white;
+
+}
+
+
+.rr-entry::after {
+
+    background:
+        white;
+
+}
+
+
+.rr-target {
+
+    color:
+        var(--green);
+
+}
+
+
+.rr-chart-legend {
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        20px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        12px;
+
+    margin-top:
+        15px;
+
+}
+
+
+@media (
+    max-width:
+    600px
+) {
+
+    .rr-chart {
+
+        overflow-x:
+            auto;
+
+    }
+
+
+    .rr-chart-track {
+
+        min-width:
+            550px;
+
+    }
+
+}    
+    
     /* ============================================
        MOBILE
     ============================================ */
