@@ -1,1200 +1,2257 @@
-<!DOCTYPE html><html lang="en">
-<head>
-    <meta charset="UTF-8"><meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>
-    RO'LYFE Tactical Intelligence Center™
-</title>
-
-<style>
-
 /* =========================================================
-   RO'LYFE TACTICAL INTELLIGENCE CENTER™
-   MASTER TRADE PLANNER ENGINE
+RO'LYFE TACTICAL INTELLIGENCE CENTER™
+MASTER TRADE PLANNER
+
+PURPOSE:
+
+THE INTELLIGENCE BRIDGE BETWEEN:
+
+• User Trade Inputs
+• RO'LYFE Risk Engine
+• RO'LYFE Ladder Engine
+• Trade Controller
+• Trade Journal
+
+FLOW:
+
+SYMBOL
+↓
+ENTRY + STOP
+↓
+RISK ENGINE
+↓
+CAPITAL AFFORDABILITY
+↓
+USER DESIRED POSITION
+↓
+POSITION LIMIT CHECK
+↓
+LADDER ENGINE
+↓
+MASTER TRADE PLAN
+↓
+JOURNAL
+
 ========================================================= */
-    :root {
 
-        --bg:
-            #08110c;
+const TradePlanner = {
 
-        --panel:
-            #101b14;
+/* =====================================================
+   CONFIGURATION
+===================================================== */
 
-        --panel-2:
-            #15241a;
+config: {
 
-        --border:
-            #2a4933;
+    defaultInstrument:
+        "stock",
 
-        --green:
-            #39ff88;
+    defaultDirection:
+        "long",
 
-        --green-dark:
-            #159447;
+    defaultRiskPercent:
+        2,
 
-        --gold:
-            #f5c542;
+    defaultOptionDelta:
+        0,
 
-        --red:
-            #ff5c5c;
+    defaultCapitalAllocationPercent:
+        100,
 
-        --text:
-            #f2f7f3;
+    defaultReserveCashPercent:
+        0,
 
-        --muted:
-            #a9b7ae;
+    autoUseRecommendedSize:
+        true
 
-    }
+},
 
 
-    * {
+/* =====================================================
+   STATE
+===================================================== */
 
-        box-sizing:
-            border-box;
+state: {
 
-    }
+    activePlan:
+        null,
 
+    lastPlan:
+        null,
 
-    body {
+    planHistory:
+        []
 
-        margin:
-            0;
+},
 
-        font-family:
-            Arial,
-            Helvetica,
-            sans-serif;
 
-        background:
-            var(--bg);
+/* =====================================================
+   SAFE NUMBER
+===================================================== */
 
-        color:
-            var(--text);
+safeNumber(
+    value,
+    fallback = 0
+) {
 
-    }
+    const number =
+        Number(value);
 
+    return Number.isFinite(number)
+        ? number
+        : fallback;
 
-    /* ============================================
-       HEADER
-    ============================================ */
+},
 
-    .app-header {
 
-        padding:
-            25px 20px;
+/* =====================================================
+   NORMALIZE INSTRUMENT
+===================================================== */
 
-        text-align:
-            center;
+normalizeInstrument(
+    instrument = "stock"
+) {
 
-        border-bottom:
-            1px solid var(--border);
+    instrument =
+        String(instrument)
+            .trim()
+            .toLowerCase();
 
-        background:
-            linear-gradient(
-                135deg,
-                #07110b,
-                #102817
-            );
 
-    }
-
-
-    .app-header h1 {
-
-        margin:
-            0;
-
-        color:
-            var(--green);
-
-        font-size:
-            clamp(
-                24px,
-                5vw,
-                42px
-            );
-
-    }
-
-
-    .app-header p {
-
-        margin:
-            10px 0 0;
-
-        color:
-            var(--muted);
-
-    }
-
-
-    /* ============================================
-       MAIN CONTAINER
-    ============================================ */
-
-    .container {
-
-        width:
-            min(
-                1200px,
-                95%
-            );
-
-        margin:
-            30px auto 60px;
-
-    }
-
-
-    /* ============================================
-       GRID
-    ============================================ */
-
-    .planner-grid {
-
-        display:
-            grid;
-
-        grid-template-columns:
-            repeat(
-                auto-fit,
-                minmax(
-                    300px,
-                    1fr
-                )
-            );
-
-        gap:
-            20px;
-
-    }
-
-
-    /* ============================================
-       CARD
-    ============================================ */
-
-    .card {
-
-        background:
-            var(--panel);
-
-        border:
-            1px solid var(--border);
-
-        border-radius:
-            14px;
-
-        padding:
-            20px;
-
-        box-shadow:
-            0 10px 30px
-            rgba(
-                0,
-                0,
-                0,
-                .25
-            );
-
-    }
-
-
-    .card h2 {
-
-        margin-top:
-            0;
-
-        color:
-            var(--green);
-
-        font-size:
-            18px;
-
-        border-bottom:
-            1px solid var(--border);
-
-        padding-bottom:
-            10px;
-
-    }
-
-
-    /* ============================================
-       FORM
-    ============================================ */
-
-    .field {
-
-        margin-bottom:
-            14px;
-
-    }
-
-
-    label {
-
-        display:
-            block;
-
-        margin-bottom:
-            6px;
-
-        font-size:
-            13px;
-
-        color:
-            var(--muted);
-
-    }
-
-
-    input,
-    select {
-
-        width:
-            100%;
-
-        padding:
-            12px;
-
-        border-radius:
-            8px;
-
-        border:
-            1px solid var(--border);
-
-        background:
-            #07100a;
-
-        color:
-            var(--text);
-
-        outline:
-            none;
-
-    }
-
-
-    input:focus,
-    select:focus {
-
-        border-color:
-            var(--green);
-
-        box-shadow:
-            0 0 0 2px
-            rgba(
-                57,
-                255,
-                136,
-                .12
-            );
-
-    }
-
-
-    .row {
-
-        display:
-            grid;
-
-        grid-template-columns:
-            repeat(
-                2,
-                1fr
-            );
-
-        gap:
-            12px;
-
-    }
-
-
-    /* ============================================
-       BUTTONS
-    ============================================ */
-
-    .button-row {
-
-        display:
-            flex;
-
-        flex-wrap:
-            wrap;
-
-        gap:
-            12px;
-
-        margin:
-            25px 0;
-
-    }
-
-
-    button {
-
-        border:
-            none;
-
-        padding:
-            14px 20px;
-
-        border-radius:
-            9px;
-
-        cursor:
-            pointer;
-
-        font-weight:
-            bold;
-
-        transition:
-            .2s ease;
-
-    }
-
-
-    button:hover {
-
-        transform:
-            translateY(-2px);
-
-    }
-
-
-    .primary-button {
-
-        background:
-            var(--green);
-
-        color:
-            #031008;
-
-        flex:
-            1;
-
-        min-width:
-            200px;
-
-    }
-
-
-    .secondary-button {
-
-        background:
-            var(--panel-2);
-
-        color:
-            var(--text);
-
-        border:
-            1px solid var(--border);
-
-    }
-
-
-    /* ============================================
-       OUTPUT
-    ============================================ */
-
-    #tradePlanOutput {
-
-        margin-top:
-            25px;
-
-    }
-
-
-    .trade-plan-card {
-
-        background:
-            var(--panel);
-
-        border:
-            1px solid var(--green);
-
-        border-radius:
-            15px;
-
-        padding:
-            25px;
-
-    }
-
-
-    .trade-plan-card h3 {
-
-        margin-top:
-            0;
-
-        color:
-            var(--green);
-
-        text-align:
-            center;
-
-    }
-
-
-    .plan-status {
-
-        display:
-            inline-block;
-
-        padding:
-            6px 12px;
-
-        border-radius:
-            20px;
-
-        background:
-            rgba(
-                57,
-                255,
-                136,
-                .12
-            );
-
-        color:
-            var(--green);
-
-        font-size:
-            12px;
-
-        font-weight:
-            bold;
-
-        margin-bottom:
-            20px;
-
-    }
-
-
-    .plan-section {
-
-        background:
-            var(--panel-2);
-
-        border:
-            1px solid var(--border);
-
-        border-radius:
-            12px;
-
-        padding:
-            18px;
-
-        margin:
-            15px 0;
-
-    }
-
-
-    .plan-section h4 {
-
-        margin:
-            0 0 14px;
-
-        color:
-            var(--gold);
-
-    }
-
-
-    .plan-section p {
-
-        margin:
-            9px 0;
-
-    }
-
-
-    .target-result {
-
-        padding:
-            14px;
-
-        margin:
-            12px 0;
-
-        background:
-            rgba(
-                0,
-                0,
-                0,
-                .15
-            );
-
-        border-left:
-            3px solid var(--green);
-
-        border-radius:
-            8px;
-
-    }
-
-
-    .result-line {
-
-        display:
-            flex;
-
-        flex-wrap:
-            wrap;
-
-        gap:
-            12px;
-
-        margin:
-            10px 0;
-
-        font-size:
-            13px;
-
-        color:
-            var(--muted);
-
-    }
-
-
-    .runner-box {
-
-        margin-top:
-            15px;
-
-        padding:
-            15px;
-
-        border:
-            1px dashed var(--gold);
-
-        border-radius:
-            8px;
-
-        color:
-            var(--gold);
-
-    }
-
-
-    .plan-date {
-
-        color:
-            var(--muted);
-
-        font-size:
-            12px;
-
-    }
-
-
-    .trade-plan-actions {
-
-        display:
-            flex;
-
-        flex-wrap:
-            wrap;
-
-        gap:
-            10px;
-
-        margin-top:
-            20px;
-
-    }
-
-
-    .trade-plan-actions button {
-
-        background:
-            var(--green);
-
-        color:
-            #031008;
-
-    }
-
-
-    @media (
-        max-width:
-        600px
+    if (
+        instrument.includes("crypto")
     ) {
 
-        .row {
+        return "crypto";
 
-            grid-template-columns:
-                1fr;
+    }
+
+
+    if (
+        instrument.includes("spread")
+    ) {
+
+        return "option_spread";
+
+    }
+
+
+    if (
+        instrument.includes("option")
+    ) {
+
+        return "option";
+
+    }
+
+
+    return "stock";
+
+},
+
+
+/* =====================================================
+   NORMALIZE DIRECTION
+===================================================== */
+
+normalizeDirection(
+    direction = "long"
+) {
+
+    return String(direction)
+        .toLowerCase()
+        .trim() === "short"
+
+            ? "short"
+
+            : "long";
+
+},
+
+
+/* =====================================================
+   GENERATE TRADE ID
+===================================================== */
+
+generateTradeId(
+    symbol = "TRADE"
+) {
+
+    const timestamp =
+        Date.now();
+
+
+    const random =
+        Math.random()
+            .toString(36)
+            .slice(2, 7)
+            .toUpperCase();
+
+
+    return `ROLYFE-${symbol}-${timestamp}-${random}`;
+
+},
+
+
+/* =====================================================
+   READ INPUT
+
+   Supports:
+
+   <input id="accountBalance">
+
+   OR:
+
+   <input data-field="accountBalance">
+
+===================================================== */
+
+getInputValue(
+    ids = [],
+    fallback = null
+) {
+
+    if (
+        !Array.isArray(ids)
+    ) {
+
+        ids =
+            [ids];
+
+    }
+
+
+    for (
+        const id of ids
+    ) {
+
+        const element =
+
+            document.getElementById(id) ||
+
+            document.querySelector(
+                `[data-field="${id}"]`
+            );
+
+
+        if (!element) {
+            continue;
+        }
+
+
+        if (
+            element.type === "checkbox"
+        ) {
+
+            return element.checked;
+
+        }
+
+
+        if (
+            element.type === "radio"
+        ) {
+
+            const selected =
+                document.querySelector(
+                    `input[name="${element.name}"]:checked`
+                );
+
+
+            if (selected) {
+
+                return selected.value;
+
+            }
+
+        }
+
+
+        if (
+            element.value !== undefined
+        ) {
+
+            return element.value;
 
         }
 
     }
 
-</style>
 
-</head><body><!-- ============================================
-     HEADER
-============================================= -->
+    return fallback;
 
-<header class="app-header">
-
-    <h1>
-        🎯 RO'LYFE TACTICAL INTELLIGENCE CENTER™
-    </h1>
-
-    <p>
-        PLAN → SIZE → LADDER → EXECUTE → JOURNAL → REVIEW
-    </p>
-
-    <p>
-        Trade Smart. Stay Disciplined. Protect Your Capital.
-    </p>
-
-</header>
+},
 
 
+/* =====================================================
+   READ CHECKBOX
+===================================================== */
 
-<main class="container">
+getCheckboxValue(
+    ids = [],
+    fallback = false
+) {
 
+    if (
+        !Array.isArray(ids)
+    ) {
 
-    <!-- ========================================
-         MASTER TRADE PLANNER
-    ========================================= -->
+        ids =
+            [ids];
 
-    <div class="planner-grid">
-
-
-        <!-- ====================================
-             BASIC TRADE INFORMATION
-        ===================================== -->
-
-        <section class="card">
-
-            <h2>
-                📋 Trade Information
-            </h2>
+    }
 
 
-            <div class="field">
+    for (
+        const id of ids
+    ) {
 
-                <label>
-                    Symbol
-                </label>
+        const element =
 
-                <input
-                    type="text"
-                    id="symbol"
-                    placeholder="Example: NVDA"
-                >
+            document.getElementById(id) ||
 
+            document.querySelector(
+                `[data-field="${id}"]`
+            );
+
+
+        if (
+            element &&
+            element.type === "checkbox"
+        ) {
+
+            return element.checked;
+
+        }
+
+    }
+
+
+    return fallback;
+
+},
+
+
+/* =====================================================
+   COLLECT TRADE INPUTS
+
+   THIS SUPPORTS MULTIPLE ID NAMES
+   SO IT IS MORE FLEXIBLE WITH YOUR UI.
+
+===================================================== */
+
+collectInputs() {
+
+    const currentSymbol =
+
+        window.TradeController?.state
+            ?.currentSymbol ||
+
+        window.activeTradePlan
+            ?.symbol ||
+
+        null;
+
+
+    const symbol =
+        String(
+
+            this.getInputValue(
+
+                [
+                    "symbol",
+                    "tradeSymbol",
+                    "ticker"
+                ],
+
+                currentSymbol || ""
+
+            )
+
+        )
+        .trim()
+        .toUpperCase();
+
+
+    const instrument =
+        this.normalizeInstrument(
+
+            this.getInputValue(
+
+                [
+                    "instrument",
+                    "tradeInstrument",
+                    "instrumentType"
+                ],
+
+                this.config.defaultInstrument
+
+            )
+
+        );
+
+
+    const direction =
+        this.normalizeDirection(
+
+            this.getInputValue(
+
+                [
+                    "direction",
+                    "tradeDirection"
+                ],
+
+                this.config.defaultDirection
+
+            )
+
+        );
+
+
+    const accountBalance =
+        this.safeNumber(
+
+            this.getInputValue(
+
+                [
+                    "accountBalance",
+                    "accountSize",
+                    "balance"
+                ],
+
+                0
+
+            )
+
+        );
+
+
+    const riskPercent =
+        this.safeNumber(
+
+            this.getInputValue(
+
+                [
+                    "riskPercent",
+                    "risk",
+                    "riskPercentage"
+                ],
+
+                this.config.defaultRiskPercent
+
+            )
+
+        );
+
+
+    const entry =
+        this.safeNumber(
+
+            this.getInputValue(
+
+                [
+                    "entry",
+                    "entryPrice",
+                    "stockEntry"
+                ],
+
+                0
+
+            )
+
+        );
+
+
+    const stop =
+        this.safeNumber(
+
+            this.getInputValue(
+
+                [
+                    "stop",
+                    "stopPrice",
+                    "stockStop"
+                ],
+
+                0
+
+            )
+
+        );
+
+
+    const target =
+        this.safeNumber(
+
+            this.getInputValue(
+
+                [
+                    "target",
+                    "targetPrice",
+                    "stockTarget"
+                ],
+
+                0
+
+            )
+
+        );
+
+
+    const optionPremium =
+        this.safeNumber(
+
+            this.getInputValue(
+
+                [
+                    "optionPremium",
+                    "premium",
+                    "optionEntry"
+                ],
+
+                0
+
+            )
+
+        );
+
+
+    const optionDelta =
+        Math.abs(
+
+            this.safeNumber(
+
+                this.getInputValue(
+
+                    [
+                        "optionDelta",
+                        "delta"
+                    ],
+
+                    this.config.defaultOptionDelta
+
+                )
+
+            )
+
+        );
+
+
+    const desiredContracts =
+        Math.max(
+
+            0,
+
+            Math.floor(
+
+                this.safeNumber(
+
+                    this.getInputValue(
+
+                        [
+                            "desiredContracts",
+                            "contracts",
+                            "positionSize",
+                            "quantity"
+                        ],
+
+                        0
+
+                    )
+
+                )
+
+            )
+
+        );
+
+
+    const capitalAllocationPercent =
+        this.safeNumber(
+
+            this.getInputValue(
+
+                [
+                    "capitalAllocationPercent",
+                    "capitalAllocation",
+                    "allocationPercent"
+                ],
+
+                this.config
+                    .defaultCapitalAllocationPercent
+
+            )
+
+        );
+
+
+    const reserveCashPercent =
+        this.safeNumber(
+
+            this.getInputValue(
+
+                [
+                    "reserveCashPercent",
+                    "reservePercent",
+                    "cashReserve"
+                ],
+
+                this.config
+                    .defaultReserveCashPercent
+
+            )
+
+        );
+
+
+    const maxPremiumRisk =
+        this.getCheckboxValue(
+
+            [
+                "maxPremiumRisk",
+                "premiumRisk"
+            ],
+
+            false
+
+        );
+
+
+    return {
+
+        symbol,
+
+        instrument,
+
+        direction,
+
+        accountBalance,
+
+        riskPercent,
+
+        entry,
+
+        stop,
+
+        target,
+
+        optionPremium,
+
+        optionDelta,
+
+        desiredContracts,
+
+        capitalAllocationPercent,
+
+        reserveCashPercent,
+
+        maxPremiumRisk
+
+    };
+
+},
+
+
+/* =====================================================
+   VALIDATE BASE TRADE
+===================================================== */
+
+validateInputs(
+    inputs
+) {
+
+    if (
+        !inputs.symbol
+    ) {
+
+        return {
+
+            valid:
+                false,
+
+            error:
+                "Enter a stock or crypto symbol."
+
+        };
+
+    }
+
+
+    if (
+        inputs.accountBalance <= 0
+    ) {
+
+        return {
+
+            valid:
+                false,
+
+            error:
+                "Enter a valid account balance."
+
+        };
+
+    }
+
+
+    if (
+        inputs.riskPercent <= 0
+    ) {
+
+        return {
+
+            valid:
+                false,
+
+            error:
+                "Enter a valid risk percentage."
+
+        };
+
+    }
+
+
+    if (
+        inputs.entry <= 0
+    ) {
+
+        return {
+
+            valid:
+                false,
+
+            error:
+                "Enter a valid entry price."
+
+        };
+
+    }
+
+
+    if (
+        inputs.stop <= 0
+    ) {
+
+        return {
+
+            valid:
+                false,
+
+            error:
+                "Enter a valid stop price."
+
+        };
+
+    }
+
+
+    return {
+
+        valid:
+            true,
+
+        error:
+            null
+
+    };
+
+},
+
+
+/* =====================================================
+   CALCULATE STOCK PLAN
+===================================================== */
+
+calculateStockPlan(
+    inputs
+) {
+
+    if (
+        !window.ROLyfeRiskEngine
+    ) {
+
+        return {
+
+            valid:
+                false,
+
+            error:
+                "RO'LYFE Risk Engine is not loaded."
+
+        };
+
+    }
+
+
+    const risk =
+
+        window.ROLyfeRiskEngine
+            .calculateStock({
+
+                accountBalance:
+                    inputs.accountBalance,
+
+                riskPercent:
+                    inputs.riskPercent,
+
+                entry:
+                    inputs.entry,
+
+                stop:
+                    inputs.stop,
+
+                direction:
+                    inputs.direction
+
+            });
+
+
+    if (
+        !risk.valid
+    ) {
+
+        return risk;
+
+    }
+
+
+    return {
+
+        valid:
+            true,
+
+        risk,
+
+        recommendedSize:
+            risk.recommendedShares,
+
+        selectedSize:
+
+            inputs.desiredContracts > 0
+
+                ? inputs.desiredContracts
+
+                : risk.recommendedShares
+
+    };
+
+},
+
+
+/* =====================================================
+   CALCULATE CRYPTO PLAN
+===================================================== */
+
+calculateCryptoPlan(
+    inputs
+) {
+
+    if (
+        !window.ROLyfeRiskEngine
+    ) {
+
+        return {
+
+            valid:
+                false,
+
+            error:
+                "RO'LYFE Risk Engine is not loaded."
+
+        };
+
+    }
+
+
+    const risk =
+
+        window.ROLyfeRiskEngine
+            .calculateCrypto({
+
+                accountBalance:
+                    inputs.accountBalance,
+
+                riskPercent:
+                    inputs.riskPercent,
+
+                entry:
+                    inputs.entry,
+
+                stop:
+                    inputs.stop,
+
+                direction:
+                    inputs.direction
+
+            });
+
+
+    if (
+        !risk.valid
+    ) {
+
+        return risk;
+
+    }
+
+
+    return {
+
+        valid:
+            true,
+
+        risk,
+
+        recommendedSize:
+            risk.quantity,
+
+        selectedSize:
+
+            inputs.desiredContracts > 0
+
+                ? inputs.desiredContracts
+
+                : risk.quantity
+
+    };
+
+},
+
+
+/* =====================================================
+   CALCULATE OPTION PLAN
+===================================================== */
+
+calculateOptionPlan(
+    inputs
+) {
+
+    if (
+        !window.ROLyfeRiskEngine
+    ) {
+
+        return {
+
+            valid:
+                false,
+
+            error:
+                "RO'LYFE Risk Engine is not loaded."
+
+        };
+
+    }
+
+
+    if (
+        inputs.optionPremium <= 0
+    ) {
+
+        return {
+
+            valid:
+                false,
+
+            error:
+                "Enter a valid option premium."
+
+        };
+
+    }
+
+
+    const risk =
+
+        window.ROLyfeRiskEngine
+            .calculateOption({
+
+                accountBalance:
+                    inputs.accountBalance,
+
+                riskPercent:
+                    inputs.riskPercent,
+
+                stockEntry:
+                    inputs.entry,
+
+                stockStop:
+                    inputs.stop,
+
+                optionPremium:
+                    inputs.optionPremium,
+
+                optionDelta:
+                    inputs.optionDelta,
+
+                direction:
+                    inputs.direction,
+
+                maxPremiumRisk:
+                    inputs.maxPremiumRisk,
+
+                desiredContracts:
+                    inputs.desiredContracts,
+
+                capitalAllocationPercent:
+                    inputs.capitalAllocationPercent,
+
+                reserveCashPercent:
+                    inputs.reserveCashPercent
+
+            });
+
+
+    if (
+        !risk.valid
+    ) {
+
+        return risk;
+
+    }
+
+
+    return {
+
+        valid:
+            true,
+
+        risk,
+
+        recommendedSize:
+            risk.recommendedContracts,
+
+        selectedSize:
+
+            inputs.desiredContracts > 0
+
+                ? inputs.desiredContracts
+
+                : risk.recommendedContracts
+
+    };
+
+},
+
+
+/* =====================================================
+   BUILD LADDER
+===================================================== */
+
+buildLadder(
+    inputs,
+    positionData
+) {
+
+    if (
+        !window.ROLyfeLadderEngine
+    ) {
+
+        return {
+
+            valid:
+                false,
+
+            error:
+                "RO'LYFE Ladder Engine is not loaded."
+
+        };
+
+    }
+
+
+    const size =
+        positionData.selectedSize;
+
+
+    if (
+        inputs.instrument === "option"
+    ) {
+
+        return window
+            .ROLyfeLadderEngine
+            .buildOptionLadder({
+
+                stockEntry:
+                    inputs.entry,
+
+                stockStop:
+                    inputs.stop,
+
+                contracts:
+                    size,
+
+                optionPremium:
+                    inputs.optionPremium,
+
+                accountBalance:
+                    inputs.accountBalance,
+
+                direction:
+                    inputs.direction
+
+            });
+
+    }
+
+
+    if (
+        inputs.instrument === "stock"
+    ) {
+
+        return window
+            .ROLyfeLadderEngine
+            .buildStockLadder({
+
+                entry:
+                    inputs.entry,
+
+                stop:
+                    inputs.stop,
+
+                positionSize:
+                    size,
+
+                direction:
+                    inputs.direction,
+
+                instrument:
+                    "stock",
+
+                accountBalance:
+                    inputs.accountBalance
+
+            });
+
+    }
+
+
+    return {
+
+        valid:
+            false,
+
+        error:
+            "Ladder is currently supported for stock and options."
+
+    };
+
+},
+
+
+/* =====================================================
+   CALCULATE TRADE QUALITY
+===================================================== */
+
+calculateTradeQuality(
+    inputs,
+    risk,
+    ladder
+) {
+
+    let score =
+        100;
+
+
+    const warnings =
+        [];
+
+
+    /*
+       RISK PERCENTAGE
+    */
+
+    if (
+        inputs.riskPercent > 5
+    ) {
+
+        score -=
+            30;
+
+
+        warnings.push(
+            "High account risk percentage."
+        );
+
+    }
+
+    else if (
+        inputs.riskPercent > 3
+    ) {
+
+        score -=
+            15;
+
+
+        warnings.push(
+            "Elevated account risk percentage."
+        );
+
+    }
+
+
+    /*
+       POSITION CHECK
+    */
+
+    if (
+        risk?.positionCheck
+            ?.exceedsRisk
+    ) {
+
+        score -=
+            35;
+
+
+        warnings.push(
+            "Selected position exceeds risk limit."
+        );
+
+    }
+
+
+    if (
+        risk?.positionCheck
+            ?.exceedsCapital
+    ) {
+
+        score -=
+            40;
+
+
+        warnings.push(
+            "Selected position exceeds available capital."
+        );
+
+    }
+
+
+    /*
+       LADDER CHECK
+    */
+
+    if (
+        !ladder ||
+        !ladder.valid
+    ) {
+
+        score -=
+            20;
+
+
+        warnings.push(
+            "Profit ladder could not be built."
+        );
+
+    }
+
+
+    score =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                score
+            )
+        );
+
+
+    let grade =
+        "A";
+
+
+    let level =
+        "safe";
+
+
+    if (
+        score < 50
+    ) {
+
+        grade =
+            "F";
+
+
+        level =
+            "danger";
+
+    }
+
+    else if (
+        score < 65
+    ) {
+
+        grade =
+            "D";
+
+
+        level =
+            "danger";
+
+    }
+
+    else if (
+        score < 75
+    ) {
+
+        grade =
+            "C";
+
+
+        level =
+            "warning";
+
+    }
+
+    else if (
+        score < 90
+    ) {
+
+        grade =
+            "B";
+
+
+        level =
+            "good";
+
+    }
+
+
+    return {
+
+        score,
+
+        grade,
+
+        level,
+
+        warnings
+
+    };
+
+},
+
+
+/* =====================================================
+   BUILD MASTER TRADE PLAN
+===================================================== */
+
+buildMasterPlan(
+    inputs,
+    positionData,
+    ladder
+) {
+
+    const risk =
+        positionData.risk;
+
+
+    const tradeId =
+        this.generateTradeId(
+            inputs.symbol
+        );
+
+
+    const stockRiskPerUnit =
+        Math.abs(
+            inputs.entry -
+            inputs.stop
+        );
+
+
+    const riskReward =
+        inputs.target > 0 &&
+        window.ROLyfeRiskEngine
+
+            ? window
+                .ROLyfeRiskEngine
+                .calculateRiskReward(
+
+                    inputs.entry,
+
+                    inputs.stop,
+
+                    inputs.target
+
+                )
+
+            : null;
+
+
+    const quality =
+        this.calculateTradeQuality(
+
+            inputs,
+
+            risk,
+
+            ladder
+
+        );
+
+
+    const plan = {
+
+        /* =============================================
+           IDENTITY
+        ============================================= */
+
+        id:
+            tradeId,
+
+
+        createdAt:
+            new Date()
+                .toISOString(),
+
+
+        status:
+            "PLANNED",
+
+
+        /* =============================================
+           TRADE
+        ============================================= */
+
+        symbol:
+            inputs.symbol,
+
+
+        instrument:
+            inputs.instrument,
+
+
+        direction:
+            inputs.direction,
+
+
+        /* =============================================
+           SETUP
+        ============================================= */
+
+        setup: {
+
+            entry:
+                inputs.entry,
+
+            stop:
+                inputs.stop,
+
+            target:
+                inputs.target || null,
+
+            riskPerUnit:
+                stockRiskPerUnit,
+
+            riskReward
+
+        },
+
+
+        /* =============================================
+           ACCOUNT
+        ============================================= */
+
+        account: {
+
+            balance:
+                inputs.accountBalance,
+
+            riskPercent:
+                inputs.riskPercent,
+
+            dollarRisk:
+                risk.dollarRisk ||
+
+                (
+                    inputs.accountBalance *
+                    inputs.riskPercent /
+                    100
+                ),
+
+            capitalAllocationPercent:
+                inputs.capitalAllocationPercent,
+
+            reserveCashPercent:
+                inputs.reserveCashPercent
+
+        },
+
+
+        /* =============================================
+           POSITION
+        ============================================= */
+
+        position: {
+
+            recommendedSize:
+                positionData.recommendedSize,
+
+
+            desiredSize:
+                inputs.desiredContracts,
+
+
+            selectedSize:
+                positionData.selectedSize,
+
+
+            status:
+
+                risk.positionCheck
+                    ?.status ||
+
+                "RISK_CALCULATED",
+
+
+            level:
+
+                risk.positionCheck
+                    ?.level ||
+
+                "neutral"
+
+        },
+
+
+        /* =============================================
+           FULL RISK ENGINE OUTPUT
+        ============================================= */
+
+        risk,
+
+
+        /* =============================================
+           LADDER
+        ============================================= */
+
+        ladder,
+
+
+        /* =============================================
+           QUALITY SCORE
+        ============================================= */
+
+        quality,
+
+
+        /* =============================================
+           JOURNAL DATA
+        ============================================= */
+
+        journal: {
+
+            status:
+                "PLANNED",
+
+            openedAt:
+                null,
+
+            closedAt:
+                null,
+
+            notes:
+                "",
+
+            realizedProfit:
+                0,
+
+            realizedLoss:
+                0
+
+        }
+
+    };
+
+
+    return plan;
+
+},
+
+
+/* =====================================================
+   CREATE TRADE PLAN
+
+   MAIN FUNCTION CALLED BY:
+
+   TradeController.createTradePlan()
+
+===================================================== */
+
+createPlan(
+    suppliedInputs = null
+) {
+
+    console.log(
+        "🧠 RO'LYFE MASTER TRADE PLANNER STARTING..."
+    );
+
+
+    const inputs =
+
+        suppliedInputs ||
+
+        this.collectInputs();
+
+
+    console.log(
+        "📥 TRADE INPUTS:",
+        inputs
+    );
+
+
+    /*
+       VALIDATE
+    */
+
+    const validation =
+        this.validateInputs(
+            inputs
+        );
+
+
+    if (
+        !validation.valid
+    ) {
+
+        console.error(
+            "❌ TRADE PLAN ERROR:",
+            validation.error
+        );
+
+
+        this.showMessage(
+            validation.error,
+            "danger"
+        );
+
+
+        return null;
+
+    }
+
+
+    /*
+       SELECT RISK MODEL
+    */
+
+    let positionData;
+
+
+    if (
+        inputs.instrument === "crypto"
+    ) {
+
+        positionData =
+            this.calculateCryptoPlan(
+                inputs
+            );
+
+    }
+
+
+    else if (
+        inputs.instrument === "option"
+    ) {
+
+        positionData =
+            this.calculateOptionPlan(
+                inputs
+            );
+
+    }
+
+
+    else {
+
+        positionData =
+            this.calculateStockPlan(
+                inputs
+            );
+
+    }
+
+
+    /*
+       CHECK RISK RESULT
+    */
+
+    if (
+        !positionData.valid
+    ) {
+
+        console.error(
+            "❌ POSITION CALCULATION ERROR:",
+            positionData.error
+        );
+
+
+        this.showMessage(
+            positionData.error ||
+            "Unable to calculate position.",
+            "danger"
+        );
+
+
+        return null;
+
+    }
+
+
+    /*
+       BUILD LADDER
+    */
+
+    const ladder =
+        this.buildLadder(
+
+            inputs,
+
+            positionData
+
+        );
+
+
+    /*
+       BUILD MASTER PLAN
+    */
+
+    const plan =
+        this.buildMasterPlan(
+
+            inputs,
+
+            positionData,
+
+            ladder
+
+        );
+
+
+    /*
+       SAVE STATE
+    */
+
+    this.state.activePlan =
+        plan;
+
+
+    this.state.lastPlan =
+        plan;
+
+
+    this.state.planHistory.push(
+        plan
+    );
+
+
+    /*
+       GLOBAL ACTIVE PLAN
+    */
+
+    window.activeTradePlan =
+        plan;
+
+
+    /*
+       UPDATE CURRENT SYMBOL
+    */
+
+    if (
+        window.TradeController
+    ) {
+
+        window.TradeController
+            .state
+            .currentSymbol =
+                plan.symbol;
+
+    }
+
+
+    /*
+       UPDATE UI
+    */
+
+    this.renderPlan(
+        plan
+    );
+
+
+    /*
+       DISPATCH EVENT
+    */
+
+    window.dispatchEvent(
+
+        new CustomEvent(
+
+            "roLyfeTradePlanBuilt",
+
+            {
+
+                detail:
+                    plan
+
+            }
+
+        )
+
+    );
+
+
+    /*
+       SUCCESS MESSAGE
+    */
+
+    this.showMessage(
+
+        `🧠 MASTER TRADE PLAN CREATED: ${plan.symbol}`,
+
+        "success"
+
+    );
+
+
+    console.log(
+        "✅ RO'LYFE MASTER TRADE PLAN:",
+        plan
+    );
+
+
+    return plan;
+
+},
+
+
+/* =====================================================
+   RENDER PLAN TO UI
+
+   Optional containers:
+
+   #tradePlanOutput
+   #tradePlanResults
+   #planResults
+
+===================================================== */
+
+renderPlan(
+    plan
+) {
+
+    const container =
+
+        document.getElementById(
+            "tradePlanOutput"
+        ) ||
+
+        document.getElementById(
+            "tradePlanResults"
+        ) ||
+
+        document.getElementById(
+            "planResults"
+        );
+
+
+    if (
+        !container
+    ) {
+
+        return;
+
+    }
+
+
+    const positionCheck =
+        plan.risk
+            ?.positionCheck;
+
+
+    const ladder =
+        plan.ladder;
+
+
+    container.innerHTML = `
+
+        <div class="rolyfe-master-plan">
+
+            <h3>
+                🎯 RO'LYFE MASTER TRADE PLAN
+            </h3>
+
+            <div>
+                <strong>Symbol:</strong>
+                ${plan.symbol}
             </div>
 
-
-            <div class="row">
-
-
-                <div class="field">
-
-                    <label>
-                        Instrument
-                    </label>
-
-                    <select id="instrument">
-
-                        <option value="Stock">
-                            Stock
-                        </option>
-
-                        <option value="Option">
-                            Option
-                        </option>
-
-                        <option value="Crypto">
-                            Crypto
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <div class="field">
-
-                    <label>
-                        Direction
-                    </label>
-
-                    <select id="direction">
-
-                        <option value="Long">
-                            Long
-                        </option>
-
-                        <option value="Short">
-                            Short
-                        </option>
-
-                    </select>
-
-                </div>
-
-
+            <div>
+                <strong>Instrument:</strong>
+                ${plan.instrument}
             </div>
 
-
-        </section>
-
-
-
-        <!-- ====================================
-             ACCOUNT / RISK
-        ===================================== -->
-
-        <section class="card">
-
-            <h2>
-                🛡️ Account & Risk
-            </h2>
-
-
-            <div class="field">
-
-                <label>
-                    Account Size
-                </label>
-
-                <input
-                    type="number"
-                    id="accountSize"
-                    placeholder="10000"
-                    step="any"
-                >
-
+            <div>
+                <strong>Direction:</strong>
+                ${plan.direction.toUpperCase()}
             </div>
 
+            <hr>
 
-            <div class="field">
-
-                <label>
-                    Risk Percentage
-                </label>
-
-                <input
-                    type="number"
-                    id="riskPercent"
-                    placeholder="1"
-                    step="0.01"
-                >
-
+            <div>
+                <strong>Entry:</strong>
+                ${this.formatMoney(plan.setup.entry)}
             </div>
 
-
-            <div class="field">
-
-                <label>
-                    Trade Probability %
-                </label>
-
-                <input
-                    type="number"
-                    id="probability"
-                    placeholder="70"
-                    min="0"
-                    max="100"
-                    step="1"
-                >
-
+            <div>
+                <strong>Stop:</strong>
+                ${this.formatMoney(plan.setup.stop)}
             </div>
 
-
-            <div class="field">
-
-                <label>
-                    Implied Volatility %
-                </label>
-
-                <input
-                    type="number"
-                    id="impliedVolatility"
-                    placeholder="45"
-                    step="0.01"
-                >
-
+            <div>
+                <strong>Risk Per Unit:</strong>
+                ${this.formatMoney(plan.setup.riskPerUnit)}
             </div>
 
-
-        </section>
-
-
-
-        <!-- ====================================
-             STOCK TRADE MAP
-        ===================================== -->
-
-        <section class="card">
-
-            <h2>
-                📈 Stock / Asset Map
-            </h2>
-
-
-            <div class="field">
-
-                <label>
-                    Entry Price
-                </label>
-
-                <input
-                    type="number"
-                    id="entry"
-                    placeholder="180"
-                    step="any"
-                >
-
+            <div>
+                <strong>Account Risk:</strong>
+                ${this.formatMoney(plan.account.dollarRisk)}
             </div>
 
+            <hr>
 
-            <div class="field">
-
-                <label>
-                    Stop Loss
-                </label>
-
-                <input
-                    type="number"
-                    id="stop"
-                    placeholder="175"
-                    step="any"
-                >
-
+            <div>
+                <strong>Recommended Size:</strong>
+                ${this.formatSize(plan.position.recommendedSize)}
             </div>
 
-
-            <div class="row">
-
-
-                <div class="field">
-
-                    <label>
-                        Manual TP1 (Optional)
-                    </label>
-
-                    <input
-                        type="number"
-                        id="target1"
-                        placeholder="Auto 1R"
-                        step="any"
-                    >
-
-                </div>
-
-
-                <div class="field">
-
-                    <label>
-                        Manual TP2 (Optional)
-                    </label>
-
-                    <input
-                        type="number"
-                        id="target2"
-                        placeholder="Auto 2R"
-                        step="any"
-                    >
-
-                </div>
-
-
+            <div>
+                <strong>Selected Size:</strong>
+                ${this.formatSize(plan.position.selectedSize)}
             </div>
 
-
-            <div class="field">
-
-                <label>
-                    Manual TP3 (Optional)
-                </label>
-
-                <input
-                    type="number"
-                    id="target3"
-                    placeholder="Auto 3R"
-                    step="any"
-                >
-
+            <div>
+                <strong>Position Status:</strong>
+                ${plan.position.status}
             </div>
 
+            <hr>
 
-        </section>
-
-
-
-        <!-- ====================================
-             OPTION EXECUTION
-        ===================================== -->
-
-        <section class="card">
-
-            <h2>
-                🎯 Option Execution
-            </h2>
-
-
-            <div class="row">
-
-
-                <div class="field">
-
-                    <label>
-                        Option Type
-                    </label>
-
-                    <select id="optionType">
-
-                        <option value="Call">
-                            Call
-                        </option>
-
-                        <option value="Put">
-                            Put
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <div class="field">
-
-                    <label>
-                        Strike Price
-                    </label>
-
-                    <input
-                        type="number"
-                        id="strike"
-                        placeholder="180"
-                        step="any"
-                    >
-
-                </div>
-
-
+            <div>
+                <strong>Trade Quality:</strong>
+                ${plan.quality.score}/100
+                (${plan.quality.grade})
             </div>
 
+            ${this.renderLadderHTML(ladder)}
 
-            <div class="field">
+            <hr>
 
-                <label>
-                    Expiration
-                </label>
-
-                <input
-                    type="date"
-                    id="expiration"
-                >
-
+            <div>
+                ${positionCheck?.message || ""}
             </div>
 
+        </div>
 
-            <div class="row">
+    `;
 
-
-                <div class="field">
-
-                    <label>
-                        Option Entry Premium
-                    </label>
-
-                    <input
-                        type="number"
-                        id="optionEntry"
-                        placeholder="2.53"
-                        step="0.01"
-                    >
-
-                </div>
+},
 
 
-                <div class="field">
+/* =====================================================
+   RENDER LADDER HTML
+===================================================== */
 
-                    <label>
-                        Option Delta
-                    </label>
+renderLadderHTML(
+    ladder
+) {
 
-                    <input
-                        type="number"
-                        id="optionDelta"
-                        placeholder="0.50"
-                        step="0.01"
-                        min="-1"
-                        max="1"
-                    >
+    if (
+        !ladder ||
+        !ladder.valid
+    ) {
 
-                </div>
+        return `
 
-
+            <div>
+                ⚠️ Ladder unavailable.
             </div>
 
+        `;
 
-            <div class="row">
-
-
-                <div class="field">
-
-                    <label>
-                        Option TP1
-                    </label>
-
-                    <input
-                        type="number"
-                        id="optionTarget1"
-                        placeholder="3.00"
-                        step="0.01"
-                    >
-
-                </div>
+    }
 
 
-                <div class="field">
+    /*
+       OPTION LADDER
+    */
 
-                    <label>
-                        Option TP2
-                    </label>
+    if (
+        ladder.instrument === "option"
+    ) {
 
-                    <input
-                        type="number"
-                        id="optionTarget2"
-                        placeholder="4.00"
-                        step="0.01"
-                    >
+        return `
 
-                </div>
+            <h4>
+                🪜 EXIT LADDER
+            </h4>
 
-
+            <div>
+                TP1:
+                ${this.formatMoney(
+                    ladder.targets.tp1.stockPrice
+                )}
+                •
+                ${ladder.targets.tp1.contracts}
+                Contract(s)
             </div>
 
-
-            <div class="field">
-
-                <label>
-                    Option TP3
-                </label>
-
-                <input
-                    type="number"
-                    id="optionTarget3"
-                    placeholder="5.00"
-                    step="0.01"
-                >
-
+            <div>
+                TP2:
+                ${this.formatMoney(
+                    ladder.targets.tp2.stockPrice
+                )}
+                •
+                ${ladder.targets.tp2.contracts}
+                Contract(s)
             </div>
 
+            <div>
+                TP3:
+                ${this.formatMoney(
+                    ladder.targets.tp3.stockPrice
+                )}
+                •
+                ${ladder.targets.tp3.contracts}
+                Contract(s)
+            </div>
 
-        </section>
+            <div>
+                RUNNER:
+                ${this.formatMoney(
+                    ladder.targets.runner.stockPrice
+                )}
+                •
+                ${ladder.targets.runner.contracts}
+                Contract(s)
+            </div>
 
+        `;
 
-    </div>
-
-
-
-    <!-- ========================================
-         ACTION BUTTONS
-    ========================================= -->
-
-    <div class="button-row">
-
-        <button
-            class="primary-button"
-            type="button"
-            onclick="TradePlanner.createPlan()"
-        >
-
-            🎯 CREATE MASTER TRADE PLAN
-
-        </button>
-
-
-        <button
-            class="secondary-button"
-            type="button"
-            onclick="TradePlanner.savePlan()"
-        >
-
-            💾 SAVE PLAN
-
-        </button>
+    }
 
 
-        <button
-            class="secondary-button"
-            type="button"
-            onclick="TradePlanner.addToJournal()"
-        >
+    /*
+       STOCK LADDER
+    */
 
-            📓 ADD TO JOURNAL
+    if (
+        ladder.targets
+    ) {
 
-        </button>
+        return `
 
+            <h4>
+                🪜 EXIT LADDER
+            </h4>
 
-    </div>
+            <div>
+                TP1:
+                ${this.formatMoney(
+                    ladder.targets.tp1.price
+                )}
+                •
+                ${ladder.targets.tp1.quantity}
+                Units
+            </div>
 
+            <div>
+                TP2:
+                ${this.formatMoney(
+                    ladder.targets.tp2.price
+                )}
+                •
+                ${ladder.targets.tp2.quantity}
+                Units
+            </div>
 
+            <div>
+                TP3:
+                ${this.formatMoney(
+                    ladder.targets.tp3.price
+                )}
+                •
+                ${ladder.targets.tp3.quantity}
+                Units
+            </div>
 
-    <!-- ========================================
-         TRADE PLAN OUTPUT
+            <div>
+                RUNNER:
+                ${this.formatMoney(
+                    ladder.targets.runner.price
+                )}
+                •
+                ${ladder.targets.runner.quantity}
+                Units
+            </div>
 
-         TradePlanner.displayPlan()
-         writes the complete plan here.
-    ========================================= -->
+        `;
 
-    <div
-        id="tradePlanOutput"
-    >
-
-    </div>
-
-
-</main>
-
-
-
-<!-- ============================================
-     JAVASCRIPT LOAD ORDER
-
-     THIS ORDER MATTERS
-============================================= -->
-
-
-<!-- 1. RISK ENGINE FIRST -->
-
-<script
-    src="js/risk-engine.js"
-></script>
-
-
-<!-- 2. LADDER ENGINE SECOND -->
-
-<script
-    src="js/ladder-engine.js"
-></script>
-
-
-<!-- 3. TRADE JOURNAL -->
-
-<script
-    src="js/trade-journal.js"
-></script>
+    }
 
 
-<!-- 4. MASTER TRADE PLANNER LAST -->
+    return "";
 
-<script
-    src="js/trade-planner.js"
-></script>
+},
 
-</body>
-</html>
+
+/* =====================================================
+   SHOW MESSAGE
+===================================================== */
+
+showMessage(
+    message,
+    level = "info"
+) {
+
+    const element =
+
+        document.getElementById(
+            "tradePlanMessage"
+        ) ||
+
+        document.querySelector(
+            "[data-role='trade-plan-message']"
+        );
+
+
+    if (
+        element
+    ) {
+
+        element.textContent =
+            message;
+
+
+        element.className =
+            `rolyfe-message ${level}`;
+
+    }
+
+
+    console.log(
+        `RO'LYFE ${level.toUpperCase()}:`,
+        message
+    );
+
+},
+
+
+/* =====================================================
+   GET ACTIVE PLAN
+===================================================== */
+
+getActivePlan() {
+
+    return this.state.activePlan;
+
+},
+
+
+/* =====================================================
+   CLEAR ACTIVE PLAN
+===================================================== */
+
+clearPlan() {
+
+    this.state.activePlan =
+        null;
+
+
+    window.activeTradePlan =
+        null;
+
+
+    console.log(
+        "🗑 RO'LYFE active trade plan cleared."
+    );
+
+},
+
+
+/* =====================================================
+   FORMAT MONEY
+===================================================== */
+
+formatMoney(
+    value
+) {
+
+    return new Intl.NumberFormat(
+
+        "en-US",
+
+        {
+
+            style:
+                "currency",
+
+            currency:
+                "USD"
+
+        }
+
+    ).format(
+
+        this.safeNumber(
+            value
+        )
+
+    );
+
+},
+
+
+/* =====================================================
+   FORMAT SIZE
+===================================================== */
+
+formatSize(
+    value
+) {
+
+    const number =
+        this.safeNumber(
+            value
+        );
+
+
+    return number
+        .toLocaleString(
+
+            "en-US",
+
+            {
+
+                maximumFractionDigits:
+                    4
+
+            }
+
+        );
+
+}
+
+};
+
+/* =========================================================
+GLOBAL EXPORT
+========================================================= */
+
+window.TradePlanner =
+TradePlanner;
+
+/* =========================================================
+SYSTEM READY
+========================================================= */
+
+console.log(
+"🧠 RO'LYFE MASTER TRADE PLANNER ONLINE"
+);
