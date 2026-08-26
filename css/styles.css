@@ -821,3 +821,723 @@ footer small {
     }
 
 }
+
+/* ============================================
+   RO'LYFE VISUAL TRADE CHART
+   LARGE EXECUTION MAP
+============================================ */
+
+#rolyfeTradeChart {
+
+    width: 100%;
+
+    margin-top: 25px;
+
+}
+
+
+.trade-chart-card {
+
+    width: 100%;
+
+    min-height: 650px;
+
+    padding: 30px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #101b14,
+            #08110c
+        );
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        18px;
+
+}
+
+
+.trade-chart-header {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    gap:
+        20px;
+
+    margin-bottom:
+        25px;
+
+}
+
+
+.trade-chart-header h3 {
+
+    margin:
+        0;
+
+    color:
+        var(--green);
+
+    font-size:
+        26px;
+
+}
+
+
+.trade-chart-header p {
+
+    color:
+        var(--muted);
+
+}
+
+
+.trade-chart-direction {
+
+    padding:
+        12px 20px;
+
+    border-radius:
+        12px;
+
+    font-size:
+        18px;
+
+    font-weight:
+        bold;
+
+}
+
+
+.trade-chart-direction.long {
+
+    color:
+        var(--green);
+
+    background:
+        rgba(
+            0,
+            230,
+            118,
+            .12
+        );
+
+}
+
+
+.trade-chart-direction.short {
+
+    color:
+        var(--danger);
+
+    background:
+        rgba(
+            255,
+            92,
+            92,
+            .12
+        );
+
+}
+
+
+/* ============================================
+   RISK / REWARD ZONES
+============================================ */
+
+.trade-chart-zones {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:
+        15px;
+
+    margin-bottom:
+        20px;
+
+}
+
+
+.trade-chart-zone {
+
+    padding:
+        12px;
+
+    text-align:
+        center;
+
+    border-radius:
+        10px;
+
+    font-weight:
+        bold;
+
+}
+
+
+.risk-zone {
+
+    color:
+        var(--danger);
+
+    background:
+        rgba(
+            255,
+            92,
+            92,
+            .08
+        );
+
+}
+
+
+.reward-zone {
+
+    color:
+        var(--green);
+
+    background:
+        rgba(
+            0,
+            230,
+            118,
+            .08
+        );
+
+}
+
+
+/* ============================================
+   MAIN VISUAL CHART
+============================================ */
+
+.trade-chart-body {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        110px 1fr;
+
+    gap:
+        15px;
+
+    min-height:
+        400px;
+
+}
+
+
+.trade-chart-scale {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    justify-content:
+        space-between;
+
+    padding:
+        10px 0;
+
+    color:
+        var(--muted);
+
+    font-size:
+        13px;
+
+    text-align:
+        right;
+
+}
+
+
+.trade-chart-visual {
+
+    position:
+        relative;
+
+    min-height:
+        400px;
+
+    background:
+        linear-gradient(
+            to top,
+            rgba(255, 92, 92, .06),
+            rgba(255, 255, 255, .02) 45%,
+            rgba(0, 230, 118, .08)
+        );
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        14px;
+
+    overflow:
+        hidden;
+
+}
+
+
+/* CENTER LINE */
+
+.trade-chart-center-line {
+
+    position:
+        absolute;
+
+    top:
+        0;
+
+    bottom:
+        0;
+
+    left:
+        50%;
+
+    width:
+        2px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .08
+        );
+
+}
+
+
+/* ============================================
+   LEVELS
+============================================ */
+
+.trade-chart-level {
+
+    position:
+        absolute;
+
+    left:
+        0;
+
+    width:
+        100%;
+
+    transform:
+        translateY(
+            50%
+        );
+
+}
+
+
+.trade-chart-line {
+
+    width:
+        100%;
+
+    border-top:
+        2px dashed
+        rgba(
+            255,
+            255,
+            255,
+            .25
+        );
+
+}
+
+
+.trade-chart-label {
+
+    position:
+        absolute;
+
+    left:
+        20px;
+
+    bottom:
+        10px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    padding:
+        8px 14px;
+
+    background:
+        #0b130e;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        10px;
+
+}
+
+
+.trade-chart-level-name {
+
+    font-weight:
+        bold;
+
+}
+
+
+.trade-chart-level-price {
+
+    color:
+        var(--muted);
+
+}
+
+
+/* STOP */
+
+.stop-level .trade-chart-line {
+
+    border-color:
+        var(--danger);
+
+}
+
+
+.stop-level .trade-chart-level-name {
+
+    color:
+        var(--danger);
+
+}
+
+
+/* ENTRY */
+
+.entry-level .trade-chart-line {
+
+    border-color:
+        white;
+
+    border-top-style:
+        solid;
+
+}
+
+
+.entry-level .trade-chart-level-name {
+
+    color:
+        white;
+
+}
+
+
+/* TARGETS */
+
+.target .trade-chart-line {
+
+    border-color:
+        var(--green);
+
+}
+
+
+.target .trade-chart-level-name {
+
+    color:
+        var(--green);
+
+}
+
+
+/* SIDE TEXT */
+
+.trade-chart-side-text {
+
+    position:
+        absolute;
+
+    right:
+        20px;
+
+    bottom:
+        10px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        12px;
+
+    font-weight:
+        bold;
+
+}
+
+
+/* DIRECTION ARROW */
+
+.trade-chart-arrow {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        );
+
+    font-size:
+        70px;
+
+    font-weight:
+        bold;
+
+    opacity:
+        .25;
+
+}
+
+
+.trade-chart-arrow.long {
+
+    color:
+        var(--green);
+
+}
+
+
+.trade-chart-arrow.short {
+
+    color:
+        var(--danger);
+
+}
+
+
+/* ============================================
+   FOOTER LEVELS
+============================================ */
+
+.trade-chart-footer {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            5,
+            1fr
+        );
+
+    gap:
+        10px;
+
+    margin-top:
+        20px;
+
+}
+
+
+.trade-chart-footer div {
+
+    padding:
+        14px;
+
+    text-align:
+        center;
+
+    background:
+        var(--panel-2);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        10px;
+
+}
+
+
+.trade-chart-footer strong {
+
+    display:
+        block;
+
+    color:
+        var(--green);
+
+    margin-bottom:
+        6px;
+
+}
+
+
+.trade-chart-footer span {
+
+    color:
+        var(--text);
+
+    font-weight:
+        bold;
+
+}
+
+
+/* ============================================
+   RULE
+============================================ */
+
+.trade-chart-rule {
+
+    margin-top:
+        20px;
+
+    padding:
+        16px;
+
+    text-align:
+        center;
+
+    color:
+        var(--muted);
+
+    background:
+        rgba(
+            0,
+            230,
+            118,
+            .05
+        );
+
+    border-radius:
+        10px;
+
+}
+
+
+/* ============================================
+   MOBILE
+============================================ */
+
+@media (
+    max-width:
+    700px
+) {
+
+    .trade-chart-card {
+
+        min-height:
+            550px;
+
+        padding:
+            16px;
+
+    }
+
+
+    .trade-chart-header {
+
+        flex-direction:
+            column;
+
+        align-items:
+            flex-start;
+
+    }
+
+
+    .trade-chart-zones {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .trade-chart-body {
+
+        grid-template-columns:
+            70px 1fr;
+
+        min-height:
+            380px;
+
+    }
+
+
+    .trade-chart-visual {
+
+        min-height:
+            380px;
+
+    }
+
+
+    .trade-chart-label {
+
+        left:
+            8px;
+
+        gap:
+            6px;
+
+        padding:
+            5px 8px;
+
+        font-size:
+            11px;
+
+    }
+
+
+    .trade-chart-side-text {
+
+        display:
+            none;
+
+    }
+
+
+    .trade-chart-footer {
+
+        grid-template-columns:
+            repeat(
+                2,
+                1fr
+            );
+
+    }
+
+   }
