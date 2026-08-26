@@ -2595,6 +2595,56 @@
             output.innerHTML =
                 "";
 
+        /* ========================================
+           RENDER RO'LYFE VISUAL TRADE CHART
+        ======================================== */
+
+        console.log(
+            "📊 CHECKING FOR RO'LYFE TRADE CHART..."
+        );
+
+
+        if (
+            window.TradeChart
+        ) {
+
+            console.log(
+                "🟢 TRADE CHART ENGINE FOUND"
+            );
+
+
+            window.TradeChart.render({
+
+                direction:
+                    direction,
+
+                entry:
+                    entry,
+
+                stop:
+                    stop,
+
+                target1:
+                    target1,
+
+                target2:
+                    target2,
+
+                target3:
+                    target3
+
+            });
+
+        }
+
+        else {
+
+            console.error(
+                "🔴 TradeChart engine not loaded!"
+            );
+
+        }           
+           
         }
 
 
