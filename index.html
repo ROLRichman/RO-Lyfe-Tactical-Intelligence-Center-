@@ -1,855 +1,651 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8"><meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
 
-<title>
-    RO'LYFE Tactical Intelligence Center™
-</title>
+    <meta charset="UTF-8">
 
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<style>
+    <title>
+        RO'LYFE Tactical Intelligence Center™
+    </title>
 
-    /* ============================================
-       RO'LYFE TACTICAL INTELLIGENCE CENTER
-    ============================================ */
 
-    * {
-        box-sizing: border-box;
-    }
+    <style>
 
+        /* ============================================
+           RO'LYFE TACTICAL INTELLIGENCE CENTER™
+           MAIN SYSTEM
+        ============================================ */
 
-    :root {
+        * {
+            box-sizing: border-box;
+        }
 
-        --bg:
-            #08110c;
 
-        --panel:
-            #101b14;
+        :root {
 
-        --panel-2:
-            #15231a;
+            --bg:
+                #08110c;
 
-        --border:
-            #294234;
+            --panel:
+                #101b14;
 
-        --green:
-            #00e676;
+            --panel-2:
+                #15231a;
 
-        --green-dark:
-            #00a854;
+            --panel-dark:
+                #07100c;
 
-        --text:
-            #f2f7f3;
+            --border:
+                #294234;
 
-        --muted:
-            #9aa89f;
+            --green:
+                #00e676;
 
-        --danger:
-            #ff5c5c;
+            --green-dark:
+                #00a854;
 
-        --gold:
-            #ffd54f;
+            --green-soft:
+                rgba(0, 230, 118, 0.12);
 
-    }
+            --text:
+                #f2f7f3;
 
+            --muted:
+                #9aa89f;
 
-    body {
+            --danger:
+                #ff5c5c;
 
-        margin: 0;
-
-        background:
-            var(--bg);
-
-        color:
-            var(--text);
-
-        font-family:
-            Arial,
-            Helvetica,
-            sans-serif;
-
-    }
-
-
-    /* ============================================
-       HEADER
-    ============================================ */
-
-    .app-header {
-
-        padding:
-            20px;
-
-        text-align:
-            center;
-
-        border-bottom:
-            1px solid var(--border);
-
-        background:
-            #0b130e;
-
-    }
-
-
-    .app-header h1 {
-
-        margin:
-            0;
-
-        font-size:
-            clamp(
-                22px,
-                5vw,
-                34px
-            );
-
-        color:
-            var(--green);
-
-    }
-
-
-    .app-header p {
-
-        margin:
-            8px 0 0;
-
-        color:
-            var(--muted);
-
-        font-size:
-            14px;
-
-    }
-
-
-    /* ============================================
-       MAIN
-    ============================================ */
-
-    .container {
-
-        width:
-            min(
-                1200px,
-                100%
-            );
-
-        margin:
-            auto;
-
-        padding:
-            20px;
-
-    }
-
-
-    /* ============================================
-       CARDS
-    ============================================ */
-
-    .card {
-
-        background:
-            var(--panel);
-
-        border:
-            1px solid var(--border);
-
-        border-radius:
-            14px;
-
-        padding:
-            20px;
-
-        margin-bottom:
-            20px;
-
-    }
-
-
-    .card h2 {
-
-        margin-top:
-            0;
-
-        color:
-            var(--green);
-
-    }
-
-
-    /* ============================================
-       FORM GRID
-    ============================================ */
-
-    .form-grid {
-
-        display:
-            grid;
-
-        grid-template-columns:
-            repeat(
-                auto-fit,
-                minmax(
-                    220px,
-                    1fr
-                )
-            );
-
-        gap:
-            15px;
-
-    }
-
-
-    .full-width {
-
-        grid-column:
-            1 / -1;
-
-    }
-
-
-    /* ============================================
-       INPUTS
-    ============================================ */
-
-    label {
-
-        display:
-            block;
-
-        margin-bottom:
-            7px;
-
-        color:
-            var(--muted);
-
-        font-size:
-            13px;
-
-        font-weight:
-            bold;
-
-    }
-
-
-    input,
-    select {
-
-        width:
-            100%;
-
-        padding:
-            13px;
-
-        background:
-            #08110c;
-
-        border:
-            1px solid var(--border);
-
-        border-radius:
-            8px;
-
-        color:
-            white;
-
-        font-size:
-            16px;
-
-        outline:
-            none;
-
-    }
-
-
-    input:focus,
-    select:focus {
-
-        border-color:
-            var(--green);
-
-    }
-
-
-    /* ============================================
-       BUTTONS
-    ============================================ */
-
-    button {
-
-        border:
-            none;
-
-        border-radius:
-            10px;
-
-        padding:
-            15px 20px;
-
-        font-size:
-            16px;
-
-        font-weight:
-            bold;
-
-        cursor:
-            pointer;
-
-        background:
-            var(--green);
-
-        color:
-            #061009;
-
-        width:
-            100%;
-
-        margin-top:
-            15px;
-
-    }
-
-
-    button:hover {
-
-        opacity:
-            .85;
-
-    }
-
-
-    /* ============================================
-       OUTPUT
-    ============================================ */
-
-    #tradePlanOutput {
-
-        min-height:
-            100px;
-
-    }
-
-
-    .trade-plan-card {
-
-        background:
-            var(--panel);
-
-        border:
-            1px solid var(--green-dark);
-
-        border-radius:
-            14px;
-
-        padding:
-            20px;
-
-        margin-top:
-            20px;
-
-    }
-
-
-    .trade-plan-card h3 {
-
-        margin-top:
-            0;
-
-        color:
-            var(--green);
-
-        text-align:
-            center;
-
-    }
-
-
-    .plan-status {
-
-        text-align:
-            center;
-
-        padding:
-            8px;
-
-        background:
-            rgba(
-                0,
-                230,
-                118,
-                .12
-            );
-
-        color:
-            var(--green);
-
-        border-radius:
-            8px;
-
-        font-weight:
-            bold;
-
-        margin-bottom:
-            20px;
-
-    }
-
-
-    .plan-section {
-
-        background:
-            var(--panel-2);
-
-        border:
-            1px solid var(--border);
-
-        border-radius:
-            10px;
-
-        padding:
-            15px;
-
-        margin-bottom:
-            15px;
-
-    }
-
-
-    .plan-section h4 {
-
-        margin-top:
-            0;
-
-        color:
-            var(--green);
-
-    }
-
-
-    .plan-section p {
-
-        padding:
-            8px 0;
-
-        margin:
-            0;
-
-        border-bottom:
-            1px solid rgba(
-                255,
-                255,
-                255,
-                .06
-            );
-
-    }
-
-
-    .target-result {
-
-        padding:
-            15px;
-
-        margin:
-            10px 0;
-
-        background:
-            #0b130e;
-
-        border-radius:
-            8px;
-
-    }
-
-
-    .result-line {
-
-        display:
-            flex;
-
-        flex-wrap:
-            wrap;
-
-        gap:
-            10px;
-
-        margin-top:
-            10px;
-
-        color:
-            var(--muted);
-
-    }
-
-
-    .runner-box {
-
-        padding:
-            15px;
-
-        background:
-            rgba(
-                255,
-                213,
-                79,
-                .08
-            );
-
-        border:
-            1px solid rgba(
-                255,
-                213,
-                79,
-                .25
-            );
-
-        border-radius:
-            10px;
-
-        color:
-            var(--gold);
-
-        margin-top:
-            15px;
-
-    }
-
-
-    .trade-plan-actions {
-
-        display:
-            grid;
-
-        grid-template-columns:
-            1fr 1fr;
-
-        gap:
-            10px;
-
-    }
-
-
-    .trade-plan-actions button {
-
-        background:
-            var(--green-dark);
-
-        color:
-            white;
-
-    }
-
-
-    .plan-date {
-
-        color:
-            var(--muted);
-
-        text-align:
-            center;
-
-        font-size:
-            12px;
-
-    }
-
-
-/* ============================================
-   RISK / REWARD TRADE MAP
-============================================ */
-
-.rr-chart {
-
-    width:
-        100%;
-
-    padding:
-        20px 10px 10px;
-
-    overflow:
-        hidden;
-
-}
-
-
-.rr-chart-header {
-
-    text-align:
-        center;
-
-    color:
-        var(--green);
-
-    font-weight:
-        bold;
-
-    margin-bottom:
-        35px;
-
-}
-
-
-.rr-chart-track {
-
-    position:
-        relative;
-
-    height:
-        90px;
-
-    width:
-        100%;
-
-    border-top:
-        3px solid var(--border);
-
-    margin:
-        35px 0 15px;
-
-}
-
-
-.rr-risk-zone {
-
-    position:
-        absolute;
-
-    top:
-        -8px;
-
-    height:
-        16px;
-
-    background:
-        rgba(
-            255,
-            92,
-            92,
-            .35
-        );
-
-    border:
-        1px solid var(--danger);
-
-    border-radius:
-        10px;
-
-}
-
-
-.rr-reward-zone {
-
-    position:
-        absolute;
-
-    top:
-        -8px;
-
-    height:
-        16px;
-
-    background:
-        rgba(
-            0,
-            230,
-            118,
-            .25
-        );
-
-    border:
-        1px solid var(--green);
-
-    border-radius:
-        10px;
-
-}
-
-
-.rr-marker {
-
-    position:
-        absolute;
-
-    top:
-        -25px;
-
-    transform:
-        translateX(
-            -50%
-        );
-
-    text-align:
-        center;
-
-    font-size:
-        11px;
-
-    min-width:
-        60px;
-
-}
-
-
-.rr-marker::after {
-
-    content:
-        "";
-
-    position:
-        absolute;
-
-    left:
-        50%;
-
-    top:
-        38px;
-
-    width:
-        2px;
-
-    height:
-        48px;
-
-    transform:
-        translateX(
-            -50%
-        );
-
-    background:
-        var(--muted);
-
-}
-
-
-.rr-marker span {
-
-    display:
-        block;
-
-    font-weight:
-        bold;
-
-}
-
-
-.rr-marker strong {
-
-    display:
-        block;
-
-    margin-top:
-        4px;
-
-}
-
-
-.rr-stop {
-
-    color:
-        var(--danger);
-
-}
-
-
-.rr-entry {
-
-    color:
-        white;
-
-}
-
-
-.rr-entry::after {
-
-    background:
-        white;
-
-}
-
-
-.rr-target {
-
-    color:
-        var(--green);
-
-}
-
-
-.rr-chart-legend {
-
-    display:
-        flex;
-
-    justify-content:
-        center;
-
-    flex-wrap:
-        wrap;
-
-    gap:
-        20px;
-
-    color:
-        var(--muted);
-
-    font-size:
-        12px;
-
-    margin-top:
-        15px;
-
-}
-
-
-@media (
-    max-width:
-    600px
-) {
-
-    .rr-chart {
-
-        overflow-x:
-            auto;
-
-    }
-
-
-    .rr-chart-track {
-
-        min-width:
-            550px;
-
-    }
-
-}    
-    
-    /* ============================================
-       MOBILE
-    ============================================ */
-
-    @media (
-        max-width:
-        600px
-    ) {
-
-        .container {
-
-            padding:
-                12px;
+            --gold:
+                #ffd54f;
 
         }
 
 
-        .card {
+        body {
+
+            margin:
+                0;
+
+            min-width:
+                320px;
+
+            background:
+                radial-gradient(
+                    circle at top,
+                    #163d2c 0%,
+                    #0b1b15 35%,
+                    #030705 100%
+                );
+
+            color:
+                var(--text);
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+        }
+
+
+        /* ============================================
+           HEADER
+        ============================================ */
+
+        .app-header {
 
             padding:
+                25px 20px;
+
+            text-align:
+                center;
+
+            border-bottom:
+                1px solid var(--border);
+
+            background:
+                rgba(11, 19, 14, 0.95);
+
+        }
+
+
+        .app-header h1 {
+
+            margin:
+                0;
+
+            font-size:
+                clamp(
+                    22px,
+                    5vw,
+                    38px
+                );
+
+            color:
+                var(--green);
+
+        }
+
+
+        .app-header p {
+
+            margin:
+                10px 0 0;
+
+            color:
+                var(--muted);
+
+            font-size:
+                14px;
+
+            font-weight:
+                bold;
+
+        }
+
+
+        /* ============================================
+           MAIN CONTAINER
+        ============================================ */
+
+        .container {
+
+            width:
+                min(
+                    1400px,
+                    100%
+                );
+
+            margin:
+                auto;
+
+            padding:
+                20px;
+
+        }
+
+
+        /* ============================================
+           CARDS
+        ============================================ */
+
+        .card {
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(16, 27, 20, 0.98),
+                    rgba(7, 16, 12, 0.98)
+                );
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                18px;
+
+            padding:
+                20px;
+
+            margin-bottom:
+                20px;
+
+            box-shadow:
+                0 12px 35px
+                rgba(0, 0, 0, 0.25);
+
+        }
+
+
+        .card h2 {
+
+            margin-top:
+                0;
+
+            color:
+                var(--green);
+
+        }
+
+
+        /* ============================================
+           FORM GRID
+        ============================================ */
+
+        .form-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(
+                        220px,
+                        1fr
+                    )
+                );
+
+            gap:
+                15px;
+
+        }
+
+
+        .full-width {
+
+            grid-column:
+                1 / -1;
+
+        }
+
+
+        /* ============================================
+           INPUTS
+        ============================================ */
+
+        label {
+
+            display:
+                block;
+
+            margin-bottom:
+                7px;
+
+            color:
+                var(--muted);
+
+            font-size:
+                13px;
+
+            font-weight:
+                bold;
+
+        }
+
+
+        input,
+        select {
+
+            width:
+                100%;
+
+            min-height:
+                50px;
+
+            padding:
+                13px;
+
+            background:
+                #08110c;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                10px;
+
+            color:
+                white;
+
+            font-size:
+                16px;
+
+            outline:
+                none;
+
+        }
+
+
+        input:focus,
+        select:focus {
+
+            border-color:
+                var(--green);
+
+            box-shadow:
+                0 0 0 3px
+                rgba(0, 230, 118, 0.10);
+
+        }
+
+
+        /* ============================================
+           BUTTONS
+        ============================================ */
+
+        button {
+
+            border:
+                none;
+
+            border-radius:
+                10px;
+
+            padding:
+                15px 20px;
+
+            font-size:
+                16px;
+
+            font-weight:
+                bold;
+
+            cursor:
+                pointer;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--green),
+                    #00b85c
+                );
+
+            color:
+                #061009;
+
+            width:
+                100%;
+
+            margin-top:
+                15px;
+
+            transition:
+                transform 0.2s ease,
+                opacity 0.2s ease;
+
+        }
+
+
+        button:hover {
+
+            opacity:
+                .90;
+
+            transform:
+                translateY(-1px);
+
+        }
+
+
+        /* ============================================
+           LIVE TRADINGVIEW CHART
+        ============================================ */
+
+        .chart-description {
+
+            color:
+                var(--muted);
+
+            margin-bottom:
+                15px;
+
+        }
+
+
+        .chart-status {
+
+            display:
+                inline-block;
+
+            margin-left:
+                8px;
+
+            padding:
+                4px 9px;
+
+            background:
+                var(--green-soft);
+
+            color:
+                var(--green);
+
+            border-radius:
+                20px;
+
+            font-size:
+                11px;
+
+            font-weight:
+                bold;
+
+        }
+
+
+        .tradingview-chart {
+
+            width:
+                100%;
+
+            height:
+                650px;
+
+            background:
+                #08110c;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                14px;
+
+            overflow:
+                hidden;
+
+        }
+
+
+        #tradingview_chart {
+
+            width:
+                100%;
+
+            height:
+                100%;
+
+        }
+
+
+        /* ============================================
+           OUTPUT
+        ============================================ */
+
+        #tradePlanOutput {
+
+            min-height:
+                100px;
+
+        }
+
+
+        .trade-plan-card {
+
+            background:
+                var(--panel);
+
+            border:
+                1px solid var(--green-dark);
+
+            border-radius:
+                14px;
+
+            padding:
+                20px;
+
+            margin-top:
+                20px;
+
+        }
+
+
+        .trade-plan-card h3 {
+
+            margin-top:
+                0;
+
+            color:
+                var(--green);
+
+            text-align:
+                center;
+
+        }
+
+
+        .plan-status {
+
+            text-align:
+                center;
+
+            padding:
+                8px;
+
+            background:
+                rgba(
+                    0,
+                    230,
+                    118,
+                    .12
+                );
+
+            color:
+                var(--green);
+
+            border-radius:
+                8px;
+
+            font-weight:
+                bold;
+
+            margin-bottom:
+                20px;
+
+        }
+
+
+        .plan-section {
+
+            background:
+                var(--panel-2);
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                10px;
+
+            padding:
+                15px;
+
+            margin-bottom:
+                15px;
+
+        }
+
+
+        .plan-section h4 {
+
+            margin-top:
+                0;
+
+            color:
+                var(--green);
+
+        }
+
+
+        .plan-section p {
+
+            padding:
+                8px 0;
+
+            margin:
+                0;
+
+            border-bottom:
+                1px solid rgba(
+                    255,
+                    255,
+                    255,
+                    .06
+                );
+
+        }
+
+
+        .target-result {
+
+            padding:
+                15px;
+
+            margin:
+                10px 0;
+
+            background:
+                #0b130e;
+
+            border-radius:
+                10px;
+
+        }
+
+
+        .result-line {
+
+            display:
+                flex;
+
+            flex-wrap:
+                wrap;
+
+            gap:
+                10px;
+
+            margin-top:
+                10px;
+
+            color:
+                var(--muted);
+
+        }
+
+
+        .runner-box {
+
+            padding:
+                15px;
+
+            background:
+                rgba(
+                    255,
+                    213,
+                    79,
+                    .08
+                );
+
+            border:
+                1px solid rgba(
+                    255,
+                    213,
+                    79,
+                    .25
+                );
+
+            border-radius:
+                10px;
+
+            color:
+                var(--gold);
+
+            margin-top:
                 15px;
 
         }
@@ -857,619 +653,1961 @@
 
         .trade-plan-actions {
 
+            display:
+                grid;
+
             grid-template-columns:
-                1fr;
+                1fr 1fr;
+
+            gap:
+                10px;
 
         }
 
-    }
 
-</style>
+        .trade-plan-actions button {
 
-</head><body><!-- ============================================
-     HEADER
-============================================= -->
+            background:
+                var(--green-dark);
 
-<header class="app-header">
+            color:
+                white;
 
-    <h1>
-        🎯 RO'LYFE TACTICAL INTELLIGENCE CENTER™
-    </h1>
+        }
 
-    <p>
-        PLAN → SIZE → LADDER → EXECUTE → JOURNAL → REVIEW
-    </p>
 
-</header>
+        .plan-date {
 
+            color:
+                var(--muted);
 
-<main class="container">
+            text-align:
+                center;
 
+            font-size:
+                12px;
 
-    <!-- ========================================
-         MASTER TRADE PLANNER
-    ========================================= -->
+        }
 
-    <section class="card">
 
-        <h2>
-            📋 MASTER TRADE PLANNER
-        </h2>
+        /* ============================================
+           RO'LYFE VISUAL TRADE CHART
+           USED BY trade-chart.js
+        ============================================ */
 
+        #rolyfeTradeChart {
 
-        <div class="form-grid">
+            margin-top:
+                20px;
 
+        }
 
-            <!-- SYMBOL -->
 
-            <div>
+        .trade-chart-card {
 
-                <label>
-                    Symbol
-                </label>
+            background:
+                linear-gradient(
+                    145deg,
+                    #101b14,
+                    #07100c
+                );
 
-                <input
-                    id="symbol"
-                    type="text"
-                    placeholder="Example: NVDA"
-                >
+            border:
+                1px solid var(--border);
 
-            </div>
+            border-radius:
+                18px;
 
+            padding:
+                20px;
 
-            <!-- INSTRUMENT -->
+            overflow:
+                hidden;
 
-            <div>
+        }
 
-                <label>
-                    Instrument
-                </label>
 
-                <select id="instrument">
+        .trade-chart-header {
 
-                    <option value="Stock">
-                        Stock
-                    </option>
+            display:
+                flex;
 
-                    <option value="Option">
-                        Option
-                    </option>
+            justify-content:
+                space-between;
 
-                    <option value="Crypto">
-                        Crypto
-                    </option>
+            align-items:
+                center;
 
-                </select>
+            gap:
+                15px;
 
-            </div>
+            margin-bottom:
+                20px;
 
+        }
 
-            <!-- DIRECTION -->
 
-            <div>
+        .trade-chart-header h3 {
 
-                <label>
-                    Direction
-                </label>
+            margin:
+                0;
 
-                <select id="direction">
+            color:
+                var(--green);
 
-                    <option value="Long">
-                        Long
-                    </option>
+        }
 
-                    <option value="Short">
-                        Short
-                    </option>
 
-                </select>
+        .trade-chart-header p {
 
-            </div>
+            color:
+                var(--muted);
 
+            margin-bottom:
+                0;
 
-            <!-- ACCOUNT SIZE -->
+        }
 
-            <div>
 
-                <label>
-                    Account Size
-                </label>
+        .trade-chart-direction {
 
-                <input
-                    id="accountSize"
-                    type="number"
-                    step="0.01"
-                    placeholder="10000"
-                >
+            padding:
+                10px 15px;
 
-            </div>
+            border-radius:
+                10px;
 
+            font-weight:
+                bold;
 
-            <!-- RISK PERCENT -->
+        }
 
-            <div>
 
-                <label>
-                    Risk Percentage
-                </label>
+        .trade-chart-direction.long {
 
-                <input
-                    id="riskPercent"
-                    type="number"
-                    step="0.01"
-                    placeholder="1"
-                >
+            color:
+                var(--green);
 
-            </div>
+            background:
+                rgba(0, 230, 118, 0.10);
 
+        }
 
-            <!-- PROBABILITY -->
 
-            <div>
+        .trade-chart-direction.short {
 
-                <label>
-                    Trade Probability %
-                </label>
+            color:
+                var(--danger);
 
-                <input
-                    id="probability"
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    placeholder="70"
-                >
+            background:
+                rgba(255, 92, 92, 0.10);
 
-            </div>
+        }
 
 
-            <!-- IMPLIED VOLATILITY -->
+        .trade-chart-zones {
 
-            <div>
+            display:
+                grid;
 
-                <label>
-                    Implied Volatility %
-                </label>
+            grid-template-columns:
+                1fr 1fr;
 
-                <input
-                    id="impliedVolatility"
-                    type="number"
-                    step="0.01"
-                    placeholder="35"
-                >
+            gap:
+                10px;
 
-            </div>
+            margin-bottom:
+                15px;
 
+        }
 
-            <!-- ====================================
-                 STOCK MAP
-            ===================================== -->
 
-            <div class="full-width">
+        .trade-chart-zone {
 
-                <h3>
-                    📈 STOCK / ASSET MAP
-                </h3>
+            padding:
+                12px;
 
-            </div>
+            text-align:
+                center;
 
+            border-radius:
+                10px;
 
-            <!-- ENTRY -->
+            font-size:
+                12px;
 
-            <div>
+            font-weight:
+                bold;
 
-                <label>
-                    Entry Price
-                </label>
+        }
 
-                <input
-                    id="entry"
-                    type="number"
-                    step="0.01"
-                    placeholder="150"
-                >
 
-            </div>
+        .risk-zone {
 
+            color:
+                var(--danger);
 
-            <!-- STOP -->
+            background:
+                rgba(255, 92, 92, 0.08);
 
-            <div>
+            border:
+                1px solid
+                rgba(255, 92, 92, 0.20);
 
-                <label>
-                    Stop Price
-                </label>
+        }
 
-                <input
-                    id="stop"
-                    type="number"
-                    step="0.01"
-                    placeholder="145"
-                >
 
-            </div>
+        .reward-zone {
 
+            color:
+                var(--green);
 
-            <!-- TARGET 1 -->
+            background:
+                rgba(0, 230, 118, 0.08);
 
-            <div>
+            border:
+                1px solid
+                rgba(0, 230, 118, 0.20);
 
-                <label>
-                    Manual Target 1 (Optional)
-                </label>
+        }
 
-                <input
-                    id="target1"
-                    type="number"
-                    step="0.01"
-                    placeholder="Auto 1R if blank"
-                >
 
-            </div>
+        .trade-chart-body {
 
+            display:
+                grid;
 
-            <!-- TARGET 2 -->
+            grid-template-columns:
+                90px 1fr;
 
-            <div>
+            gap:
+                10px;
 
-                <label>
-                    Manual Target 2 (Optional)
-                </label>
+            height:
+                500px;
 
-                <input
-                    id="target2"
-                    type="number"
-                    step="0.01"
-                    placeholder="Auto 2R if blank"
-                >
+            margin-top:
+                20px;
 
-            </div>
+        }
 
 
-            <!-- TARGET 3 -->
+        .trade-chart-scale {
 
-            <div>
+            display:
+                flex;
 
-                <label>
-                    Manual Target 3 (Optional)
-                </label>
+            flex-direction:
+                column;
 
-                <input
-                    id="target3"
-                    type="number"
-                    step="0.01"
-                    placeholder="Auto 3R if blank"
-                >
+            justify-content:
+                space-between;
 
-            </div>
+            color:
+                var(--muted);
 
+            font-size:
+                12px;
 
-            <!-- ====================================
-                 OPTION EXECUTION
-            ===================================== -->
+            padding:
+                5px 0;
 
-            <div class="full-width">
+        }
 
-                <h3>
-                    🎯 OPTION EXECUTION
-                </h3>
 
-            </div>
+        .trade-chart-visual {
 
+            position:
+                relative;
 
-            <!-- OPTION TYPE -->
+            height:
+                100%;
 
-            <div>
+            border:
+                1px solid var(--border);
 
-                <label>
-                    Option Type
-                </label>
+            border-radius:
+                14px;
 
-                <select id="optionType">
+            background:
+                linear-gradient(
+                    to top,
+                    rgba(255, 92, 92, 0.04),
+                    rgba(0, 230, 118, 0.05)
+                );
 
-                    <option value="Call">
-                        Call
-                    </option>
+            overflow:
+                hidden;
 
-                    <option value="Put">
-                        Put
-                    </option>
+        }
 
-                </select>
 
-            </div>
+        .trade-chart-center-line {
 
+            position:
+                absolute;
 
-            <!-- STRIKE -->
+            left:
+                50%;
 
-            <div>
+            top:
+                0;
 
-                <label>
-                    Strike Price
-                </label>
+            width:
+                1px;
 
-                <input
-                    id="strike"
-                    type="number"
-                    step="0.01"
-                    placeholder="150"
-                >
+            height:
+                100%;
 
-            </div>
+            background:
+                rgba(255, 255, 255, 0.10);
 
+        }
 
-            <!-- EXPIRATION -->
 
-            <div>
+        .trade-chart-level {
 
-                <label>
-                    Expiration
-                </label>
+            position:
+                absolute;
 
-                <input
-                    id="expiration"
-                    type="date"
-                >
+            left:
+                0;
 
-            </div>
+            width:
+                100%;
 
+            transform:
+                translateY(50%);
 
-            <!-- OPTION ENTRY -->
+        }
 
-            <div>
 
-                <label>
-                    Option Premium Entry
-                </label>
+        .trade-chart-line {
 
-                <input
-                    id="optionEntry"
-                    type="number"
-                    step="0.01"
-                    placeholder="2.53"
-                >
+            width:
+                100%;
 
-            </div>
+            border-top:
+                2px solid;
 
+        }
 
-            <!-- OPTION DELTA -->
 
-            <div>
+        .trade-chart-level.target
+        .trade-chart-line {
 
-                <label>
-                    Option Delta
-                </label>
+            border-color:
+                var(--green);
 
-                <input
-                    id="optionDelta"
-                    type="number"
-                    step="0.01"
-                    min="-1"
-                    max="1"
-                    placeholder="0.50"
-                >
+        }
 
-            </div>
 
+        .trade-chart-level.entry-level
+        .trade-chart-line {
 
-            <!-- OPTION TARGET 1 -->
+            border-color:
+                white;
 
-            <div>
+        }
 
-                <label>
-                    Option Target 1
-                </label>
 
-                <input
-                    id="optionTarget1"
-                    type="number"
-                    step="0.01"
-                    placeholder="3.00"
-                >
+        .trade-chart-level.stop-level
+        .trade-chart-line {
 
-            </div>
+            border-color:
+                var(--danger);
 
+        }
 
-            <!-- OPTION TARGET 2 -->
 
-            <div>
+        .trade-chart-label {
 
-                <label>
-                    Option Target 2
-                </label>
+            position:
+                absolute;
 
-                <input
-                    id="optionTarget2"
-                    type="number"
-                    step="0.01"
-                    placeholder="3.50"
-                >
+            left:
+                15px;
 
-            </div>
+            bottom:
+                7px;
 
+            display:
+                flex;
 
-            <!-- OPTION TARGET 3 -->
+            gap:
+                10px;
 
-            <div>
+            align-items:
+                center;
 
-                <label>
-                    Option Target 3
-                </label>
+            padding:
+                7px 10px;
 
-                <input
-                    id="optionTarget3"
-                    type="number"
-                    step="0.01"
-                    placeholder="4.00"
-                >
+            background:
+                rgba(7, 16, 12, 0.92);
 
-            </div>
+            border-radius:
+                8px;
 
+            font-size:
+                12px;
 
-        </div>
+        }
+
+
+        .trade-chart-level-name {
+
+            font-weight:
+                bold;
+
+        }
+
+
+        .trade-chart-side-text {
+
+            position:
+                absolute;
+
+            right:
+                15px;
+
+            bottom:
+                8px;
+
+            color:
+                var(--muted);
+
+            font-size:
+                11px;
+
+        }
+
+
+        .trade-chart-arrow {
+
+            position:
+                absolute;
+
+            left:
+                50%;
+
+            top:
+                50%;
+
+            transform:
+                translate(
+                    -50%,
+                    -50%
+                );
+
+            font-size:
+                70px;
+
+            opacity:
+                .20;
+
+        }
+
+
+        .trade-chart-arrow.long {
+
+            color:
+                var(--green);
+
+        }
+
+
+        .trade-chart-arrow.short {
+
+            color:
+                var(--danger);
+
+        }
+
+
+        .trade-chart-footer {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(
+                    5,
+                    1fr
+                );
+
+            gap:
+                10px;
+
+            margin-top:
+                15px;
+
+        }
+
+
+        .trade-chart-footer div {
+
+            padding:
+                10px;
+
+            background:
+                rgba(255, 255, 255, 0.04);
+
+            border-radius:
+                8px;
+
+            text-align:
+                center;
+
+        }
+
+
+        .trade-chart-footer strong,
+        .trade-chart-footer span {
+
+            display:
+                block;
+
+        }
+
+
+        .trade-chart-footer strong {
+
+            color:
+                var(--green);
+
+            font-size:
+                11px;
+
+        }
+
+
+        .trade-chart-footer span {
+
+            margin-top:
+                5px;
+
+            color:
+                var(--muted);
+
+            font-size:
+                12px;
+
+        }
+
+
+        .trade-chart-rule {
+
+            margin-top:
+                15px;
+
+            padding:
+                15px;
+
+            text-align:
+                center;
+
+            color:
+                var(--muted);
+
+            background:
+                rgba(0, 230, 118, 0.05);
+
+            border-radius:
+                10px;
+
+        }
+
+
+        /* ============================================
+           MOBILE
+        ============================================ */
+
+        @media (
+            max-width:
+            700px
+        ) {
+
+            .container {
+
+                padding:
+                    10px;
+
+            }
+
+
+            .card {
+
+                padding:
+                    15px;
+
+            }
+
+
+            .tradingview-chart {
+
+                height:
+                    500px;
+
+            }
+
+
+            .trade-plan-actions {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .trade-chart-header {
+
+                flex-direction:
+                    column;
+
+                align-items:
+                    flex-start;
+
+            }
+
+
+            .trade-chart-zones {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .trade-chart-body {
+
+                grid-template-columns:
+                    1fr;
+
+                height:
+                    450px;
+
+            }
+
+
+            .trade-chart-scale {
+
+                display:
+                    none;
+
+            }
+
+
+            .trade-chart-footer {
+
+                grid-template-columns:
+                    repeat(
+                        2,
+                        1fr
+                    );
+
+            }
+
+
+            .trade-chart-side-text {
+
+                display:
+                    none;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ============================================
+         HEADER
+    ============================================ -->
+
+    <header class="app-header">
+
+        <h1>
+            🎯 RO'LYFE TACTICAL INTELLIGENCE CENTER™
+        </h1>
+
+        <p>
+            PLAN → SIZE → LADDER → EXECUTE → JOURNAL → REVIEW
+        </p>
+
+    </header>
+
+
+    <main class="container">
 
 
         <!-- ========================================
-             CREATE BUTTON
+             MASTER TRADE PLANNER
         ========================================= -->
 
-        <button
-            type="button"
-            onclick="createTradePlan()"
+        <section class="card">
+
+            <h2>
+                📋 MASTER TRADE PLANNER
+            </h2>
+
+
+            <div class="form-grid">
+
+
+                <!-- SYMBOL -->
+
+                <div>
+
+                    <label>
+                        Symbol
+                    </label>
+
+                    <input
+                        id="symbol"
+                        type="text"
+                        placeholder="Example: NVDA"
+                        value="NVDA"
+                    >
+
+                </div>
+
+
+                <!-- INSTRUMENT -->
+
+                <div>
+
+                    <label>
+                        Instrument
+                    </label>
+
+                    <select id="instrument">
+
+                        <option value="Stock">
+                            Stock
+                        </option>
+
+                        <option value="Option">
+                            Option
+                        </option>
+
+                        <option value="Crypto">
+                            Crypto
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- DIRECTION -->
+
+                <div>
+
+                    <label>
+                        Direction
+                    </label>
+
+                    <select id="direction">
+
+                        <option value="Long">
+                            Long
+                        </option>
+
+                        <option value="Short">
+                            Short
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- ACCOUNT SIZE -->
+
+                <div>
+
+                    <label>
+                        Account Size
+                    </label>
+
+                    <input
+                        id="accountSize"
+                        type="number"
+                        step="0.01"
+                        placeholder="10000"
+                    >
+
+                </div>
+
+
+                <!-- RISK PERCENT -->
+
+                <div>
+
+                    <label>
+                        Risk Percentage
+                    </label>
+
+                    <input
+                        id="riskPercent"
+                        type="number"
+                        step="0.01"
+                        placeholder="1"
+                    >
+
+                </div>
+
+
+                <!-- PROBABILITY -->
+
+                <div>
+
+                    <label>
+                        Trade Probability %
+                    </label>
+
+                    <input
+                        id="probability"
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        placeholder="70"
+                    >
+
+                </div>
+
+
+                <!-- IMPLIED VOLATILITY -->
+
+                <div>
+
+                    <label>
+                        Implied Volatility %
+                    </label>
+
+                    <input
+                        id="impliedVolatility"
+                        type="number"
+                        step="0.01"
+                        placeholder="35"
+                    >
+
+                </div>
+
+
+                <!-- STOCK MAP -->
+
+                <div class="full-width">
+
+                    <h3>
+                        📈 STOCK / ASSET MAP
+                    </h3>
+
+                </div>
+
+
+                <!-- ENTRY -->
+
+                <div>
+
+                    <label>
+                        Entry Price
+                    </label>
+
+                    <input
+                        id="entry"
+                        type="number"
+                        step="0.01"
+                        placeholder="150"
+                    >
+
+                </div>
+
+
+                <!-- STOP -->
+
+                <div>
+
+                    <label>
+                        Stop Price
+                    </label>
+
+                    <input
+                        id="stop"
+                        type="number"
+                        step="0.01"
+                        placeholder="145"
+                    >
+
+                </div>
+
+
+                <!-- TARGET 1 -->
+
+                <div>
+
+                    <label>
+                        Manual Target 1 (Optional)
+                    </label>
+
+                    <input
+                        id="target1"
+                        type="number"
+                        step="0.01"
+                        placeholder="Auto 1R if blank"
+                    >
+
+                </div>
+
+
+                <!-- TARGET 2 -->
+
+                <div>
+
+                    <label>
+                        Manual Target 2 (Optional)
+                    </label>
+
+                    <input
+                        id="target2"
+                        type="number"
+                        step="0.01"
+                        placeholder="Auto 2R if blank"
+                    >
+
+                </div>
+
+
+                <!-- TARGET 3 -->
+
+                <div>
+
+                    <label>
+                        Manual Target 3 (Optional)
+                    </label>
+
+                    <input
+                        id="target3"
+                        type="number"
+                        step="0.01"
+                        placeholder="Auto 3R if blank"
+                    >
+
+                </div>
+
+
+                <!-- OPTION EXECUTION -->
+
+                <div class="full-width">
+
+                    <h3>
+                        🎯 OPTION EXECUTION
+                    </h3>
+
+                </div>
+
+
+                <!-- OPTION TYPE -->
+
+                <div>
+
+                    <label>
+                        Option Type
+                    </label>
+
+                    <select id="optionType">
+
+                        <option value="Call">
+                            Call
+                        </option>
+
+                        <option value="Put">
+                            Put
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- STRIKE -->
+
+                <div>
+
+                    <label>
+                        Strike Price
+                    </label>
+
+                    <input
+                        id="strike"
+                        type="number"
+                        step="0.01"
+                        placeholder="150"
+                    >
+
+                </div>
+
+
+                <!-- EXPIRATION -->
+
+                <div>
+
+                    <label>
+                        Expiration
+                    </label>
+
+                    <input
+                        id="expiration"
+                        type="date"
+                    >
+
+                </div>
+
+
+                <!-- OPTION ENTRY -->
+
+                <div>
+
+                    <label>
+                        Option Premium Entry
+                    </label>
+
+                    <input
+                        id="optionEntry"
+                        type="number"
+                        step="0.01"
+                        placeholder="2.53"
+                    >
+
+                </div>
+
+
+                <!-- OPTION DELTA -->
+
+                <div>
+
+                    <label>
+                        Option Delta
+                    </label>
+
+                    <input
+                        id="optionDelta"
+                        type="number"
+                        step="0.01"
+                        min="-1"
+                        max="1"
+                        placeholder="0.50"
+                    >
+
+                </div>
+
+
+                <!-- OPTION TARGET 1 -->
+
+                <div>
+
+                    <label>
+                        Option Target 1
+                    </label>
+
+                    <input
+                        id="optionTarget1"
+                        type="number"
+                        step="0.01"
+                        placeholder="3.00"
+                    >
+
+                </div>
+
+
+                <!-- OPTION TARGET 2 -->
+
+                <div>
+
+                    <label>
+                        Option Target 2
+                    </label>
+
+                    <input
+                        id="optionTarget2"
+                        type="number"
+                        step="0.01"
+                        placeholder="3.50"
+                    >
+
+                </div>
+
+
+                <!-- OPTION TARGET 3 -->
+
+                <div>
+
+                    <label>
+                        Option Target 3
+                    </label>
+
+                    <input
+                        id="optionTarget3"
+                        type="number"
+                        step="0.01"
+                        placeholder="4.00"
+                    >
+
+                </div>
+
+
+            </div>
+
+
+            <button
+                type="button"
+                onclick="createTradePlan()"
+            >
+
+                🎯 CREATE MASTER TRADE PLAN
+
+            </button>
+
+
+        </section>
+
+
+        <!-- ============================================
+             LIVE TRADINGVIEW CHART
+        ============================================= -->
+
+        <section class="card">
+
+            <h2>
+                📈 LIVE MARKET CHART
+            </h2>
+
+
+            <p class="chart-description">
+
+                Live market view for:
+
+                <strong id="chartSymbolLabel">
+                    NVDA
+                </strong>
+
+                <span class="chart-status">
+                    LIVE
+                </span>
+
+            </p>
+
+
+            <div
+                id="tradingview_chart"
+                class="tradingview-chart"
+            ></div>
+
+
+        </section>
+
+
+        <!-- ============================================
+             TRADE PLAN OUTPUT
+        ============================================= -->
+
+        <section
+            id="tradePlanOutput"
         >
 
-            🎯 CREATE MASTER TRADE PLAN
+            <!-- MASTER TRADE PLAN APPEARS HERE -->
 
-        </button>
-
-
-    </section>
-
-<!-- ============================================
-     LIVE TRADINGVIEW CHART
-============================================= -->
-
-<section class="card">
-
-    <h2>
-        📈 LIVE MARKET CHART
-    </h2>
-
-    <p class="chart-description">
-
-        Live market view for
-        <strong id="chartSymbolLabel">
-            NVDA
-        </strong>
-
-    </p>
-
-    <div
-        id="tradingview_chart"
-        class="tradingview-chart"
-    ></div>
-
-</section>
-
-    <!-- ============================================
-         OUTPUT
-    ============================================= -->
-
-    <section
-        id="tradePlanOutput"
-    >
-
-        <!-- TRADE PLAN APPEARS HERE -->
-
-    </section>
+        </section>
 
 
-</main>
+        <!-- ============================================
+             RO'LYFE VISUAL TRADE MAP
+        ============================================= -->
+
+        <div
+            id="rolyfeTradeChart"
+        ></div>
 
 
-<!-- ================================================
-     LOAD ENGINES
-     
-     ORDER IS IMPORTANT!
-     
-     1. Risk Engine
-     2. Ladder Engine
-     3. Journal
-     4. Trade Planner
-================================================= -->
-
-<script src="js/risk-engine.js"></script>
-
-<script src="js/ladder-engine.js"></script>
-
-<script src="js/trade-journal.js"></script>
-
-<script src="js/trade-chart.js"></script>
-
-<script src="js/trade-planner.js"></script>
-    
+    </main>
 
 
-<!-- ================================================
-     SAFE BUTTON FUNCTION
-================================================= -->
+    <!-- ================================================
+         EXTERNAL ENGINES
 
-<script>
+         EACH FILE LOADS ONLY ONCE
+    ================================================= -->
 
-    function createTradePlan() {
+    <script src="js/risk-engine.js"></script>
 
-        console.log(
-            "CREATE PLAN BUTTON CLICKED"
+    <script src="js/ladder-engine.js"></script>
+
+    <script src="js/trade-journal.js"></script>
+
+    <script src="js/trade-chart.js"></script>
+
+    <script src="js/trade-planner.js"></script>
+
+
+    <!-- ================================================
+         TRADINGVIEW LIBRARY
+    ================================================= -->
+
+    <script src="https://s3.tradingview.com/tv.js"></script>
+
+
+    <!-- ================================================
+         RO'LYFE LIVE CHART ENGINE
+    ================================================= -->
+
+    <script>
+
+        /* ============================================
+           CURRENT CHART SYMBOL
+        ============================================ */
+
+        let currentChartSymbol =
+            "NASDAQ:NVDA";
+
+
+        /* ============================================
+           FORMAT SYMBOL FOR TRADINGVIEW
+        ============================================ */
+
+        function formatTradingViewSymbol(
+            symbol
+        ) {
+
+            let cleanSymbol =
+                String(
+                    symbol || "NVDA"
+                )
+                .trim()
+                .toUpperCase();
+
+
+            if (
+                !cleanSymbol
+            ) {
+
+                cleanSymbol =
+                    "NVDA";
+
+            }
+
+
+            /*
+             * If user already enters:
+             *
+             * NASDAQ:NVDA
+             * NYSE:IBM
+             * BINANCE:BTCUSDT
+             *
+             * keep it unchanged.
+             */
+
+            if (
+                cleanSymbol.includes(
+                    ":"
+                )
+            ) {
+
+                return cleanSymbol;
+
+            }
+
+
+            /*
+             * Common crypto symbols.
+             */
+
+            if (
+                cleanSymbol === "BTC"
+            ) {
+
+                return "BINANCE:BTCUSDT";
+
+            }
+
+
+            if (
+                cleanSymbol === "ETH"
+            ) {
+
+                return "BINANCE:ETHUSDT";
+
+            }
+
+
+            /*
+             * Default stock exchange.
+             */
+
+            return (
+                "NASDAQ:" +
+                cleanSymbol
+            );
+
+        }
+
+
+        /* ============================================
+           LOAD LIVE TRADINGVIEW CHART
+        ============================================ */
+
+        function loadTradingViewChart(
+            symbol
+        ) {
+
+            const chartContainer =
+                document.getElementById(
+                    "tradingview_chart"
+                );
+
+
+            const chartLabel =
+                document.getElementById(
+                    "chartSymbolLabel"
+                );
+
+
+            if (
+                !chartContainer
+            ) {
+
+                console.error(
+                    "TradingView chart container not found."
+                );
+
+                return;
+
+            }
+
+
+            const formattedSymbol =
+                formatTradingViewSymbol(
+                    symbol
+                );
+
+
+            currentChartSymbol =
+                formattedSymbol;
+
+
+            if (
+                chartLabel
+            ) {
+
+                chartLabel.textContent =
+                    formattedSymbol;
+
+            }
+
+
+            /*
+             * Clear old chart.
+             */
+
+            chartContainer.innerHTML =
+                "";
+
+
+            /*
+             * Check TradingView loaded.
+             */
+
+            if (
+                typeof TradingView ===
+                "undefined"
+            ) {
+
+                chartContainer.innerHTML =
+                    `
+                    <div
+                        style="
+                            padding:30px;
+                            text-align:center;
+                            color:#ff5c5c;
+                        "
+                    >
+
+                        TradingView failed to load.
+
+                    </div>
+                    `;
+
+                console.error(
+                    "TradingView library failed to load."
+                );
+
+                return;
+
+            }
+
+
+            console.log(
+                "📈 LOADING LIVE CHART:",
+                formattedSymbol
+            );
+
+
+            new TradingView.widget({
+
+                autosize:
+                    true,
+
+                symbol:
+                    formattedSymbol,
+
+                interval:
+                    "15",
+
+                timezone:
+                    "America/New_York",
+
+                theme:
+                    "dark",
+
+                style:
+                    "1",
+
+                locale:
+                    "en",
+
+                toolbar_bg:
+                    "#08110c",
+
+                enable_publishing:
+                    false,
+
+                allow_symbol_change:
+                    true,
+
+                save_image:
+                    true,
+
+                hide_top_toolbar:
+                    false,
+
+                hide_legend:
+                    false,
+
+                withdateranges:
+                    true,
+
+                details:
+                    true,
+
+                hotlist:
+                    true,
+
+                calendar:
+                    true,
+
+                container_id:
+                    "tradingview_chart"
+
+            });
+
+
+            console.log(
+                "🟢 LIVE TRADINGVIEW CHART LOADED:",
+                formattedSymbol
+            );
+
+        }
+
+
+        /* ============================================
+           UPDATE CHART FROM SYMBOL INPUT
+        ============================================ */
+
+        function updateChartFromPlanner() {
+
+            const symbolInput =
+                document.getElementById(
+                    "symbol"
+                );
+
+
+            const symbol =
+                symbolInput
+                    ?
+                    symbolInput.value
+                    :
+                    "NVDA";
+
+
+            loadTradingViewChart(
+                symbol
+            );
+
+        }
+
+
+        /* ================================================
+           CREATE MASTER TRADE PLAN
+        ================================================= */
+
+        function createTradePlan() {
+
+            console.log(
+                "🎯 CREATE PLAN BUTTON CLICKED"
+            );
+
+
+            /*
+             * UPDATE LIVE MARKET CHART
+             */
+
+            updateChartFromPlanner();
+
+
+            /*
+             * CHECK TRADE PLANNER
+             */
+
+            if (
+                !window.TradePlanner
+            ) {
+
+                console.error(
+                    "TradePlanner is not loaded."
+                );
+
+
+                alert(
+                    "ERROR: Trade Planner is not loaded. Check your Console."
+                );
+
+                return;
+
+            }
+
+
+            if (
+                typeof
+                window.TradePlanner.createPlan
+                !==
+                "function"
+            ) {
+
+                console.error(
+                    "TradePlanner.createPlan() is missing."
+                );
+
+
+                alert(
+                    "ERROR: createPlan() function is missing."
+                );
+
+                return;
+
+            }
+
+
+            /*
+             * CREATE MASTER PLAN
+             */
+
+            window.TradePlanner.createPlan();
+
+
+            /*
+             * Give the planner a moment to calculate,
+             * then render the visual RO'LYFE Trade Map.
+             */
+
+            setTimeout(
+
+                function () {
+
+                    renderTradeMapFromInputs();
+
+                },
+
+                100
+
+            );
+
+        }
+
+
+        /* ================================================
+           AUTO TARGET CALCULATION
+        ================================================= */
+
+        function getAutoTargets() {
+
+            const direction =
+                document.getElementById(
+                    "direction"
+                ).value;
+
+
+            const entry =
+                Number(
+                    document.getElementById(
+                        "entry"
+                    ).value
+                );
+
+
+            const stop =
+                Number(
+                    document.getElementById(
+                        "stop"
+                    ).value
+                );
+
+
+            const risk =
+                Math.abs(
+                    entry -
+                    stop
+                );
+
+
+            if (
+                !Number.isFinite(entry) ||
+                !Number.isFinite(stop) ||
+                risk <= 0
+            ) {
+
+                return null;
+
+            }
+
+
+            let target1 =
+                Number(
+                    document.getElementById(
+                        "target1"
+                    ).value
+                );
+
+
+            let target2 =
+                Number(
+                    document.getElementById(
+                        "target2"
+                    ).value
+                );
+
+
+            let target3 =
+                Number(
+                    document.getElementById(
+                        "target3"
+                    ).value
+                );
+
+
+            if (
+                direction === "Long"
+            ) {
+
+                if (
+                    !Number.isFinite(target1) ||
+                    target1 === 0
+                ) {
+
+                    target1 =
+                        entry +
+                        risk;
+
+                }
+
+
+                if (
+                    !Number.isFinite(target2) ||
+                    target2 === 0
+                ) {
+
+                    target2 =
+                        entry +
+                        (
+                            risk * 2
+                        );
+
+                }
+
+
+                if (
+                    !Number.isFinite(target3) ||
+                    target3 === 0
+                ) {
+
+                    target3 =
+                        entry +
+                        (
+                            risk * 3
+                        );
+
+                }
+
+            }
+
+            else {
+
+                if (
+                    !Number.isFinite(target1) ||
+                    target1 === 0
+                ) {
+
+                    target1 =
+                        entry -
+                        risk;
+
+                }
+
+
+                if (
+                    !Number.isFinite(target2) ||
+                    target2 === 0
+                ) {
+
+                    target2 =
+                        entry -
+                        (
+                            risk * 2
+                        );
+
+                }
+
+
+                if (
+                    !Number.isFinite(target3) ||
+                    target3 === 0
+                ) {
+
+                    target3 =
+                        entry -
+                        (
+                            risk * 3
+                        );
+
+                }
+
+            }
+
+
+            return {
+
+                direction:
+                    direction,
+
+                entry:
+                    entry,
+
+                stop:
+                    stop,
+
+                target1:
+                    target1,
+
+                target2:
+                    target2,
+
+                target3:
+                    target3
+
+            };
+
+        }
+
+
+        /* ================================================
+           RENDER RO'LYFE VISUAL TRADE MAP
+        ================================================= */
+
+        function renderTradeMapFromInputs() {
+
+            if (
+                !window.TradeChart
+            ) {
+
+                console.warn(
+                    "TradeChart engine is not loaded."
+                );
+
+                return;
+
+            }
+
+
+            if (
+                typeof
+                window.TradeChart.render
+                !==
+                "function"
+            ) {
+
+                console.warn(
+                    "TradeChart.render is not available."
+                );
+
+                return;
+
+            }
+
+
+            const chartData =
+                getAutoTargets();
+
+
+            if (
+                !chartData
+            ) {
+
+                console.warn(
+                    "Trade Map needs Entry and Stop."
+                );
+
+                return;
+
+            }
+
+
+            window.TradeChart.render(
+                chartData
+            );
+
+
+            console.log(
+                "🟢 RO'LYFE TRADE MAP UPDATED"
+            );
+
+        }
+
+
+        /* ================================================
+           SYMBOL CHANGE
+        ================================================= */
+
+        document.addEventListener(
+
+            "DOMContentLoaded",
+
+            function () {
+
+                console.log(
+                    "🔥 RO'LYFE TACTICAL INTELLIGENCE CENTER ONLINE"
+                );
+
+
+                /*
+                 * LOAD DEFAULT CHART
+                 */
+
+                setTimeout(
+
+                    function () {
+
+                        updateChartFromPlanner();
+
+                    },
+
+                    300
+
+                );
+
+
+                /*
+                 * ENTER KEY ON SYMBOL
+                 */
+
+                const symbolInput =
+                    document.getElementById(
+                        "symbol"
+                    );
+
+
+                if (
+                    symbolInput
+                ) {
+
+                    symbolInput.addEventListener(
+
+                        "change",
+
+                        function () {
+
+                            updateChartFromPlanner();
+
+                        }
+
+                    );
+
+
+                    symbolInput.addEventListener(
+
+                        "keydown",
+
+                        function (
+                            event
+                        ) {
+
+                            if (
+                                event.key ===
+                                "Enter"
+                            ) {
+
+                                event.preventDefault();
+
+                                updateChartFromPlanner();
+
+                            }
+
+                        }
+
+                    );
+
+                }
+
+            }
+
         );
 
 
-        if (
-            !window.TradePlanner
-        ) {
+        /* ================================================
+           GLOBAL ERROR LOGGER
+        ================================================= */
 
-            console.error(
-                "TradePlanner is not loaded."
-            );
+        window.addEventListener(
 
+            "error",
 
-            alert(
-                "ERROR: Trade Planner is not loaded. Check the Console."
-            );
+            function (
+                event
+            ) {
 
-            return;
+                console.error(
 
-        }
+                    "RO'LYFE SYSTEM ERROR:",
 
+                    event.message,
 
-        if (
-            typeof
-            window.TradePlanner.createPlan
-            !==
-            "function"
-        ) {
+                    event.filename,
 
-            console.error(
-                "TradePlanner.createPlan() is missing."
-            );
+                    event.lineno
 
+                );
 
-            alert(
-                "ERROR: createPlan() function is missing."
-            );
+            }
 
-            return;
+        );
 
-        }
+    </script>
 
-
-        window.TradePlanner.createPlan();
-
-    }
-
-
-    window.addEventListener(
-
-        "error",
-
-        function(event) {
-
-            console.error(
-                "RO'LYFE SYSTEM ERROR:",
-                event.message,
-                event.filename,
-                event.lineno
-            );
-
-        }
-
-    );
-
-
-    console.log(
-        "🔥 RO'LYFE TACTICAL INTELLIGENCE CENTER ONLINE"
-    );
-
-</script>
 
 </body>
+
     </html>
