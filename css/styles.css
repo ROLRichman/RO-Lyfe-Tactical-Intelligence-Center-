@@ -1541,3 +1541,460 @@ footer small {
     }
 
    }
+
+/* ============================================
+   RO'LYFE RISK / REWARD CHART
+   MASTER TRADE PLANNER ENGINE
+============================================ */
+
+.rr-chart {
+
+    width: 100%;
+
+    min-height: 600px;
+
+    padding: 30px;
+
+    margin-top: 20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #101b14,
+            #08110c
+        );
+
+    border:
+        1px solid var(--border);
+
+    border-radius: 20px;
+
+    overflow: hidden;
+
+}
+
+
+/* ============================================
+   CHART HEADER
+============================================ */
+
+.rr-chart-header {
+
+    padding-bottom: 20px;
+
+    margin-bottom: 30px;
+
+    color:
+        var(--green-bright);
+
+    font-size:
+        clamp(1.3rem, 3vw, 2rem);
+
+    font-weight: 900;
+
+    letter-spacing: 0.04em;
+
+    border-bottom:
+        1px solid rgba(114, 245, 178, 0.12);
+
+}
+
+
+/* ============================================
+   MAIN CHART TRACK
+============================================ */
+
+.rr-chart-track {
+
+    position: relative;
+
+    width: 100%;
+
+    height: 380px;
+
+    margin-top: 50px;
+
+    margin-bottom: 40px;
+
+    background:
+
+        linear-gradient(
+            to right,
+
+            rgba(229, 91, 91, 0.10) 0%,
+
+            rgba(229, 91, 91, 0.05) 45%,
+
+            rgba(53, 208, 127, 0.05) 55%,
+
+            rgba(53, 208, 127, 0.10) 100%
+
+        );
+
+    border:
+        1px solid rgba(114, 245, 178, 0.12);
+
+    border-radius: 18px;
+
+    overflow: visible;
+
+}
+
+
+/* ============================================
+   CENTER REFERENCE LINE
+============================================ */
+
+.rr-chart-track::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+
+    bottom: 0;
+
+    left: 50%;
+
+    width: 2px;
+
+    background:
+        rgba(255, 255, 255, 0.08);
+
+}
+
+
+/* ============================================
+   RISK ZONE
+============================================ */
+
+.rr-risk-zone {
+
+    position: absolute;
+
+    top: 0;
+
+    bottom: 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(229, 91, 91, 0.25),
+            rgba(229, 91, 91, 0.08)
+        );
+
+    border-left:
+        2px solid rgba(229, 91, 91, 0.45);
+
+    border-right:
+        2px solid rgba(229, 91, 91, 0.25);
+
+}
+
+
+/* ============================================
+   REWARD ZONE
+============================================ */
+
+.rr-reward-zone {
+
+    position: absolute;
+
+    top: 0;
+
+    bottom: 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(53, 208, 127, 0.08),
+            rgba(53, 208, 127, 0.25)
+        );
+
+    border-left:
+        2px solid rgba(53, 208, 127, 0.25);
+
+    border-right:
+        2px solid rgba(53, 208, 127, 0.45);
+
+}
+
+
+/* ============================================
+   MARKERS
+============================================ */
+
+.rr-marker {
+
+    position: absolute;
+
+    top: 50%;
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        );
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    min-width: 115px;
+
+    min-height: 90px;
+
+    padding: 14px 16px;
+
+    background:
+        rgba(6, 15, 10, 0.96);
+
+    border:
+        2px solid rgba(255, 255, 255, 0.15);
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 12px 30px
+        rgba(0, 0, 0, 0.45);
+
+    z-index: 5;
+
+}
+
+
+/* ============================================
+   MARKER NAME
+============================================ */
+
+.rr-marker span {
+
+    font-size:
+        0.85rem;
+
+    font-weight: 900;
+
+    letter-spacing: 0.08em;
+
+}
+
+
+/* ============================================
+   MARKER PRICE
+============================================ */
+
+.rr-marker strong {
+
+    color:
+        var(--text);
+
+    font-size:
+        1.15rem;
+
+}
+
+
+/* ============================================
+   STOP
+============================================ */
+
+.rr-stop {
+
+    border-color:
+        rgba(229, 91, 91, 0.7);
+
+}
+
+.rr-stop span {
+
+    color:
+        var(--danger);
+
+}
+
+
+/* ============================================
+   ENTRY
+============================================ */
+
+.rr-entry {
+
+    border-color:
+        rgba(255, 255, 255, 0.65);
+
+}
+
+.rr-entry span {
+
+    color:
+        white;
+
+}
+
+
+/* ============================================
+   TARGETS
+============================================ */
+
+.rr-target {
+
+    border-color:
+        rgba(53, 208, 127, 0.65);
+
+}
+
+.rr-target span {
+
+    color:
+        var(--green-bright);
+
+}
+
+
+/* ============================================
+   STACK TARGETS VERTICALLY
+============================================ */
+
+.rr-target-1 {
+
+    top:
+        22%;
+
+}
+
+.rr-target-2 {
+
+    top:
+        50%;
+
+}
+
+.rr-target-3 {
+
+    top:
+        78%;
+
+}
+
+
+/* ============================================
+   LEGEND
+============================================ */
+
+.rr-chart-legend {
+
+    display: flex;
+
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 25px;
+
+    padding-top: 20px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        1rem;
+
+    font-weight: 800;
+
+}
+
+
+/* ============================================
+   MOBILE
+============================================ */
+
+@media (max-width: 700px) {
+
+    .rr-chart {
+
+        min-height: 520px;
+
+        padding: 16px;
+
+    }
+
+
+    .rr-chart-track {
+
+        height: 330px;
+
+        margin-top: 30px;
+
+    }
+
+
+    .rr-marker {
+
+        min-width: 82px;
+
+        min-height: 68px;
+
+        padding: 8px;
+
+        border-radius: 12px;
+
+    }
+
+
+    .rr-marker span {
+
+        font-size:
+            0.65rem;
+
+    }
+
+
+    .rr-marker strong {
+
+        font-size:
+            0.8rem;
+
+    }
+
+
+    .rr-target-1 {
+
+        top:
+            20%;
+
+    }
+
+
+    .rr-target-2 {
+
+        top:
+            50%;
+
+    }
+
+
+    .rr-target-3 {
+
+        top:
+            80%;
+
+    }
+
+
+    .rr-chart-legend {
+
+        gap: 12px;
+
+        font-size:
+            0.8rem;
+
+    }
+
+                       }
