@@ -118,6 +118,10 @@ button:hover{opacity:.92;transform:translateY(-1px)}
  .data-row{flex-direction:column;gap:4px}.data-row strong{text-align:left}.journal-entry-header{flex-direction:column}
 }
 @media(max-width:380px){.status-bar{grid-template-columns:1fr}.timeframe-bar{grid-template-columns:repeat(2,1fr)}.tradingview-chart{height:470px}}
+
+/* RO'LYFE VISUAL CHARTS + PERFORMANCE UPGRADE */
+.visual-charts{border:1px solid var(--border-bright);background:linear-gradient(145deg,rgba(8,24,15,.98),rgba(5,10,7,.98));border-radius:18px;margin-bottom:16px;overflow:hidden}.visual-charts summary{list-style:none;cursor:pointer;padding:18px;font-size:clamp(20px,5vw,30px);font-weight:900;color:var(--green);display:flex;justify-content:space-between;align-items:center;gap:12px}.visual-charts summary::-webkit-details-marker{display:none}.visual-charts summary:after{content:'+';font-size:28px;color:var(--green)}.visual-charts[open] summary:after{content:'−'}.visual-chart-body{padding:0 16px 16px}.visual-chart-nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}.visual-chart-btn{margin:0;min-height:46px;background:#0c1911;border:1px solid var(--border);color:#dce7df}.visual-chart-btn.active{border-color:var(--green);background:var(--green-soft);color:var(--green)}.visual-output{min-height:80px}.visual-card{padding:16px;background:#09140e;border:1px solid var(--border);border-radius:14px;margin-top:10px}.visual-card h3{margin:0 0 12px;color:var(--green);font-size:20px}.visual-sub{color:var(--muted);font-size:12px;line-height:1.55;margin-bottom:14px}.risk-reward-bar{display:grid;grid-template-columns:1fr 1fr;gap:4px;height:54px;border-radius:12px;overflow:hidden;margin:14px 0}.risk-zone{background:var(--red-soft);border:1px solid rgba(255,92,92,.35);display:flex;align-items:center;justify-content:center;color:var(--red);font-weight:900;text-align:center}.reward-zone{background:var(--green-soft);border:1px solid rgba(0,230,118,.35);display:flex;align-items:center;justify-content:center;color:var(--green);font-weight:900;text-align:center}.execution-map{display:flex;flex-direction:column;gap:7px}.execution-level{display:grid;grid-template-columns:90px 1fr 110px;align-items:center;gap:10px;padding:12px;border-radius:10px;border:1px solid var(--border)}.execution-level.stop{background:var(--red-soft);border-color:rgba(255,92,92,.35);color:var(--red)}.execution-level.entry{background:rgba(255,255,255,.06);color:#fff}.execution-level.target{background:var(--green-soft);border-color:rgba(0,230,118,.25);color:var(--green)}.execution-level strong{text-align:right}.execution-arrow{text-align:center;color:var(--muted);font-size:18px}.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px}.metric-card{padding:13px;background:#09140e;border:1px solid var(--border);border-radius:12px}.metric-card span{display:block;color:var(--muted);font-size:11px;font-weight:800}.metric-card strong{display:block;margin-top:6px;font-size:18px;color:#fff}.dashboard-card{border-color:var(--border-bright)}.journal-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-top:12px;padding:14px;background:#09140e;border:1px solid var(--border);border-radius:12px}.journal-form .full-width{grid-column:1/-1}.journal-form button{margin:0}.journal-entry-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:10px}.journal-entry-actions button{margin:0;min-height:42px;padding:9px;font-size:12px}.outcome-status{margin-top:10px;padding:10px;border-radius:9px;background:#07100c;color:var(--muted);font-size:12px}.outcome-status.win{color:var(--green);border:1px solid rgba(0,230,118,.25)}.outcome-status.loss{color:var(--red);border:1px solid rgba(255,92,92,.25)}
+@media(max-width:600px){.execution-level{grid-template-columns:72px 1fr 85px;font-size:12px}.visual-chart-body{padding:0 12px 12px}}
 </style>
 </head>
 
@@ -264,7 +268,20 @@ button:hover{opacity:.92;transform:translateY(-1px)}
 </section>
 
 <section id="tradePlanOutput"></section>
-<section id="tradeMapOutput"></section>
+<details id="visualCharts" class="visual-charts" open>
+ <summary>📊 RO'LYFE VISUAL CHARTS</summary>
+ <div class="visual-chart-body">
+  <div class="visual-chart-nav">
+   <button type="button" class="visual-chart-btn active" data-visual="trade" onclick="renderVisualChart('trade',this)">🗺️ Trade Map</button>
+   <button type="button" class="visual-chart-btn" data-visual="long" onclick="renderVisualChart('long',this)">📈 Long Trade Map</button>
+   <button type="button" class="visual-chart-btn" data-visual="short" onclick="renderVisualChart('short',this)">📉 Short Trade Map</button>
+   <button type="button" class="visual-chart-btn" data-visual="ladder" onclick="renderVisualChart('ladder',this)">🎯 Target Ladder</button>
+   <button type="button" class="visual-chart-btn" data-visual="risk" onclick="renderVisualChart('risk',this)">💰 Position &amp; Risk</button>
+   <button type="button" class="visual-chart-btn" data-visual="execution" onclick="renderVisualChart('execution',this)">🧠 Execution Map</button>
+  </div>
+  <div id="tradeMapOutput" class="visual-output"></div>
+ </div>
+</details>
 
 <section class="download-card">
  <h2>📥 RO'LYFE DOWNLOAD / EXPORT CENTER</h2>
@@ -297,6 +314,12 @@ button:hover{opacity:.92;transform:translateY(-1px)}
   <a class="market-link" href="https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html" target="_blank" rel="noopener">🏦 CME FedWatch<span>Interest-rate expectations</span></a>
   <a class="market-link" href="https://finance.yahoo.com/" target="_blank" rel="noopener">📈 Yahoo Finance<span>Futures • News • Market overview</span></a>
  </div>
+</section>
+
+<section class="card dashboard-card">
+ <h2>📈 RO'LYFE PERFORMANCE DASHBOARD</h2>
+ <p class="chart-description">Coach-inspired performance review: cumulative results plus 25-trade performance blocks.</p>
+ <div id="performanceDashboard"></div>
 </section>
 
 <section class="card">
@@ -582,23 +605,18 @@ function renderTradePlan(plan){
   <div class="system-rule">🧠 The chart defines the risk. The position size fits the account. The indicators confirm the setup. The ladder manages the money.</div>
  </div>`;
 }
-function renderTradeMap(plan){
- const isLong=plan.direction==="Long";
- document.getElementById("tradeMapOutput").innerHTML=`
- <div class="trade-map">
-  <div class="trade-map-header"><h2>📈 ${plan.direction.toUpperCase()} TRADE MAP</h2><p>${esc(plan.symbol)} • Visual execution map</p></div>
-  <div class="map-direction" style="color:${isLong?"var(--green)":"var(--red)"};background:${isLong?"var(--green-soft)":"var(--red-soft)"}">${isLong?"↑ LONG":"↓ SHORT"}</div>
-  <div class="map-levels">
-   <div class="map-level map-stop"><span>🔴 STOP</span><strong>${money(plan.stop)}</strong></div>
-   <div class="map-arrow">↓</div>
-   <div class="map-level map-entry"><span>⚪ ENTRY</span><strong>${money(plan.entry)}</strong></div>
-   <div class="map-arrow">↑</div>
-   <div class="map-level map-target"><span>🟢 T1</span><strong>${money(plan.target1)}</strong></div>
-   <div class="map-level map-target"><span>🟢 T2</span><strong>${money(plan.target2)}</strong></div>
-   <div class="map-level map-target"><span>🟢 T3</span><strong>${money(plan.target3)}</strong></div>
-  </div>
-  <div class="system-rule">🧠 STOP → ENTRY → T1 → T2 → T3<br>The setup determines the trade. The risk determines the size. The ladder manages the money.</div>
- </div>`;
+function renderTradeMap(plan){ renderVisualChart('trade'); }
+function getVisualPlan(){ const p=currentPlan||calculateTrade(); if(!p){alert("Create a valid trade plan first.");return null} return p; }
+function renderVisualChart(type,button){
+ const p=getVisualPlan();if(!p)return; document.querySelectorAll('.visual-chart-btn').forEach(b=>b.classList.toggle('active',b.dataset.visual===type));
+ const out=document.getElementById('tradeMapOutput');if(!out)return; const forcedDir=type==='long'?'Long':type==='short'?'Short':p.direction; const isLong=forcedDir==='Long'; const stopDist=Math.abs(p.entry-p.stop); const mapStop=isLong?p.entry-stopDist:p.entry+stopDist; const mapT1=isLong?p.entry+stopDist:p.entry-stopDist,mapT2=isLong?p.entry+stopDist*2:p.entry-stopDist*2,mapT3=isLong?p.entry+stopDist*3:p.entry-stopDist*3; const t1R=1,t2R=2,t3R=3;
+ const q=p.maximumShares,s1=Math.floor(q*p.ladderT1/100),s2=Math.floor(q*p.ladderT2/100),s3=Math.floor(q*p.ladderT3/100),sr=Math.max(0,q-s1-s2-s3); const profitAt=(target,qty)=>isLong?(target-p.entry)*qty:(p.entry-target)*qty; const maxProfitAtT3=profitAt(p.target3,q),planned=profitAt(p.target1,s1)+profitAt(p.target2,s2)+profitAt(p.target3,s3); const roi=p.positionValue>0?maxProfitAtT3/p.positionValue*100:0;
+ const title={trade:'🗺️ TRADE MAP',long:'📈 LONG TRADE MAP',short:'📉 SHORT TRADE MAP',ladder:'🎯 TARGET LADDER',risk:'💰 POSITION & RISK MAP',execution:'🧠 EXECUTION MAP'}[type]||'🗺️ TRADE MAP';
+ if(type==='trade') out.innerHTML=`<div class="visual-card"><h3>${title}</h3><div class="visual-sub">${esc(p.symbol)} • ${p.direction} • ${esc(p.instrument)} • Setup ${esc(p.setupGrade)}</div><div class="risk-reward-bar"><div class="risk-zone">🔴 RISK<br>${money(p.dollarRisk)}</div><div class="reward-zone">🟢 T3 REWARD<br>${money(maxProfitAtT3)}</div></div><div class="metric-grid"><div class="metric-card"><span>Entry</span><strong>${money(p.entry)}</strong></div><div class="metric-card"><span>Stop</span><strong>${money(p.stop)}</strong></div><div class="metric-card"><span>Risk / Share</span><strong>${money(p.riskPerShare)}</strong></div><div class="metric-card"><span>Position</span><strong>${p.maximumShares}</strong></div><div class="metric-card"><span>R:R to T3</span><strong>1:${t3R.toFixed(2)}</strong></div><div class="metric-card"><span>Planned ROI</span><strong>${roi.toFixed(2)}%</strong></div></div></div>`;
+ else if(type==='long'||type==='short'){ const mapLong=type==='long'; const levels=[['STOP',p.stop,'stop',''],['ENTRY',p.entry,'entry',''],['T1',p.target1,'target',`1:${t1R.toFixed(2)} R`],['T2',p.target2,'target',`1:${t2R.toFixed(2)} R`],['T3',p.target3,'target',`1:${t3R.toFixed(2)} R`]]; out.innerHTML=`<div class="visual-card"><h3>${title}</h3><div class="visual-sub">${esc(p.symbol)} • Visual execution map • ${mapLong?'Upside thesis':'Downside thesis'}</div><div class="execution-map">${levels.map((x,i)=>`<div class="execution-level ${x[2]}"><span>${x[2]==='stop'?'🔴':x[2]==='entry'?'⚪':'🟢'} ${x[0]}</span><strong>${money(x[1])}</strong><span>${x[3]}</span></div>${i<4?'<div class="execution-arrow">↓</div>':''}`).join('')}</div><div class="system-rule" style="margin-top:12px">🧠 STOP → ENTRY → T1 → T2 → T3<br>The setup determines the trade. The risk determines the size. The ladder manages the money.</div></div>`; }
+ else if(type==='ladder'){ const rows=[['T1',p.target1,p.ladderT1,s1,profitAt(p.target1,s1),t1R],['T2',p.target2,p.ladderT2,s2,profitAt(p.target2,s2),t2R],['T3',p.target3,p.ladderT3,s3,profitAt(p.target3,s3),t3R]]; out.innerHTML=`<div class="visual-card"><h3>${title}</h3><div class="visual-sub">Scale out according to the predefined ladder.</div><div class="ladder-grid">${rows.map(r=>`<div class="ladder-box"><strong>${r[0]} • ${money(r[1])}</strong><span>EXIT ${r[2]}% • ${r[3]} shares</span><span>R:R 1:${r[5].toFixed(2)}</span><span style="color:var(--green);font-weight:900">Profit ${money(r[4])}</span></div>`).join('')}<div class="ladder-box"><strong>RUNNER</strong><span>${p.runner}% • ${sr} shares</span><span>Continuation position</span></div></div><div class="metric-grid" style="margin-top:12px"><div class="metric-card"><span>Planned Scale-Out Profit</span><strong>${money(planned)}</strong></div><div class="metric-card"><span>T3 Full-Position Profit</span><strong>${money(maxProfitAtT3)}</strong></div></div></div>`; }
+ else if(type==='risk') out.innerHTML=`<div class="visual-card"><h3>${title}</h3><div class="visual-sub">Position sizing is driven by entry-to-stop distance and the selected risk budget.</div><div class="metric-grid"><div class="metric-card"><span>Account Equity</span><strong>${money(p.accountSize)}</strong></div><div class="metric-card"><span>Risk %</span><strong>${p.riskPercent}%</strong></div><div class="metric-card"><span>Risk Budget</span><strong>${money(p.dollarRisk)}</strong></div><div class="metric-card"><span>Entry</span><strong>${money(p.entry)}</strong></div><div class="metric-card"><span>Stop</span><strong>${money(p.stop)}</strong></div><div class="metric-card"><span>Stop Distance</span><strong>${money(stopDist)}</strong></div><div class="metric-card"><span>Max Shares</span><strong>${p.maximumShares}</strong></div><div class="metric-card"><span>Position Value</span><strong>${money(p.positionValue)}</strong></div></div><div class="risk-reward-bar"><div class="risk-zone">MAX PLANNED LOSS<br>${money(p.dollarRisk)}</div><div class="reward-zone">T3 POTENTIAL<br>${money(maxProfitAtT3)}</div></div></div>`;
+ else { const phases=[['1','SETUP','Validate the setup grade'],['2','CONFIRM','Check direction, chart and indicator stack'],['3','ENTER','Execute at the planned entry'],['4','PROTECT','Honor the predefined stop'],['5','SCALE','T1 → T2 → T3 using the ladder'],['6','REVIEW','Record exits, P/L and days held']]; out.innerHTML=`<div class="visual-card"><h3>${title}</h3><div class="visual-sub">A clean decision path from thesis to journal.</div><div class="execution-map">${phases.map(r=>`<div class="execution-level ${r[0]==='4'?'stop':r[0]==='6'?'entry':'target'}"><span>${r[0]}</span><strong>${r[1]}</strong><span>${r[2]}</span></div>`).join('')}</div><div class="system-rule" style="margin-top:12px">PLAN → SIZE → LADDER → EXECUTE → JOURNAL → REVIEW</div></div>`; }
 }
 
 /* =========================================================
@@ -682,30 +700,19 @@ function filterWatchlist(){
 }
 
 /* =========================================================
-   JOURNAL
+   JOURNAL + PERFORMANCE DASHBOARD
 ========================================================= */
 function getJournal(){try{return JSON.parse(localStorage.getItem("rolyfeTradeJournal")||"[]")}catch{return[]}}
 function saveJournal(j){localStorage.setItem("rolyfeTradeJournal",JSON.stringify(j))}
-function saveCurrentPlan(){
- if(!currentPlan){currentPlan=calculateTrade()}
- if(!currentPlan){alert("Create a valid trade plan first.");return}
- const j=getJournal();j.unshift({...currentPlan,journalSavedAt:new Date().toLocaleString()});saveJournal(j);renderJournal();alert("Trade plan saved to RO'LYFE Journal.");
-}
-function renderJournal(){
- const j=getJournal(),out=document.getElementById("journalOutput");
- if(!j.length){out.innerHTML='<div class="journal-empty">📓 No saved trades yet.<br><br>Create a trade plan and save it.</div>';return}
- out.innerHTML=j.map((t,i)=>`
-  <div class="journal-entry">
-   <div class="journal-entry-header"><div class="journal-entry-title">${esc(t.symbol)} • ${esc(t.direction)} • ${esc(t.setupGrade)}</div><div class="journal-entry-date">${esc(t.journalSavedAt)}</div></div>
-   <div class="data-row"><span>Entry</span><strong>${money(t.entry)}</strong></div>
-   <div class="data-row"><span>Stop</span><strong>${money(t.stop)}</strong></div>
-   <div class="data-row"><span>Position Size</span><strong>${t.maximumShares} shares</strong></div>
-   <div class="data-row"><span>Targets</span><strong>${money(t.target1)} / ${money(t.target2)} / ${money(t.target3)}</strong></div>
-   <button class="danger-btn" onclick="deleteJournalTrade(${i})">Delete Trade</button>
-  </div>`).join("");
-}
+function journalMultiplier(t){return t.instrument==='Option'?100:1}
+function calcRealized(t){const mult=journalMultiplier(t),entry=Number(t.entry)||0,dir=t.direction==='Long'?1:-1,q1=Math.max(0,Number(t.exit1Qty)||0),q2=Math.max(0,Number(t.exit2Qty)||0),e1=Number(t.exit1)||0,e2=Number(t.exit2)||0;const gross1=e1>0?q1*(e1-entry)*dir*mult:0,gross2=e2>0?q2*(e2-entry)*dir*mult:0,commission=Number(t.commission)||0,realized=gross1+gross2-commission,closedQty=q1+q2,baseQty=t.instrument==='Option'?(Number(t.maxOptionContracts)||0):(Number(t.maximumShares)||0),days=[];if(t.exit1Date&&t.tradeDate)days.push(Math.max(0,(new Date(t.exit1Date)-new Date(t.tradeDate))/86400000));if(t.exit2Date&&t.tradeDate)days.push(Math.max(0,(new Date(t.exit2Date)-new Date(t.tradeDate))/86400000));return{gross1,gross2,commission,realized,closedQty,baseQty,days}}
+function saveCurrentPlan(){if(!currentPlan)currentPlan=calculateTrade();if(!currentPlan){alert("Create a valid trade plan first.");return}const j=getJournal();j.unshift({...currentPlan,tradeDate:new Date().toISOString().slice(0,10),exit1:'',exit1Qty:'',exit1Date:'',exit2:'',exit2Qty:'',exit2Date:'',commission:0,journalSavedAt:new Date().toLocaleString()});saveJournal(j);renderJournal();alert("Trade plan saved to RO'LYFE Journal.")}
+function updateJournalTrade(i){const j=getJournal(),t=j[i];if(!t)return;['tradeDate','exit1','exit1Qty','exit1Date','exit2','exit2Qty','exit2Date','commission'].forEach(k=>{const el=document.getElementById(`j_${k}_${i}`);if(el)t[k]=el.value});saveJournal(j);renderJournal()}
 function deleteJournalTrade(i){const j=getJournal();j.splice(i,1);saveJournal(j);renderJournal()}
 function clearJournal(){if(!confirm("Clear the entire RO'LYFE Trade Journal?"))return;localStorage.removeItem("rolyfeTradeJournal");renderJournal()}
+function formatPct(n){return Number.isFinite(n)?n.toFixed(2)+'%':'0.00%'}
+function renderPerformanceDashboard(){const j=getJournal(),out=document.getElementById('performanceDashboard');if(!out)return;const stats=arr=>{const vals=arr.map(calcRealized).map(x=>x.realized),w=vals.filter(x=>x>0),l=vals.filter(x=>x<0),trades=vals.length,net=vals.reduce((a,x)=>a+x,0),avgWin=w.length?w.reduce((a,x)=>a+x,0)/w.length:0,avgLoss=l.length?l.reduce((a,x)=>a+x,0)/l.length:0,wr=trades?w.length/trades*100:0,lr=trades?l.length/trades*100:0,rr=Math.abs(avgLoss)>0?avgWin/Math.abs(avgLoss):0,exp=trades?(wr/100*avgWin)+(lr/100*avgLoss):0,kelly=avgWin>0&&avgLoss<0?(wr/100-((lr/100)/(avgWin/Math.abs(avgLoss))))*100:0;return{trades,w:w.length,l:l.length,wr,lr,avgWin,avgLoss,rr,exp,kelly,net,gains:w.reduce((a,x)=>a+x,0),losses:l.reduce((a,x)=>a+x,0)}};const all=stats(j),blocks=[j,j.slice(0,25),j.slice(25,50),j.slice(50,75),j.slice(75,100)],beginning=Number(j[j.length-1]?.accountSize||j[0]?.accountSize||0),ending=beginning+all.net,days=j.flatMap(t=>calcRealized(t).days),avgDays=days.length?days.reduce((a,x)=>a+x,0)/days.length:0,winDays=j.filter(t=>calcRealized(t).realized>0).flatMap(t=>calcRealized(t).days),lossDays=j.filter(t=>calcRealized(t).realized<0).flatMap(t=>calcRealized(t).days),avgWinDays=winDays.length?winDays.reduce((a,x)=>a+x,0)/winDays.length:0,avgLossDays=lossDays.length?lossDays.reduce((a,x)=>a+x,0)/lossDays.length:0,netReturn=beginning?all.net/beginning*100:0;const blockHtml=blocks.map((arr,i)=>{const x=stats(arr),label=i===0?'Cumulative Results':`Trades ${i*25+1}-${i*25+25}`;return `<div class="plan-section"><h3>${label}</h3><div class="metric-grid"><div class="metric-card"><span># of Trades</span><strong>${x.trades}</strong></div><div class="metric-card"><span># of Winners</span><strong>${x.w}</strong></div><div class="metric-card"><span># of Losers</span><strong>${x.l}</strong></div><div class="metric-card"><span>% Winners</span><strong>${formatPct(x.wr)}</strong></div><div class="metric-card"><span>% Losers</span><strong>${formatPct(x.lr)}</strong></div><div class="metric-card"><span>Avg. $ Win</span><strong class="win-text">${money(x.avgWin)}</strong></div><div class="metric-card"><span>Avg. $ Loss</span><strong class="loss-text">${money(x.avgLoss)}</strong></div><div class="metric-card"><span>R-to-R Ratio</span><strong>1:${x.rr.toFixed(2)}</strong></div><div class="metric-card"><span>Expectancy</span><strong>${money(x.exp)}</strong></div><div class="metric-card"><span>Kelly</span><strong>${formatPct(x.kelly)}</strong></div><div class="metric-card"><span>Net Profit/Loss</span><strong class="${x.net>=0?'win-text':'loss-text'}">${money(x.net)}</strong></div></div></div>`}).join('');out.innerHTML=`<div class="metric-grid"><div class="metric-card"><span>Net Gains</span><strong class="win-text">${money(all.gains)}</strong></div><div class="metric-card"><span>Net Losses</span><strong class="loss-text">${money(all.losses)}</strong></div><div class="metric-card"><span>Net Profit/Loss</span><strong class="${all.net>=0?'win-text':'loss-text'}">${money(all.net)}</strong></div><div class="metric-card"><span>Win Rate</span><strong>${formatPct(all.wr)}</strong></div><div class="metric-card"><span>Expectancy / Trade</span><strong>${money(all.exp)}</strong></div><div class="metric-card"><span>Avg. Days Held</span><strong>${avgDays.toFixed(1)}</strong></div><div class="metric-card"><span>Avg. Days Winners</span><strong>${avgWinDays.toFixed(1)}</strong></div><div class="metric-card"><span>Avg. Days Losers</span><strong>${avgLossDays.toFixed(1)}</strong></div><div class="metric-card"><span>Net Return</span><strong>${formatPct(netReturn)}</strong></div><div class="metric-card"><span>Beginning Equity</span><strong>${money(beginning)}</strong></div><div class="metric-card"><span>Ending Equity</span><strong>${money(ending)}</strong></div></div>${blockHtml}`}
+function renderJournal(){const j=getJournal(),out=document.getElementById('journalOutput');if(!out)return;renderPerformanceDashboard();if(!j.length){out.innerHTML='<div class="journal-empty">📓 No saved trades yet.<br><br>Create a trade plan and save it.</div>';return}out.innerHTML=j.map((t,i)=>{const r=calcRealized(t),status=r.realized>0?'win':r.realized<0?'loss':'';return `<details class="journal-entry"><summary class="journal-entry-header"><span class="journal-entry-title">${esc(t.symbol)} • ${esc(t.direction)} • ${esc(t.setupGrade)}</span><span class="journal-entry-date">${esc(t.tradeDate||t.journalSavedAt||'')}</span></summary><div class="data-row"><span>Planned Entry / Stop</span><strong>${money(t.entry)} / ${money(t.stop)}</strong></div><div class="data-row"><span>Position</span><strong>${t.instrument==='Option'?(t.maxOptionContracts||0)+' contracts':(t.maximumShares||0)+' shares'}</strong></div><div class="journal-form"><div><label>Trade Date</label><input id="j_tradeDate_${i}" type="date" value="${esc(t.tradeDate||'')}"></div><div><label>Exit #1 Price</label><input id="j_exit1_${i}" type="number" step="0.01" value="${esc(t.exit1||'')}"></div><div><label># Exited</label><input id="j_exit1Qty_${i}" type="number" step="1" value="${esc(t.exit1Qty||'')}"></div><div><label>Exit #1 Date</label><input id="j_exit1Date_${i}" type="date" value="${esc(t.exit1Date||'')}"></div><div><label>Exit #2 Price</label><input id="j_exit2_${i}" type="number" step="0.01" value="${esc(t.exit2||'')}"></div><div><label># Exited</label><input id="j_exit2Qty_${i}" type="number" step="1" value="${esc(t.exit2Qty||'')}"></div><div><label>Exit #2 Date</label><input id="j_exit2Date_${i}" type="date" value="${esc(t.exit2Date||'')}"></div><div><label>Commission</label><input id="j_commission_${i}" type="number" step="0.01" value="${esc(t.commission||0)}"></div><div class="full-width"><button type="button" class="primary-btn" onclick="updateJournalTrade(${i})">💾 UPDATE TRADE OUTCOME</button></div></div><div class="outcome-status ${status}"><strong>Realized Gain/Loss:</strong> ${money(r.realized)} &nbsp; • &nbsp; <strong>Days:</strong> ${r.days.length?r.days.map(x=>x.toFixed(1)).join(' / '):'—'} &nbsp; • &nbsp; <strong>Closed:</strong> ${r.closedQty}/${r.baseQty||'—'}</div><div class="journal-entry-actions"><button type="button" class="danger-btn" onclick="deleteJournalTrade(${i})">Delete Trade</button></div></details>`}).join('')}
 
 /* =========================================================
    DOWNLOAD / EXPORT
@@ -759,7 +766,7 @@ function downloadTradeTicketTXT(){
 }
 function downloadJournalTXT(){
  const j=getJournal();if(!j.length){alert("Your journal is empty.");return}
- const text=j.map((p,i)=>`TRADE ${i+1}\\n${planText(p)}\\nSaved: ${p.journalSavedAt}\\n\\n`).join("\\n");
+ const text=j.map((p,i)=>{const r=calcRealized(p);return `TRADE ${i+1}\n${planText(p)}\nTrade Date: ${p.tradeDate||""}\nExit #1: ${p.exit1||""} | Qty: ${p.exit1Qty||""} | Date: ${p.exit1Date||""}\nExit #2: ${p.exit2||""} | Qty: ${p.exit2Qty||""} | Date: ${p.exit2Date||""}\nCommission: ${money(r.commission)}\nRealized Gain/Loss: ${money(r.realized)}\nSaved: ${p.journalSavedAt||""}\n\n`}).join("\n");
  downloadBlob("ROLYFE_Trade_Journal.txt",text,"text/plain;charset=utf-8");
 }
 function downloadTradePlanHTML(){
@@ -800,14 +807,14 @@ function clearPlan(){
 ========================================================= */
 document.addEventListener("DOMContentLoaded",()=>{
  document.getElementById("symbol").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();updateChartFromPlanner()}});
- ["probability","accountSize","riskPercent","entry","stop","optionEntry","ladderT1","ladderT2","ladderT3","runner","whatIfAccount","whatIfRisk","whatIfStop","whatIfPremium"].forEach(id=>{
+ ["probability","accountSize","riskPercent","entry","stop","optionEntry","ladderT1","ladderT2","ladderT3","runner","target1","target2","target3","whatIfAccount","whatIfRisk","whatIfStop","whatIfPremium"].forEach(id=>{
   const el=document.getElementById(id);if(el)el.addEventListener("input",()=>{updateSignalDashboard();renderPsychology()});
  });
  document.getElementById("direction").addEventListener("change",()=>{updateSignalDashboard();renderPsychology()});
- renderWatchlist(watchlistSymbols);renderJournal();syncSymbolHeader();updateSignalDashboard();
+ renderWatchlist(watchlistSymbols);renderJournal();syncSymbolHeader();updateSignalDashboard();setTimeout(()=>renderVisualChart('trade'),50);
  setTimeout(loadTradingViewChart,700);
  setTimeout(renderPsychology,800);
 });
 </script>
 </body>
-</html>
+ </html>
