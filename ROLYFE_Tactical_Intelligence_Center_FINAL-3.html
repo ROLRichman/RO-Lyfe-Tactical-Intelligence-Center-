@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07100c">
+<meta name="description" content="RO'LYFE Tactical Intelligence Center — Plan, Size, Ladder, Execute, Journal, Review.">
+<title>RO'LYFE Tactical Intelligence Center™ — Final Trade Assistant Build</title>
+
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;width:100%;max-width:100%;overflow-x:hidden}
+:root{
+ --bg:#050a07;--panel:#0d1811;--panel2:#132319;--panel3:#182b1e;
+ --border:#294234;--border2:#39704b;--green:#00e676;--green2:#00b85c;
+ --greenSoft:rgba(0,230,118,.12);--yellow:#ffd54f;--yellowSoft:rgba(255,213,79,.12);
+ --red:#ff5c5c;--redSoft:rgba(255,92,92,.12);--blue:#4da3ff;
+ --text:#f4f8f5;--muted:#99a79f
+}
+body{background:radial-gradient(circle at top,#143525 0%,#09150f 35%,#030604 100%);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app-header{padding:26px 14px 20px;text-align:center;background:linear-gradient(180deg,#07100c,#08130e);border-bottom:1px solid var(--border)}
+.logo-title{margin:0;color:var(--green);font-size:clamp(26px,8vw,58px);line-height:1.05;font-weight:900;letter-spacing:1px}
+.logo-subtitle{margin:14px 0 0;color:#b6c1ba;font-size:clamp(12px,3.8vw,20px);font-weight:800;line-height:1.5}
+.status-bar{width:min(1450px,100%);margin:auto;padding:10px 12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px}
+.status-item{padding:10px;text-align:center;background:rgba(19,35,25,.88);border:1px solid var(--border);border-radius:10px;font-size:12px;font-weight:800}
+.status-green{color:var(--green)}.status-yellow{color:var(--yellow)}.status-red{color:var(--red)}
+.container{width:min(1450px,100%);margin:auto;padding:10px}
+.card,.trade-plan-card,.trade-map,.psychology-card,.download-card,.disclosure-card{width:100%;margin-bottom:14px;padding:15px;background:linear-gradient(145deg,rgba(15,28,20,.98),rgba(6,13,9,.98));border:1px solid var(--border);border-radius:16px;box-shadow:0 12px 38px rgba(0,0,0,.25);overflow:hidden}
+.card h2,.trade-plan-card h2,.psychology-card h2,.download-card h2,.disclosure-card h2{margin:0 0 15px;color:var(--green);font-size:clamp(19px,5vw,29px)}
+.card h3{margin:10px 0 12px;color:var(--green)}
+details.section-drop{margin-bottom:14px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(145deg,rgba(15,28,20,.98),rgba(6,13,9,.98));overflow:hidden}
+details.section-drop>summary{list-style:none;cursor:pointer;padding:16px;color:var(--green);font-size:clamp(19px,5vw,29px);font-weight:900;display:flex;align-items:center;justify-content:space-between;gap:10px}
+details.section-drop>summary::-webkit-details-marker{display:none}
+details.section-drop>summary:after{content:"+";font-size:27px}
+details.section-drop[open]>summary:after{content:"−"}
+.drop-body{padding:0 15px 15px}
+.market-control-bar,.form-grid,.action-grid,.scenario-grid,.link-grid,.guard-grid,.whatif-controls{display:grid;gap:10px}
+.market-control-bar{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:8px}
+.form-grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:11px}
+.full-width{grid-column:1/-1}
+label{display:block;margin:0 0 6px;color:var(--muted);font-size:11px;font-weight:900}
+input,select,textarea{width:100%;min-width:0;min-height:46px;padding:11px;background:#07100c;border:1px solid var(--border);border-radius:9px;color:#fff;outline:none}
+textarea{min-height:100px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,230,118,.1)}
+.setup-options{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+button{width:100%;min-height:46px;margin-top:10px;padding:11px 14px;border:0;border-radius:10px;font-weight:900;transition:.16s}
+button:hover{opacity:.92;transform:translateY(-1px)}
+.setup-btn{margin:0;background:#09130d;color:#fff;border:1px solid var(--border)}
+.active-green{border-color:var(--green)!important;background:var(--greenSoft)!important;color:var(--green)!important}
+.active-yellow{border-color:var(--yellow)!important;background:var(--yellowSoft)!important;color:var(--yellow)!important}
+.active-red{border-color:var(--red)!important;background:var(--redSoft)!important;color:var(--red)!important}
+.primary-btn{background:linear-gradient(135deg,var(--green),var(--green2));color:#041009}
+.secondary-btn{background:#173323;color:#fff;border:1px solid var(--border2)}
+.danger-btn{background:linear-gradient(135deg,#ff6565,#d63d3d);color:#fff}
+.action-grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-top:9px}
+.action-grid button{margin:0}
+.help{margin:5px 0 0;color:var(--muted);font-size:11px;line-height:1.45}
+.badge{display:inline-block;padding:4px 8px;border-radius:20px;font-size:10px;font-weight:900}
+.badge-green{color:var(--green);background:var(--greenSoft)}
+.badge-yellow{color:var(--yellow);background:var(--yellowSoft)}
+.badge-red{color:var(--red);background:var(--redSoft)}
+.indicator-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px;margin-bottom:12px}
+.indicator-card{padding:12px;background:#0a130e;border:1px solid var(--border);border-radius:11px;text-align:center}
+.indicator-name{display:block;color:var(--muted);font-size:11px;font-weight:900}
+.indicator-value{display:block;margin-top:6px;color:#fff;font-size:15px;font-weight:900}
+.indicator-status{display:block;margin-top:5px;font-size:11px;font-weight:900}
+.bullish{color:var(--green)}.bearish{color:var(--red)}.neutral{color:var(--yellow)}
+.signal-score{padding:16px;text-align:center;border-radius:14px;background:linear-gradient(135deg,rgba(0,230,118,.12),rgba(0,0,0,.08));border:1px solid var(--border2)}
+.signal-score-number{display:block;color:var(--green);font-size:clamp(34px,10vw,58px);font-weight:900}
+.signal-score-label{display:block;margin-top:3px;color:var(--muted);font-size:11px;font-weight:900}
+.timeframe-bar{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:10px 0}
+.tf-btn{margin:0;min-height:40px;padding:7px;background:#101d15;color:#fff;border:1px solid var(--border);font-size:12px}
+.tf-btn.active{background:var(--green);color:#041009;border-color:var(--green)}
+.chart-description{margin:0 0 10px;color:var(--muted);line-height:1.55}
+.tradingview-shell{height:720px;min-width:0;overflow:hidden;background:#07100c;border:1px solid var(--border);border-radius:13px}
+.tradingview-widget-container{height:100%;width:100%}
+.tradingview-widget-container__widget{height:100%;width:100%}
+.chart-fallback{padding:30px;text-align:center;color:var(--muted);line-height:1.6}
+.chart-fallback strong{color:var(--red)}
+.chart-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:8px}
+.chart-actions a{display:block;text-decoration:none;text-align:center;padding:11px;border-radius:10px;background:#101d15;border:1px solid var(--border);color:#fff;font-weight:900}
+.chart-actions a:hover{border-color:var(--green)}
+.trade-plan-card{border-color:var(--green2)}
+.trade-plan-card h2{text-align:center}
+.plan-status{padding:9px;text-align:center;border-radius:9px;font-weight:900;margin-bottom:12px}
+.plan-section{margin-bottom:10px;padding:13px;background:#122018;border:1px solid var(--border);border-radius:11px}
+.plan-section h3{margin:0 0 10px;font-size:15px}
+.data-row{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.data-row:last-child{border-bottom:none}
+.data-row span{color:var(--muted)}.data-row strong{color:#fff;text-align:right}
+.ladder-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:7px}
+.ladder-box{padding:11px;text-align:center;background:#09120d;border:1px solid var(--border);border-radius:9px}
+.ladder-box strong{display:block;color:var(--green);font-size:15px}.ladder-box span{display:block;margin-top:4px;color:var(--muted);font-size:10px}
+.system-rule{padding:12px;text-align:center;color:var(--green);background:var(--greenSoft);border-radius:9px;font-weight:800;line-height:1.55}
+.visual-charts{border:1px solid var(--border2)!important;background:linear-gradient(145deg,rgba(8,24,15,.98),rgba(5,10,7,.98))!important}
+.visual-chart-nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:7px;margin-bottom:10px}
+.visual-chart-btn{margin:0;min-height:43px;background:#0c1911;border:1px solid var(--border);color:#dce7df}
+.visual-chart-btn.active{border-color:var(--green);background:var(--greenSoft);color:var(--green)}
+.visual-output{min-height:80px}
+.visual-card{padding:14px;background:#09140e;border:1px solid var(--border);border-radius:12px;margin-top:9px}
+.visual-card h3{margin:0 0 10px;color:var(--green);font-size:19px}
+.visual-sub{color:var(--muted);font-size:11px;line-height:1.5;margin-bottom:12px}
+.map-levels{display:flex;flex-direction:column;gap:8px}
+.map-level{display:flex;justify-content:space-between;gap:10px;padding:13px;border-radius:9px;font-weight:900}
+.map-stop{background:var(--redSoft);border:1px solid rgba(255,92,92,.3);color:var(--red)}
+.map-entry{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.2);color:#fff}
+.map-target{background:var(--greenSoft);border:1px solid rgba(0,230,118,.25);color:var(--green)}
+.map-arrow{text-align:center;color:var(--muted);font-size:18px}
+.watchlist-search{margin-bottom:9px}.watchlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(85px,1fr));gap:7px}
+.watch-item{min-height:43px;margin:0;padding:7px;background:#0b160f;border:1px solid var(--border);color:#fff;font-size:11px}
+.watch-item:hover{border-color:var(--green)}
+.link-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.market-link{display:block;padding:13px;background:#101d15;border:1px solid var(--border);border-radius:10px;color:#fff;text-decoration:none;font-size:13px;font-weight:900;line-height:1.45}
+.market-link:hover{border-color:var(--green)}
+.market-link span{display:block;margin-top:4px;color:var(--muted);font-size:10px;font-weight:normal}
+.psychology-card{border-color:#765f18;background:linear-gradient(145deg,rgba(27,24,10,.98),rgba(7,13,9,.98))}
+.psychology-intro,.download-note,.disclosure-note{color:#c7cec9;line-height:1.6;font-size:12px}
+.scenario-grid{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.scenario{padding:13px;background:#0c160f;border:1px solid var(--border);border-radius:12px}
+.scenario h3{margin:0 0 7px;color:var(--yellow);font-size:14px}
+.scenario p{margin:0 0 9px;color:var(--muted);font-size:11px;line-height:1.45}
+.scenario-result{padding:10px;background:#07100c;border-radius:9px;line-height:1.6;font-size:12px}
+.whatif-controls{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:10px}
+.callout{padding:12px;border-radius:9px;background:rgba(77,163,255,.1);border:1px solid rgba(77,163,255,.3);color:#dceeff;line-height:1.5;font-size:12px}
+.guard-grid{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.guard-card{margin-top:12px;padding:13px;background:#0a130e;border:1px solid var(--border);border-radius:11px}
+.guard-status{padding:12px;border-radius:9px;font-weight:900;line-height:1.5}
+.guard-safe{background:var(--greenSoft);border:1px solid var(--green);color:var(--green)}
+.guard-warning{background:var(--yellowSoft);border:1px solid var(--yellow);color:var(--yellow)}
+.guard-danger{background:var(--redSoft);border:1px solid var(--red);color:var(--red)}
+.guard-limits{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:7px;margin-top:8px}
+.guard-limit{padding:9px;background:#07100c;border:1px solid var(--border);border-radius:8px}
+.guard-limit span{display:block;color:var(--muted);font-size:9px;font-weight:900}.guard-limit strong{display:block;margin-top:4px;font-size:13px}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px}
+.metric-card{padding:11px;background:#0a130e;border:1px solid var(--border);border-radius:9px}
+.metric-card span{display:block;color:var(--muted);font-size:10px;font-weight:900}.metric-card strong{display:block;margin-top:5px;font-size:16px}
+.performance-blocks{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:9px;margin-top:10px}
+.performance-block{padding:12px;background:#0a130e;border:1px solid var(--border);border-radius:10px}
+.performance-block h3{margin:0 0 9px;color:var(--green);font-size:14px}
+.journal-empty{padding:24px;text-align:center;color:var(--muted);background:#0a130e;border-radius:10px}
+.journal-entry{margin-bottom:9px;padding:12px;background:#0d1811;border:1px solid var(--border);border-radius:11px}
+.journal-entry summary{cursor:pointer}
+.journal-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:10px}
+.outcome-status{margin-top:9px;padding:10px;border-radius:9px;background:#07100c;color:#fff;font-size:11px}
+.outcome-status.win{border:1px solid var(--green);color:var(--green)}
+.outcome-status.loss{border:1px solid var(--red);color:var(--red)}
+.disclosure-card{border-color:#5c6540}.disclosure-card strong{color:#fff}
+.small-muted{color:var(--muted);font-size:10px;line-height:1.5}
+.app-footer{padding:22px 14px 95px;text-align:center;color:var(--muted);font-size:11px;line-height:1.8}
+.hidden{display:none!important}
+
+/* Floating RO'LYFE AI */
+.ai-fab{position:fixed;right:16px;bottom:16px;z-index:9999;width:62px;height:62px;min-height:62px;margin:0;padding:0;border-radius:50%;background:linear-gradient(135deg,var(--green),#00a956);color:#041009;border:2px solid rgba(255,255,255,.35);box-shadow:0 10px 30px rgba(0,0,0,.45);font-size:25px}
+.ai-fab:hover{transform:scale(1.04)}
+.ai-panel{position:fixed;right:16px;bottom:88px;z-index:9998;width:min(390px,calc(100vw - 24px));max-height:min(78vh,720px);display:none;flex-direction:column;background:#07100c;border:1px solid var(--border2);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.6);overflow:hidden}
+.ai-panel.open{display:flex}
+.ai-head{padding:12px 14px;background:#0d1811;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.ai-head strong{color:var(--green)}.ai-subtitle{margin-left:auto;margin-right:8px;color:var(--muted);font-size:9px;font-weight:800}.ai-close{width:auto;min-height:34px;margin:0;padding:6px 10px;background:transparent;color:#fff;border:1px solid var(--border)}
+.ai-body{padding:12px;overflow:auto}
+.ai-quick{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:8px}
+.ai-quick button{margin:0;min-height:38px;padding:7px;font-size:10px;background:#101d15;color:#fff;border:1px solid var(--border)}
+.ai-answer{min-height:90px;padding:10px;background:#0c160f;border:1px solid var(--border);border-radius:9px;color:#dce7df;font-size:12px;line-height:1.55;margin-bottom:8px;white-space:pre-wrap}
+.ai-input-row{display:grid;grid-template-columns:1fr 80px;gap:7px}
+.ai-input-row button{margin:0}
+
+/* mobile */
+@media(max-width:700px){
+ .container{padding:7px}
+ .card,.trade-plan-card,.trade-map,.psychology-card,.download-card,.disclosure-card{padding:12px;border-radius:13px}
+ .status-bar{grid-template-columns:repeat(2,1fr);padding:7px}
+ .setup-options{grid-template-columns:1fr}
+ .timeframe-bar{grid-template-columns:repeat(3,1fr)}
+ .tradingview-shell{height:720px}
+ .data-row{flex-direction:column;gap:3px}.data-row strong{text-align:left}
+ .ai-panel{right:12px;bottom:86px}
+}
+@media(max-width:380px){
+ .status-bar{grid-template-columns:1fr}
+ .timeframe-bar{grid-template-columns:repeat(2,1fr)}
+ .tradingview-shell{height:650px}
+}
+</style>
+</head>
+
+<body>
+<header class="app-header">
+ <h1 class="logo-title">🎯 RO'LYFE TACTICAL INTELLIGENCE CENTER™</h1>
+ <p class="logo-subtitle">PLAN → SIZE → LADDER → EXECUTE → JOURNAL → REVIEW</p>
+</header>
+
+<div class="status-bar">
+ <div class="status-item">🟢 SYSTEM<br><span class="status-green">ONLINE</span></div>
+ <div class="status-item">🎯 SETUP<br><span id="headerSetupStatus" class="status-green">🟢 GREEN SETUP</span></div>
+ <div class="status-item">📊 SYMBOL<br><span id="headerSymbol">NVDA</span></div>
+ <div class="status-item">🧠 MODE<br><span class="status-green">RO'LYFE GREEN IGNITION™</span></div>
+</div>
+
+<main class="container">
+
+<!-- MARKET CONTROL -->
+<section class="card">
+ <h2>⚡ MARKET CONTROL CENTER</h2>
+ <div class="market-control-bar">
+  <div><label>Crypto</label><select onchange="changeMarketSymbol(this.value)">
+   <option value="">Select Crypto</option><option value="BINANCE:BTCUSDT">BTC</option><option value="BINANCE:ETHUSDT">ETH</option><option value="BINANCE:SOLUSDT">SOL</option><option value="BINANCE:XRPUSDT">XRP</option><option value="BINANCE:ADAUSDT">ADA</option><option value="BINANCE:AVAXUSDT">AVAX</option><option value="BINANCE:DOGEUSDT">DOGE</option>
+  </select></div>
+  <div><label>Futures</label><select onchange="changeMarketSymbol(this.value)">
+   <option value="">Select Futures</option><option value="CME_MINI:ES1!">ES</option><option value="CME_MINI:NQ1!">NQ</option><option value="NYMEX:CL1!">CL</option><option value="COMEX:GC1!">GC</option><option value="CBOT_MINI:YM1!">YM</option>
+  </select></div>
+  <div><label>Sector</label><select onchange="changeMarketSymbol(this.value)">
+   <option value="">Select Sector</option><option value="AMEX:XLK">XLK Tech</option><option value="AMEX:XLF">XLF Financials</option><option value="AMEX:XLE">XLE Energy</option><option value="AMEX:XLU">XLU Utilities</option><option value="AMEX:XLY">XLY Consumer</option><option value="AMEX:XLV">XLV Healthcare</option><option value="AMEX:XLB">XLB Materials</option><option value="AMEX:XLC">XLC Communication</option><option value="AMEX:XLI">XLI Industrials</option><option value="AMEX:XLP">XLP Staples</option>
+  </select></div>
+  <div><label>Quick Stock</label><select id="quickStockSelect" onchange="changeMarketSymbol(this.value)">
+   <option value="">Select Stock</option>
+  </select></div>
+ </div>
+ <div class="help">You can also type a symbol in the Master Trade Plan or use TradingView's own symbol search inside the chart.</div>
+</section>
+
+<!-- MASTER PLAN -->
+<details class="section-drop" open>
+ <summary>🎯 MASTER TRADE PLAN</summary>
+ <div class="drop-body">
+  <div class="form-grid">
+   <div><label>Symbol</label><input id="symbol" value="NVDA" autocomplete="off" oninput="syncSymbolHeader()"></div>
+   <div><label>Instrument</label><select id="instrument" onchange="onInstrumentChange()"><option>Stock</option><option>Option</option><option>Crypto</option><option>Future</option></select></div>
+   <div><label>Direction</label><select id="direction" onchange="refreshCalculations()"><option value="Long">📈 Long</option><option value="Short">📉 Short</option></select></div>
+   <div><label>Setup Grade</label><div class="setup-options">
+    <button type="button" class="setup-btn active-green" data-grade="GREEN" onclick="setSetupGrade('GREEN')">🟢 GREEN</button>
+    <button type="button" class="setup-btn" data-grade="YELLOW" onclick="setSetupGrade('YELLOW')">🟡 YELLOW</button>
+    <button type="button" class="setup-btn" data-grade="RED" onclick="setSetupGrade('RED')">🔴 RED</button>
+   </div></div>
+   <div><label>Account Size</label><input id="accountSize" type="number" step="0.01" value="10000"></div>
+   <div><label>Risk Percentage</label><input id="riskPercent" type="number" min="0" max="100" step="0.01" value="1"></div>
+   <div><label>Trade Probability %</label><input id="probability" type="number" min="0" max="100" value="70"></div>
+   <div><label>Implied Volatility %</label><input id="impliedVolatility" type="number" min="0" step="0.01" value="35"></div>
+
+   <div class="full-width"><h3>📈 STOCK / ASSET MAP</h3></div>
+   <div><label>Entry Price</label><input id="entry" type="number" step="0.01" value="150"></div>
+   <div><label>Stop Price — your hard chart stop</label><input id="stop" type="number" step="0.01" value="145"></div>
+   <div><label>Manual Target 1</label><input id="target1" type="number" step="0.01" placeholder="Auto 1R"></div>
+   <div><label>Manual Target 2</label><input id="target2" type="number" step="0.01" placeholder="Auto 2R"></div>
+   <div><label>Manual Target 3</label><input id="target3" type="number" step="0.01" placeholder="Auto 3R"></div>
+
+   <div class="full-width"><h3>🎯 OPTION / DERIVATIVE EXECUTION</h3></div>
+   <div><label>Strategy</label><select id="strategy" onchange="updateStrategyUI()">
+    <option value="LONG_CALL">Long Call</option>
+    <option value="LONG_PUT">Long Put</option>
+    <option value="BULL_CALL_SPREAD">Bull Call Spread</option>
+    <option value="BEAR_PUT_SPREAD">Bear Put Spread</option>
+    <option value="BULL_PUT_CREDIT">Bull Put Credit Spread</option>
+    <option value="BEAR_CALL_CREDIT">Bear Call Credit Spread</option>
+    <option value="CALL_CALENDAR">Call Calendar</option>
+    <option value="PUT_CALENDAR">Put Calendar</option>
+    <option value="COVERED_CALL">Covered Call</option>
+    <option value="CASH_SECURED_PUT">Cash-Secured Put</option>
+    <option value="IRON_CONDOR">Iron Condor</option>
+   </select></div>
+   <div><label>Risk Basis</label><select id="riskBasis" onchange="refreshCalculations()">
+    <option value="STOP_PROXY">Underlying Stop + Delta Proxy</option>
+    <option value="DEFINED">Defined / Contractual Max Loss</option>
+    <option value="CONSERVATIVE">Conservative — larger of both</option>
+   </select></div>
+   <div><label>Expiration</label><input id="expiration" type="date"></div>
+   <div><label>Desired Position</label><input id="desiredContracts" type="number" min="1" step="1" value="1"></div>
+   <div><label>Custom Max Loss / Contract</label><input id="customMaxLoss" type="number" min="0" step="0.01" value="0" placeholder="0 = calculate"></div>
+
+   <div class="full-width">
+    <div class="plan-section" style="margin:0">
+     <h3>🧩 Strategy Legs &amp; Premiums</h3>
+     <div class="form-grid">
+      <div><label id="leg1Label">Leg 1 Strike</label><input id="leg1Strike" type="number" step="0.01" value="150"></div>
+      <div><label id="leg1PremiumLabel">Leg 1 Premium</label><input id="leg1Premium" type="number" step="0.01" value="2.53"></div>
+      <div><label>Leg 1 Delta</label><input id="leg1Delta" type="number" step="0.01" value="0.50"></div>
+      <div><label id="leg2Label">Leg 2 Strike</label><input id="leg2Strike" type="number" step="0.01" value="155"></div>
+      <div><label id="leg2PremiumLabel">Leg 2 Premium</label><input id="leg2Premium" type="number" step="0.01" value="1.25"></div>
+      <div><label>Leg 2 Delta</label><input id="leg2Delta" type="number" step="0.01" value="0.30"></div>
+      <div><label id="leg3Label">Leg 3 Strike</label><input id="leg3Strike" type="number" step="0.01" value="145"></div>
+      <div><label id="leg3PremiumLabel">Leg 3 Premium</label><input id="leg3Premium" type="number" step="0.01" value="1.00"></div>
+      <div><label>Leg 3 Delta</label><input id="leg3Delta" type="number" step="0.01" value="0.20"></div>
+      <div><label id="leg4Label">Leg 4 Strike</label><input id="leg4Strike" type="number" step="0.01" value="160"></div>
+      <div><label id="leg4PremiumLabel">Leg 4 Premium</label><input id="leg4Premium" type="number" step="0.01" value="0.75"></div>
+      <div><label>Leg 4 Delta</label><input id="leg4Delta" type="number" step="0.01" value="0.15"></div>
+      <div><label>Strategy Target 1 Value</label><input id="strategyTarget1" type="number" step="0.01" value="3.00"></div>
+      <div><label>Strategy Target 2 Value</label><input id="strategyTarget2" type="number" step="0.01" value="3.50"></div>
+      <div><label>Strategy Target 3 Value</label><input id="strategyTarget3" type="number" step="0.01" value="4.00"></div>
+     </div>
+     <p id="strategyHelp" class="help"></p>
+    </div>
+   </div>
+
+   <div class="full-width"><h3>🪜 RO'LYFE EXIT LADDER</h3></div>
+   <div><label>Ladder T1 Exit %</label><input id="ladderT1" type="number" min="0" max="100" value="40"></div>
+   <div><label>Ladder T2 Exit %</label><input id="ladderT2" type="number" min="0" max="100" value="30"></div>
+   <div><label>Ladder T3 Exit %</label><input id="ladderT3" type="number" min="0" max="100" value="20"></div>
+   <div><label>Runner %</label><input id="runner" type="number" min="0" max="100" value="10"></div>
+
+   <div class="full-width"><h3>🛡️ RO'LYFE POSITION CONTROL <span class="badge badge-green">RISK GUARD ONLINE</span></h3></div>
+   <div class="help">Optional guardrail — it does not choose your trade. It checks affordability, capital allocation, risk budget, and your personal maximum. Leave Personal Max at 0 for no personal cap.</div>
+   <div><label>Capital Allocation %</label><input id="capitalAllocationPercent" type="number" min="1" max="100" value="25"></div>
+   <div><label>Personal Max Position</label><input id="personalMaxPosition" type="number" min="0" step="1" value="0" placeholder="0 = none"></div>
+   <div><label>Futures Point Value</label><input id="futuresPointValue" type="number" min="0.01" step="0.01" value="50"></div>
+   <div><label>Futures Margin / Contract</label><input id="futuresMargin" type="number" min="0" step="1" value="15000"></div>
+  </div>
+
+  <div id="positionSizingOutput"></div>
+  <div class="action-grid">
+   <button type="button" class="primary-btn" onclick="createTradePlan()">🎯 CREATE MASTER TRADE PLAN</button>
+   <button type="button" class="secondary-btn" onclick="updateChartFromPlanner()">📈 UPDATE LIVE CHART</button>
+   <button type="button" class="secondary-btn" onclick="saveCurrentPlan()">💾 SAVE TO JOURNAL</button>
+   <button type="button" class="danger-btn" onclick="clearPlan()">🗑️ CLEAR PLAN</button>
+  </div>
+ </div>
+</details>
+
+<!-- WHAT IF -->
+<details class="section-drop">
+ <summary>🧠 RO'LYFE WHAT-IF PSYCHOLOGY ENGINE</summary>
+ <div class="drop-body">
+  <p class="psychology-intro">Change one variable before the trade. The engine exposes the consequence before capital is exposed.</p>
+  <div class="whatif-controls">
+   <div><label>Psychology Account</label><input id="whatIfAccount" type="number" step="0.01" value="100"></div>
+   <div><label>Psychology Risk %</label><input id="whatIfRisk" type="number" step="0.01" value="1"></div>
+   <div><label>Wider Stop Price</label><input id="whatIfStop" type="number" step="0.01" value="140"></div>
+   <div><label>Option / Strategy Entry Value</label><input id="whatIfPremium" type="number" step="0.01" value="2.53"></div>
+  </div>
+  <div id="psychologyOutput" class="scenario-grid"></div>
+  <div class="callout"><strong>RO'LYFE principle:</strong> If the trade cannot fit the account at the chosen risk, do not force it. Change the setup, stop, instrument, contract, or wait.</div>
+ </div>
+</details>
+
+<!-- INDICATORS -->
+<details class="section-drop" open>
+ <summary>🧠 RO'LYFE GREEN IGNITION™ INDICATOR SYSTEM</summary>
+ <div class="drop-body">
+  <p class="chart-description">Core confirmation stack: EMA 20 → EMA 50 → EMA 200 → VWAP → RSI → MACD → Stochastic RSI.</p>
+  <div class="indicator-grid">
+   <div class="indicator-card"><span class="indicator-name">📈 EMA 20</span><span id="ema20Value" class="indicator-value">ON CHART</span><span id="ema20Status" class="indicator-status neutral">FAST TREND</span></div>
+   <div class="indicator-card"><span class="indicator-name">📊 EMA 50</span><span id="ema50Value" class="indicator-value">ON CHART</span><span id="ema50Status" class="indicator-status neutral">TREND</span></div>
+   <div class="indicator-card"><span class="indicator-name">🧱 EMA 200</span><span id="ema200Value" class="indicator-value">ON CHART</span><span id="ema200Status" class="indicator-status neutral">MAJOR TREND</span></div>
+   <div class="indicator-card"><span class="indicator-name">⚡ VWAP</span><span id="vwapValue" class="indicator-value">ON CHART</span><span id="vwapStatus" class="indicator-status neutral">VALUE</span></div>
+   <div class="indicator-card"><span class="indicator-name">📉 RSI</span><span id="rsiValue" class="indicator-value">ON CHART</span><span id="rsiStatus" class="indicator-status neutral">MOMENTUM</span></div>
+   <div class="indicator-card"><span class="indicator-name">🚀 MACD</span><span id="macdValue" class="indicator-value">ON CHART</span><span id="macdStatus" class="indicator-status neutral">MOMENTUM TREND</span></div>
+   <div class="indicator-card"><span class="indicator-name">🎯 STOCH RSI</span><span id="stochValue" class="indicator-value">ON CHART</span><span id="stochStatus" class="indicator-status neutral">TIMING</span></div>
+  </div>
+  <div class="form-grid" style="margin-bottom:10px">
+   <div><label>EMA / VWAP Bias</label><select id="trendBias" onchange="updateSignalDashboard()"><option value="bullish">Bullish</option><option value="neutral" selected>Neutral</option><option value="bearish">Bearish</option></select></div>
+   <div><label>RSI Bias</label><select id="rsiBias" onchange="updateSignalDashboard()"><option value="bullish">Bullish</option><option value="neutral" selected>Neutral</option><option value="bearish">Bearish</option></select></div>
+   <div><label>MACD Bias</label><select id="macdBias" onchange="updateSignalDashboard()"><option value="bullish">Bullish</option><option value="neutral" selected>Neutral</option><option value="bearish">Bearish</option></select></div>
+   <div><label>Stoch RSI Bias</label><select id="stochBias" onchange="updateSignalDashboard()"><option value="bullish">Bullish</option><option value="neutral" selected>Neutral</option><option value="bearish">Bearish</option></select></div>
+  </div>
+  <div class="signal-score"><span id="signalScore" class="signal-score-number">50</span><span class="signal-score-label">RO'LYFE SIGNAL CONFIDENCE</span><span id="signalMessage" class="indicator-status neutral">🟡 WAIT FOR CONFIRMATION</span></div>
+ </div>
+</details>
+
+<!-- LIVE CHART -->
+<details class="section-drop" open>
+ <summary>📈 LIVE MARKET CHART</summary>
+ <div class="drop-body">
+  <p class="chart-description">Live market view for <strong id="chartSymbolLabel">NASDAQ:NVDA</strong> <span class="badge badge-green">LIVE WIDGET</span></p>
+  <div class="timeframe-bar">
+   <button class="tf-btn" onclick="changeTimeframe('5',this)">5m</button>
+   <button class="tf-btn active" onclick="changeTimeframe('15',this)">15m</button>
+   <button class="tf-btn" onclick="changeTimeframe('60',this)">1H</button>
+   <button class="tf-btn" onclick="changeTimeframe('240',this)">4H</button>
+   <button class="tf-btn" onclick="changeTimeframe('D',this)">1D</button>
+   <button class="tf-btn" onclick="changeTimeframe('W',this)">1W</button>
+  </div>
+  <div id="tradingview_chart" class="tradingview-shell"></div>
+  <div class="chart-actions">
+   <a id="tvOpenLink" href="https://www.tradingview.com/chart/" target="_blank" rel="noopener">↗ Open Current Symbol in TradingView</a>
+   <a href="https://www.tradingview.com/chart/" target="_blank" rel="noopener">🔎 Full TradingView Symbol Search</a>
+  </div>
+  <p class="help">Important: some symbols are not licensed for embedded widgets. TradingView documents that “only available on TradingView” means the symbol cannot be shown in the website widget. The full TradingView link above is the fallback.</p>
+ </div>
+</details>
+
+<!-- OUTPUT -->
+<section id="tradePlanOutput"></section>
+
+<!-- VISUALS -->
+<details id="visualCharts" class="section-drop" open>
+ <summary>📊 RO'LYFE VISUAL CHARTS</summary>
+ <div class="drop-body">
+  <div class="visual-chart-nav">
+   <button class="visual-chart-btn active" data-visual="trade" onclick="renderVisualChart('trade',this)">🗺️ Trade Map</button>
+   <button class="visual-chart-btn" data-visual="long" onclick="renderVisualChart('long',this)">📈 Long Trade Map</button>
+   <button class="visual-chart-btn" data-visual="short" onclick="renderVisualChart('short',this)">📉 Short Trade Map</button>
+   <button class="visual-chart-btn" data-visual="ladder" onclick="renderVisualChart('ladder',this)">🎯 Target Ladder</button>
+   <button class="visual-chart-btn" data-visual="risk" onclick="renderVisualChart('risk',this)">💰 Position &amp; Risk</button>
+   <button class="visual-chart-btn" data-visual="execution" onclick="renderVisualChart('execution',this)">🧠 Execution Map</button>
+  </div>
+  <div id="tradeMapOutput" class="visual-output"></div>
+ </div>
+</details>
+
+<!-- EXPORT -->
+<details class="section-drop">
+ <summary>📥 RO'LYFE DOWNLOAD / EXPORT CENTER</summary>
+ <div class="drop-body">
+  <p class="download-note">Export the current plan as a standalone HTML report, trade ticket, or journal text file. Print can be saved as PDF from the browser.</p>
+  <div class="action-grid">
+   <button class="primary-btn" onclick="downloadTradePlanHTML()">📥 DOWNLOAD TRADE PLAN HTML</button>
+   <button class="secondary-btn" onclick="downloadTradeTicketTXT()">📄 DOWNLOAD TRADE TICKET TXT</button>
+   <button class="secondary-btn" onclick="downloadJournalTXT()">📓 DOWNLOAD JOURNAL TXT</button>
+   <button class="secondary-btn" onclick="printCurrentPlan()">🖨️ PRINT / SAVE PDF</button>
+  </div>
+ </div>
+</details>
+
+<!-- WATCHLIST -->
+<details class="section-drop">
+ <summary>👁️ RO'LYFE MASTER WATCHLIST</summary>
+ <div class="drop-body">
+  <input id="watchlistSearch" class="watchlist-search" type="text" placeholder="Search symbol..." oninput="filterWatchlist()">
+  <div id="watchlist" class="watchlist"></div>
+ </div>
+</details>
+
+<!-- MARKET INTEL -->
+<details class="section-drop">
+ <summary>🌎 MARKET INTELLIGENCE CENTER</summary>
+ <div class="drop-body">
+  <div class="link-grid">
+   <a class="market-link" href="https://stockcharts.com/freecharts/perf.php?$COMPQ,iwm,$INDU,$SPX" target="_blank" rel="noopener">📊 Market Posture<span>Nasdaq • Russell • Dow • S&amp;P 500</span></a>
+   <a class="market-link" href="https://stockcharts.com/freecharts/perf.php?SPY,XLY,XLC,XLK,XLI,XLB,XLE,XLP,XLV,XLU,XLF" target="_blank" rel="noopener">🔄 Sector Rotation<span>Track capital movement between sectors</span></a>
+   <a class="market-link" href="https://finviz.com/screener.ashx?v=211&f=sh_avgvol_o2000,sh_opt_optionshort,sh_price_o10,ta_sma200_pa,ta_sma50_pa&o=-perf4w" target="_blank" rel="noopener">🔍 Finviz Bullish Scanner<span>Volume • Options • Price • SMA filters</span></a>
+   <a class="market-link" href="https://www.marketwatch.com/economy-politics/calendar" target="_blank" rel="noopener">📰 Economic Calendar<span>News and scheduled economic events</span></a>
+   <a class="market-link" href="https://finviz.com/map.ashx?t=sec" target="_blank" rel="noopener">🔥 S&amp;P 500 Heat Map<span>Sector and market performance</span></a>
+   <a class="market-link" href="https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html" target="_blank" rel="noopener">🏦 CME FedWatch<span>Interest-rate expectations</span></a>
+   <a class="market-link" href="https://finance.yahoo.com/" target="_blank" rel="noopener">📈 Yahoo Finance<span>Futures • News • Market overview</span></a>
+   <a class="market-link" href="https://www.schwab.com/trading/thinkorswim" target="_blank" rel="noopener">🧠 thinkorswim<span>Schwab's thinkorswim desktop, web and mobile platforms</span></a>
+  </div>
+ </div>
+</details>
+
+<!-- PERFORMANCE -->
+<details class="section-drop">
+ <summary>📈 RO'LYFE PERFORMANCE DASHBOARD</summary>
+ <div class="drop-body">
+  <p class="chart-description">Coach-inspired performance review: cumulative results plus 25-trade performance blocks.</p>
+  <div id="performanceDashboard"></div>
+ </div>
+</details>
+
+<!-- JOURNAL -->
+<details class="section-drop">
+ <summary>📓 RO'LYFE TRADE JOURNAL</summary>
+ <div class="drop-body">
+  <p class="chart-description">Save trade plans, record exits, and review realized P/L.</p>
+  <div id="journalOutput"></div>
+  <div class="action-grid">
+   <button class="secondary-btn" onclick="renderJournal()">🔄 REFRESH JOURNAL</button>
+   <button class="danger-btn" onclick="clearJournal()">🗑️ CLEAR JOURNAL</button>
+  </div>
+ </div>
+</details>
+
+<!-- DISCLOSURE -->
+<details class="section-drop">
+ <summary>⚠️ RO'LYFE DISCLOSURE</summary>
+ <div class="drop-body">
+  <p class="disclosure-note"><strong>Educational and informational use only.</strong> RO'LYFE Tactical Intelligence Center™ is a planning, calculation, charting, and journaling tool. It is not investment, financial, legal, tax, or trading advice and is not a recommendation to buy, sell, or hold any security, option, cryptocurrency, future, or other financial instrument.</p>
+  <p class="disclosure-note">Market prices, charts, indicators, probabilities, risk calculations, and scenario outputs may be delayed, incomplete, estimated, or dependent on third-party data. Options and derivatives involve substantial risk. A calculated position size is not a guarantee that a broker will accept an order or that a trade can be executed at the displayed price.</p>
+  <p class="disclosure-note"><strong>Affiliate/resource disclosure:</strong> Some external resources may be affiliate/referral links through which RO'LYFE may receive compensation at no additional cost to the user.</p>
+  <p class="small-muted">RO'LYFE Tactical Intelligence Center™ • Built for disciplined planning, not prediction.</p>
+ </div>
+</details>
+
+</main>
+
+<footer class="app-footer">
+ RO'LYFE Tactical Intelligence Center™<br>
+ PLAN → SIZE → LADDER → EXECUTE → JOURNAL → REVIEW<br>
+ <span>For educational and informational purposes only.</span>
+</footer>
+
+<!-- Floating AI -->
+<button id="aiFab" class="ai-fab" type="button" onclick="toggleAI()" aria-label="Open RO'LYFE Trade Assistant">🧠</button>
+<div id="aiPanel" class="ai-panel" aria-live="polite">
+ <div class="ai-head"><strong>🧠 RO'LYFE TRADE ASSISTANT</strong><span class="ai-subtitle">AI-powered plan helper</span><button class="ai-close" onclick="toggleAI()">✕</button></div>
+ <div class="ai-body">
+  <div class="small-muted" style="margin-bottom:8px">Use this for quick sizing, stop checks, strategy explanations, ladder math and pre-entry review.</div>
+  <div class="ai-quick">
+   <button onclick="askAI('What is my risk?')">What is my risk?</button>
+   <button onclick="askAI('Why do I have zero contracts?')">Why 0 contracts?</button>
+   <button onclick="askAI('Explain this strategy')">Explain strategy</button>
+   <button onclick="askAI('How does my ladder work?')">Explain ladder</button>
+   <button onclick="askAI('What does the indicator stack mean?')">Indicators</button>
+   <button onclick="askAI('What should I check before entry?')">Pre-entry check</button>
+  </div>
+  <div id="aiAnswer" class="ai-answer">Ask RO'LYFE AI about the current plan, risk, ladder, strategy, indicators, position size, or chart workflow.</div>
+  <div class="ai-input-row"><input id="aiInput" placeholder="Ask about your trade, stop, size, strategy..." onkeydown="if(event.key==='Enter')askAI()"><button class="primary-btn" onclick="askAI()">ASK RO'LYFE</button></div>
+ </div>
+</div>
+
+<script>
+/* =========================================================
+   RO'LYFE COMPLETE ENGINE
+========================================================= */
+let currentChartSymbol="NASDAQ:NVDA";
+let currentTimeframe="15";
+let currentSetupGrade="GREEN";
+let currentPlan=null;
+let tvLoadTimer=null;
+
+const watchlistSymbols=[
+"AAPL","AMKR","AMZN","APH","ASX","AVGO","AXP","BAC","BK","C","CAT","CIEN","CLS","COHR","CRDO","CSCO","DAL","DIA",
+"FOXA","FSLR","GE","GLD","GM","GOOGL","GS","GTX","HWM","IBM","INTC","IWM","JCI","JNJ","LITE","LLY","LRCX","M",
+"MA","META","MS","MSFT","MU","NFLX","NVDA","NXT","PLTR","QQQ","REAL","RKLB","ROKU","ROST","RTX","SLV","SNDK",
+"SOFI","SPY","STX","TER","TJX","TSLA","TSM","UUP","VIX","W","WBD","WDC","WMT","XLB","XLC","XLE","XLF","XLI","XLK","XLP","XLU","XLV","XLY"
+];
+
+const strategyMeta={
+ LONG_CALL:{name:"Long Call",kind:"debit",legs:1,help:"Buy a call. Premium paid is the contractual maximum loss. The chart stop remains your execution trigger."},
+ LONG_PUT:{name:"Long Put",kind:"debit",legs:1,help:"Buy a put. Premium paid is the contractual maximum loss. For a bearish thesis, the chart stop is above the entry."},
+ BULL_CALL_SPREAD:{name:"Bull Call Spread",kind:"debit",legs:2,help:"Buy the lower-strike call and sell the higher-strike call. Max loss is the net debit; max profit is spread width minus debit."},
+ BEAR_PUT_SPREAD:{name:"Bear Put Spread",kind:"debit",legs:2,help:"Buy the higher-strike put and sell the lower-strike put. Max loss is the net debit; max profit is spread width minus debit."},
+ BULL_PUT_CREDIT:{name:"Bull Put Credit Spread",kind:"credit",legs:2,help:"Sell the higher-strike put and buy the lower-strike put. Premium received is max profit; max loss is spread width minus credit."},
+ BEAR_CALL_CREDIT:{name:"Bear Call Credit Spread",kind:"credit",legs:2,help:"Sell the lower-strike call and buy the higher-strike call. Premium received is max profit; max loss is spread width minus credit."},
+ CALL_CALENDAR:{name:"Call Calendar",kind:"debit",legs:2,help:"Buy the longer-dated call and sell the shorter-dated call. Net debit is the defined amount paid; outcome is path/volatility dependent."},
+ PUT_CALENDAR:{name:"Put Calendar",kind:"debit",legs:2,help:"Buy the longer-dated put and sell the shorter-dated put. Net debit is the defined amount paid; outcome is path/volatility dependent."},
+ COVERED_CALL:{name:"Covered Call",kind:"covered",legs:1,help:"Long stock plus a short call. Call premium is received, while the stock stop controls the planned downside exit."},
+ CASH_SECURED_PUT:{name:"Cash-Secured Put",kind:"cashput",legs:1,help:"Sell a put for premium. Premium received is max profit; contractual downside is strike minus credit per share if held to expiration."},
+ IRON_CONDOR:{name:"Iron Condor",kind:"credit4",legs:4,help:"Four-leg defined-risk credit strategy. Net credit is max profit; max loss is the larger wing width minus credit."}
+};
+
+function money(v){const n=Number(v);return Number.isFinite(n)?n.toLocaleString("en-US",{style:"currency",currency:"USD"}):"$0.00"}
+function number(v,d=2){const n=Number(v);return Number.isFinite(n)?n.toLocaleString("en-US",{maximumFractionDigits:d}):"0"}
+function num(id){const e=document.getElementById(id),n=e?Number(e.value):0;return Number.isFinite(n)?n:0}
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function clamp(n,min,max){return Math.max(min,Math.min(max,n))}
+function getSymbol(){return (String(document.getElementById("symbol")?.value||"NVDA").trim().toUpperCase()||"NVDA")}
+function pct(v){return `${number(v,2)}%`}
+function fmtDate(v){return v?new Date(v+"T00:00:00").toLocaleDateString("en-US"):"—"}
+
+function setSetupGrade(grade){
+ currentSetupGrade=grade;
+ document.querySelectorAll(".setup-btn").forEach(b=>{b.classList.remove("active-green","active-yellow","active-red");if(b.dataset.grade===grade)b.classList.add("active-"+grade.toLowerCase())});
+ const s=document.getElementById("headerSetupStatus");
+ s.textContent=grade==="GREEN"?"🟢 GREEN SETUP":grade==="YELLOW"?"🟡 YELLOW SETUP":"🔴 RED SETUP";
+ s.className=grade==="GREEN"?"status-green":grade==="YELLOW"?"status-yellow":"status-red";
+ updateSignalDashboard();renderPsychology();updatePositionGuard();
+}
+function syncSymbolHeader(){document.getElementById("headerSymbol").textContent=getSymbol()}
+
+function formatTradingViewSymbol(symbol){
+ let s=String(symbol||"NVDA").trim().toUpperCase();
+ if(s.includes(":"))return s;
+ const crypto={BTC:"BINANCE:BTCUSDT",ETH:"BINANCE:ETHUSDT",SOL:"BINANCE:SOLUSDT",XRP:"BINANCE:XRPUSDT",ADA:"BINANCE:ADAUSDT",AVAX:"BINANCE:AVAXUSDT",DOGE:"BINANCE:DOGEUSDT"};
+ if(crypto[s])return crypto[s];
+ if(["XLK","XLF","XLE","XLU","XLY","XLV","XLB","XLC","XLI","XLP"].includes(s))return "AMEX:"+s;
+ if(["ES1!","NQ1!"].includes(s))return "CME_MINI:"+s;
+ if(s==="CL1!")return "NYMEX:CL1!";
+ if(s==="GC1!")return "COMEX:GC1!";
+ if(s==="YM1!")return "CBOT_MINI:YM1!";
+ return s;
+}
+function changeMarketSymbol(symbol){
+ if(!symbol)return;
+ const raw=symbol.includes(":")?symbol.split(":").pop():symbol;
+ const clean=raw.replace(/USDT$|USD$/,"").replace(/1!$/,"");
+ document.getElementById("symbol").value=clean;
+ syncSymbolHeader();
+ currentChartSymbol=symbol;
+ updateChartFromPlanner();
+ document.getElementById("symbol").scrollIntoView({behavior:"smooth",block:"center"});
+}
+function changeTimeframe(tf,button){
+ currentTimeframe=tf;
+ document.querySelectorAll(".tf-btn").forEach(b=>b.classList.remove("active"));
+ if(button)button.classList.add("active");
+ loadTradingViewChart();
+}
+
+function loadTradingViewChart(){
+ const container=document.getElementById("tradingview_chart");
+ if(!container)return;
+ clearTimeout(tvLoadTimer);
+ container.innerHTML='<div class="chart-fallback">Loading TradingView chart…<br><span class="small-muted">The embedded chart includes symbol search plus EMA 20/50/200, VWAP, RSI, MACD and Stochastic RSI. Some exchange symbols may be unavailable in the embedded widget; use Open Current Symbol in TradingView when that happens.</span></div>';
+ const raw=currentChartSymbol||formatTradingViewSymbol(getSymbol());
+ document.getElementById("chartSymbolLabel").textContent=raw;
+ const link=document.getElementById("tvOpenLink");
+ if(link)link.href="https://www.tradingview.com/chart/?symbol="+encodeURIComponent(raw);
+ const script=document.createElement("script");
+ script.type="text/javascript";
+ script.src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+ script.async=true;
+ script.innerHTML=JSON.stringify({
+  autosize:true,symbol:raw,interval:currentTimeframe,timezone:"America/New_York",theme:"dark",style:"1",
+  locale:"en",backgroundColor:"rgba(7,16,12,1)",enable_publishing:false,allow_symbol_change:true,
+  save_image:true,hide_top_toolbar:false,hide_side_toolbar:false,hide_legend:false,withdateranges:true,
+  details:true,hotlist:true,calendar:false,show_popup_button:true,popup_width:"1000",popup_height:"650",
+  studies:["MAExp@tv-basicstudies","MAExp@tv-basicstudies","MAExp@tv-basicstudies","VWAP@tv-basicstudies","RSI@tv-basicstudies","MACD@tv-basicstudies","StochasticRSI@tv-basicstudies"],
+  support_host:"https://www.tradingview.com"
+ });
+ container.innerHTML='<div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div></div>';
+ container.firstElementChild.querySelector(".tradingview-widget-container__widget").appendChild(script);
+}
+function updateChartFromPlanner(){
+ syncSymbolHeader();
+ currentChartSymbol=formatTradingViewSymbol(getSymbol());
+ loadTradingViewChart();
+}
+
+function updateStrategyUI(){
+ const s=document.getElementById("strategy").value,meta=strategyMeta[s];
+ document.getElementById("strategyHelp").textContent=meta.help;
+ const labels={
+  LONG_CALL:["Call Strike","Call Premium","—","—"],
+  LONG_PUT:["Put Strike","Put Premium","—","—"],
+  BULL_CALL_SPREAD:["Long Call Strike","Long Call Debit","Short Call Strike","Short Call Credit"],
+  BEAR_PUT_SPREAD:["Long Put Strike","Long Put Debit","Short Put Strike","Short Put Credit"],
+  BULL_PUT_CREDIT:["Short Put Strike","Short Put Credit","Long Put Strike","Long Put Debit"],
+  BEAR_CALL_CREDIT:["Short Call Strike","Short Call Credit","Long Call Strike","Long Call Debit"],
+  CALL_CALENDAR:["Long Dated Call Strike","Long Dated Call Debit","Short Dated Call Strike","Short Dated Call Credit"],
+  PUT_CALENDAR:["Long Dated Put Strike","Long Dated Put Debit","Short Dated Put Strike","Short Dated Put Credit"],
+  COVERED_CALL:["Stock / Call Strike","Call Credit","—","—"],
+  CASH_SECURED_PUT:["Put Strike","Put Credit","—","—"],
+  IRON_CONDOR:["Short Put Strike","Short Put Credit","Long Put Strike","Long Put Debit"]
+ };
+ const L=labels[s]||["Leg 1 Strike","Leg 1 Premium","Leg 2 Strike","Leg 2 Premium"];
+ document.getElementById("leg1Label").textContent=L[0];document.getElementById("leg1PremiumLabel").textContent=L[1];
+ document.getElementById("leg2Label").textContent=L[2]||"Leg 2 Strike";document.getElementById("leg2PremiumLabel").textContent=L[3]||"Leg 2 Premium";
+ document.getElementById("leg3Label").textContent=s==="IRON_CONDOR"?"Long Call Strike":"Leg 3 Strike";
+ document.getElementById("leg3PremiumLabel").textContent=s==="IRON_CONDOR"?"Long Call Debit":"Leg 3 Premium";
+ document.getElementById("leg4Label").textContent=s==="IRON_CONDOR"?"Short Call Strike":"Leg 4 Strike";
+ document.getElementById("leg4PremiumLabel").textContent=s==="IRON_CONDOR"?"Short Call Credit":"Leg 4 Premium";
+ const isDerivative=!["Stock","Crypto","Future"].includes(document.getElementById("instrument").value);
+ if(!isDerivative)document.getElementById("strategyHelp").textContent="Strategy fields are retained for reference. Stock/Crypto/Future sizing uses the underlying stop.";
+ refreshCalculations();
+}
+
+function onInstrumentChange(){
+ const inst=document.getElementById("instrument").value;
+ document.getElementById("strategy").disabled=!["Option"].includes(inst);
+ document.getElementById("riskBasis").disabled=!["Option"].includes(inst);
+ if(inst==="Option")updateStrategyUI();else refreshCalculations();
+}
+function riskBudget(){return Math.max(0,num("accountSize")*num("riskPercent")/100)}
+function underlyingTargets(entry,stop,direction){
+ const r=Math.abs(entry-stop);
+ let t1=num("target1"),t2=num("target2"),t3=num("target3");
+ if(direction==="Long"){if(!(t1>entry))t1=entry+r;if(!(t2>entry))t2=entry+2*r;if(!(t3>entry))t3=entry+3*r}
+ else{if(!(t1<entry))t1=entry-r;if(!(t2<entry))t2=entry-2*r;if(!(t3<entry))t3=entry-3*r}
+ return {t1,t2,t3,r}
+}
+
+function strategyCalc(){
+ const s=document.getElementById("strategy").value, m=strategyMeta[s], p1=num("leg1Premium"),p2=num("leg2Premium"),p3=num("leg3Premium"),p4=num("leg4Premium");
+ const k1=num("leg1Strike"),k2=num("leg2Strike"),k3=num("leg3Strike"),k4=num("leg4Strike");
+ const d1=Math.abs(num("leg1Delta")),d2=Math.abs(num("leg2Delta")),d3=Math.abs(num("leg3Delta")),d4=Math.abs(num("leg4Delta"));
+ let net=0,defined=0,stopDelta=0,capital=0,maxProfit=0,width=0;
+ if(s==="LONG_CALL"||s==="LONG_PUT"){net=p1;defined=p1*100;capital=p1*100;stopDelta=d1;maxProfit=Infinity}
+ else if(s==="BULL_CALL_SPREAD"||s==="BEAR_PUT_SPREAD"){net=Math.max(0,p1-p2);width=Math.abs(k1-k2);defined=net*100;capital=net*100;maxProfit=Math.max(0,width-net)*100;stopDelta=Math.abs(d1-d2)}
+ else if(s==="BULL_PUT_CREDIT"||s==="BEAR_CALL_CREDIT"){net=Math.max(0,p1-p2);width=Math.abs(k1-k2);defined=Math.max(0,width-net)*100;capital=defined;maxProfit=net*100;stopDelta=Math.max(0,d1-d2)}
+ else if(s==="CALL_CALENDAR"||s==="PUT_CALENDAR"){net=Math.max(0,p1-p2);defined=net*100;capital=net*100;stopDelta=Math.abs(d1-d2);maxProfit=Infinity}
+ else if(s==="COVERED_CALL"){net=p1;defined=Math.max(0,num("entry")-p1)*100;capital=Math.max(0,num("entry")*100);stopDelta=1;maxProfit=Infinity}
+ else if(s==="CASH_SECURED_PUT"){net=p1;defined=Math.max(0,k1-net)*100;capital=Math.max(0,k1*100);stopDelta=d1;maxProfit=net*100}
+ else if(s==="IRON_CONDOR"){
+   const putWidth=Math.abs(k1-k2),callWidth=Math.abs(k4-k3);
+   net=Math.max(0,p1-p2+p4-p3);width=Math.max(putWidth,callWidth);defined=Math.max(0,width-net)*100;capital=defined;maxProfit=net*100;
+   stopDelta=Math.abs(d1-d2+d4-d3);
+ }
+ const custom=num("customMaxLoss");
+ if(custom>0)defined=custom;
+ return {strategy:s,meta:m,net,defined,capital,stopDelta,maxProfit,width,legs:m.legs};
+}
+
+function calculateTrade(){
+ const symbol=getSymbol(),instrument=document.getElementById("instrument").value,direction=document.getElementById("direction").value;
+ const accountSize=num("accountSize"),riskPercent=num("riskPercent"),probability=num("probability"),impliedVolatility=num("impliedVolatility");
+ const entry=num("entry"),stop=num("stop");
+ if(!(entry>0&&stop>0)||entry===stop)return null;
+ const targets=underlyingTargets(entry,stop,direction),dollarRisk=riskBudget();
+ let riskPerUnit=targets.r, baseUnitRisk=targets.r, maxUnits=0, unitLabel="Shares",capitalPerUnit=entry;
+ let derivative=null;
+ if(instrument==="Option"){
+  derivative=strategyCalc();
+  baseUnitRisk=Math.max(0,Math.abs(entry-stop)*Math.max(derivative.stopDelta,0.01)*100);
+  const basis=document.getElementById("riskBasis").value;
+  let selectedRisk=derivative.defined;
+  if(basis==="STOP_PROXY")selectedRisk=baseUnitRisk;
+  if(basis==="CONSERVATIVE")selectedRisk=Math.max(baseUnitRisk,derivative.defined);
+  if(!(selectedRisk>0))selectedRisk=derivative.defined||baseUnitRisk;
+  maxUnits=selectedRisk>0?Math.floor(dollarRisk/selectedRisk):0;
+  unitLabel="Contracts";
+  capitalPerUnit=derivative.capital||derivative.net*100||0;
+ }else if(instrument==="Future"){
+  const pv=Math.max(.01,num("futuresPointValue")||50);
+  riskPerUnit=targets.r*pv;maxUnits=riskPerUnit>0?Math.floor(dollarRisk/riskPerUnit):0;unitLabel="Contracts";
+  capitalPerUnit=Math.max(0,num("futuresMargin"));
+ }else if(instrument==="Crypto"){
+  riskPerUnit=targets.r;maxUnits=riskPerUnit>0?dollarRisk/riskPerUnit:0;unitLabel="Units";capitalPerUnit=entry;
+ }else{
+  riskPerUnit=targets.r;maxUnits=riskPerUnit>0?Math.floor(dollarRisk/riskPerUnit):0;unitLabel="Shares";capitalPerUnit=entry;
+ }
+ const ladderTotal=num("ladderT1")+num("ladderT2")+num("ladderT3")+num("runner");
+ const ladderValid=Math.abs(ladderTotal-100)<0.001;
+ return {
+  symbol,instrument,direction,setupGrade:currentSetupGrade,accountSize,riskPercent,probability,impliedVolatility,
+  entry,stop,riskPerUnit,baseUnitRisk,dollarRisk,maxUnits,unitLabel,capitalPerUnit,
+  positionValue:maxUnits*capitalPerUnit,target1:targets.t1,target2:targets.t2,target3:targets.t3,
+  strategy:document.getElementById("strategy").value,strategyName:strategyMeta[document.getElementById("strategy").value]?.name||"—",
+  riskBasis:document.getElementById("riskBasis").value,derivative,
+  expiration:document.getElementById("expiration").value,
+  ladderT1:num("ladderT1"),ladderT2:num("ladderT2"),ladderT3:num("ladderT3"),runner:num("runner"),ladderTotal,ladderValid,
+  createdAt:new Date().toLocaleString()
+ };
+}
+
+function positionGuard(p){
+ const account=p.accountSize,allocPct=clamp(num("capitalAllocationPercent")||25,1,100),allocCash=account*allocPct/100;
+ const personal=num("personalMaxPosition"),desired=Math.max(1,Math.floor(num("desiredContracts")||1));
+ let affordable=0,allocLimit=0,riskLimit=0,cost=p.capitalPerUnit||0;
+ if(p.instrument==="Crypto"){affordable=cost?account/cost:0;allocLimit=cost?allocCash/cost:0;riskLimit=p.riskPerUnit?p.dollarRisk/p.riskPerUnit:0}
+ else{affordable=cost?Math.floor(account/cost):0;allocLimit=cost?Math.floor(allocCash/cost):0;riskLimit=p.riskPerUnit?Math.floor(p.dollarRisk/p.riskPerUnit):0}
+ if(p.instrument==="Stock")riskLimit=p.riskPerUnit?Math.floor(p.dollarRisk/p.riskPerUnit):0;
+ const personalLimit=personal>0?personal:Infinity;
+ const recommended=Math.max(0,Math.min(affordable,allocLimit,riskLimit,personalLimit));
+ const warnings=[];
+ if(desired>affordable)warnings.push(`🚨 Affordability: ${desired} ${p.unitLabel} requested; account supports ${number(affordable,2)}.`);
+ if(desired>allocLimit)warnings.push(`⚠️ Capital allocation: ${allocPct}% allows about ${number(allocLimit,2)} ${p.unitLabel}.`);
+ if(desired>riskLimit)warnings.push(`🛡️ Risk budget: supports about ${number(riskLimit,2)} ${p.unitLabel}.`);
+ if(desired>personalLimit)warnings.push(`⚠️ Personal maximum: ${personalLimit} ${p.unitLabel}.`);
+ return {allocationPercent:allocPct,allocatedCapital:allocCash,personalLimit,desired,affordable,allocLimit,riskLimit,recommended,cost,remainingCash:Math.max(0,account-recommended*cost),warnings,status:desired>affordable?"DO NOT ENTER 🚨":desired>recommended?"LIMIT EXCEEDED ⚠️":"SAFE 🟢"};
+}
+
+function updatePositionGuard(){
+ const out=document.getElementById("positionSizingOutput");if(!out)return;
+ const p=calculateTrade();if(!p){out.innerHTML="";return}
+ p.positionSizing=positionGuard(p);
+ const s=p.positionSizing,cls=s.status.includes("DO NOT")?"guard-danger":s.status.includes("EXCEEDED")?"guard-warning":"guard-safe";
+ out.innerHTML=`<div class="guard-card"><div class="guard-status ${cls}">${s.status}<div style="margin-top:4px">Recommended: ${number(s.recommended,2)} ${p.unitLabel} • Cost/Unit: ${money(s.cost)} • Cash Remaining: ${money(s.remainingCash)}</div></div><div class="guard-limits"><div class="guard-limit"><span>Risk Limit</span><strong>${number(s.riskLimit,2)}</strong></div><div class="guard-limit"><span>Capital Limit</span><strong>${number(s.allocLimit,2)}</strong></div><div class="guard-limit"><span>Affordable</span><strong>${number(s.affordable,2)}</strong></div><div class="guard-limit"><span>Personal Max</span><strong>${Number.isFinite(s.personalLimit)?number(s.personalLimit,2):"—"}</strong></div></div><div class="help">${s.warnings.length?s.warnings.map(esc).join("<br>"):"🟢 Desired position is inside the active RO'LYFE limits."}</div></div>`;
+}
+function refreshCalculations(){syncSymbolHeader();updateSignalDashboard();renderPsychology();updatePositionGuard();updateStrategyUIIfNeeded()}
+function updateStrategyUIIfNeeded(){const inst=document.getElementById("instrument").value;if(inst==="Option")document.getElementById("strategyHelp").textContent=strategyMeta[document.getElementById("strategy").value].help}
+
+function updateSignalDashboard(){
+ const prob=num("probability")||50,dir=document.getElementById("direction").value;
+ const trend=document.getElementById("trendBias").value,rsi=document.getElementById("rsiBias").value,macd=document.getElementById("macdBias").value,stoch=document.getElementById("stochBias").value;
+ const bias=[trend,rsi,macd,stoch].reduce((a,b)=>a+(b==="bullish"?1:b==="bearish"?-1:0),0);
+ let score=clamp(Math.round(prob+bias*8+(currentSetupGrade==="GREEN"?10:currentSetupGrade==="YELLOW"?0:-15)),0,100);
+ document.getElementById("signalScore").textContent=score;
+ const statuses=[
+  ["ema20Status",trend==="bullish"?"BULLISH ALIGNMENT":trend==="bearish"?"BEARISH ALIGNMENT":"WAIT / NEUTRAL"],
+  ["ema50Status",trend==="bullish"?"TREND CONFIRMATION":trend==="bearish"?"BEARISH TREND":"TREND FILTER"],
+  ["ema200Status",trend==="bullish"?"MAJOR TREND BULLISH":trend==="bearish"?"MAJOR TREND BEARISH":"MAJOR TREND FILTER"],
+  ["vwapStatus",trend==="bullish"?"WATCH ABOVE VWAP":trend==="bearish"?"WATCH BELOW VWAP":"WATCH VWAP"],
+  ["rsiStatus",rsi==="bullish"?"BULLISH MOMENTUM":rsi==="bearish"?"BEARISH MOMENTUM":"MOMENTUM FILTER"],
+  ["macdStatus",macd==="bullish"?"BULLISH MOMENTUM":macd==="bearish"?"BEARISH MOMENTUM":"MOMENTUM TREND"],
+  ["stochStatus",stoch==="bullish"?"UPSIDE TIMING":stoch==="bearish"?"DOWNSIDE TIMING":"TIMING FILTER"]
+ ];
+ statuses.forEach(([id,text])=>{const e=document.getElementById(id);e.textContent=text;e.className="indicator-status "+(text.includes("BULLISH")||text.includes("UPSIDE")||text.includes("ABOVE")?"bullish":text.includes("BEARISH")||text.includes("DOWNSIDE")||text.includes("BELOW")?"bearish":"neutral")});
+ const m=document.getElementById("signalMessage");
+ if(score>=70){m.textContent=dir==="Long"?"🟢 GREEN IGNITION WATCH":"🟢 RED-SIDE GREEN IGNITION WATCH";m.className="indicator-status bullish"}
+ else if(score>=45){m.textContent="🟡 WAIT FOR CONFIRMATION";m.className="indicator-status neutral"}
+ else{m.textContent="🔴 NO TRADE / HIGH RISK";m.className="indicator-status bearish"}
+}
+
+function createTradePlan(){
+ updateChartFromPlanner();
+ const p=calculateTrade();
+ if(!p){alert("Enter a valid Entry Price and Stop Price first.");return}
+ p.positionSizing=positionGuard(p);currentPlan=p;
+ renderTradePlan(p);renderVisualChart("trade");renderPsychology();
+ document.getElementById("tradePlanOutput").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function renderTradePlan(p){
+ const setupIcon=p.setupGrade==="GREEN"?"🟢":p.setupGrade==="YELLOW"?"🟡":"🔴";
+ const s=p.positionSizing||positionGuard(p),d=p.derivative;
+ let derivativeHtml="";
+ if(p.instrument==="Option"&&d){
+  const stopProxy=p.baseUnitRisk,defined=d.defined,selected=p.riskBasis==="DEFINED"?defined:p.riskBasis==="CONSERVATIVE"?Math.max(stopProxy,defined):stopProxy;
+  const maxContracts=selected>0?Math.floor(p.dollarRisk/selected):0;
+  const ladder=ladderCounts(maxContracts,p.ladderT1,p.ladderT2,p.ladderT3,p.runner);
+  const maxProfit=Number.isFinite(d.maxProfit)?money(d.maxProfit):"Unlimited / path dependent";
+  derivativeHtml=`<div class="plan-section"><h3>🎯 DERIVATIVE / STRATEGY EXECUTION</h3>
+   <div class="data-row"><span>Strategy</span><strong>${esc(p.strategyName)}</strong></div>
+   <div class="data-row"><span>Risk Basis</span><strong>${esc(p.riskBasis)}</strong></div>
+   <div class="data-row"><span>Net Premium</span><strong>${money(d.net)}</strong></div>
+   <div class="data-row"><span>Defined Max Loss / Contract</span><strong>${money(defined)}</strong></div>
+   <div class="data-row"><span>Stop-Risk Proxy / Contract</span><strong>${money(stopProxy)}</strong></div>
+   <div class="data-row"><span>Risk Used / Contract</span><strong>${money(selected)}</strong></div>
+   <div class="data-row"><span>Max Contracts by Risk</span><strong>${maxContracts}</strong></div>
+   <div class="data-row"><span>Capital Requirement / Contract</span><strong>${money(d.capital)}</strong></div>
+   <div class="data-row"><span>Max Profit / Contract</span><strong>${maxProfit}</strong></div>
+   <div class="data-row"><span>Expiration</span><strong>${esc(p.expiration||"Not Set")}</strong></div>
+   <div class="data-row"><span>Ladder Contracts</span><strong>T1 ${ladder.t1} • T2 ${ladder.t2} • T3 ${ladder.t3} • Runner ${ladder.runner}</strong></div>
+   <div class="system-rule">The chart stop is the execution trigger. The contractual max loss is shown separately. The delta proxy is an estimate, not a guaranteed option P/L.</div>
+  </div>`;
+ }
+ document.getElementById("tradePlanOutput").innerHTML=`<div class="trade-plan-card">
+  <h2>🎯 ${esc(p.symbol)} MASTER TRADE PLAN</h2>
+  <div class="plan-status">${setupIcon} ${p.setupGrade} SETUP</div>
+  <div class="plan-section"><h3>📋 TRADE IDENTITY</h3>
+   <div class="data-row"><span>Symbol</span><strong>${esc(p.symbol)}</strong></div>
+   <div class="data-row"><span>Direction</span><strong>${p.direction}</strong></div>
+   <div class="data-row"><span>Instrument</span><strong>${p.instrument}</strong></div>
+   <div class="data-row"><span>Probability</span><strong>${p.probability}%</strong></div>
+   <div class="data-row"><span>Setup Grade</span><strong>${p.setupGrade}</strong></div>
+  </div>
+  <div class="plan-section"><h3>🛡️ RISK ENGINE</h3>
+   <div class="data-row"><span>Account</span><strong>${money(p.accountSize)}</strong></div>
+   <div class="data-row"><span>Risk %</span><strong>${p.riskPercent}%</strong></div>
+   <div class="data-row"><span>Dollar Risk Budget</span><strong>${money(p.dollarRisk)}</strong></div>
+   <div class="data-row"><span>Underlying Stop Distance</span><strong>${money(Math.abs(p.entry-p.stop))}</strong></div>
+   <div class="data-row"><span>Hard Chart Stop</span><strong>${money(p.stop)}</strong></div>
+  </div>
+  <div class="plan-section"><h3>📊 POSITION SIZE</h3>
+   <div class="data-row"><span>Entry</span><strong>${money(p.entry)}</strong></div>
+   <div class="data-row"><span>Stop</span><strong>${money(p.stop)}</strong></div>
+   <div class="data-row"><span>Risk / ${p.unitLabel.replace("s","")}</span><strong>${money(p.riskPerUnit)}</strong></div>
+   <div class="data-row"><span>Risk-Only Maximum</span><strong>${number(p.maxUnits,2)} ${p.unitLabel}</strong></div>
+   <div class="data-row"><span>Position Value / Capital</span><strong>${money(p.positionValue)}</strong></div>
+   <div class="data-row"><span>RO'LYFE Recommended Position</span><strong>${number(s.recommended,2)} ${p.unitLabel}</strong></div>
+  </div>
+  ${derivativeHtml}
+  <div class="plan-section"><h3>🎯 TARGET SYSTEM</h3>
+   <div class="ladder-grid"><div class="ladder-box"><strong>T1</strong><span>${money(p.target1)} • 1R</span></div><div class="ladder-box"><strong>T2</strong><span>${money(p.target2)} • 2R</span></div><div class="ladder-box"><strong>T3</strong><span>${money(p.target3)} • 3R</span></div></div>
+   <div class="data-row"><span>R:R to T3</span><strong>1:3.00</strong></div>
+  </div>
+  <div class="plan-section"><h3>🪜 RO'LYFE EXIT LADDER</h3>
+   <div class="data-row"><span>T1</span><strong>${pct(p.ladderT1)}</strong></div><div class="data-row"><span>T2</span><strong>${pct(p.ladderT2)}</strong></div><div class="data-row"><span>T3</span><strong>${pct(p.ladderT3)}</strong></div><div class="data-row"><span>Runner</span><strong>${pct(p.runner)}</strong></div>
+   <div class="system-rule">${p.ladderValid?"✓ Ladder allocation totals 100%.":"⚠️ Ladder must total exactly 100% before execution."}</div>
+  </div>
+  <div class="system-rule">🧠 The chart defines the stop. The position size fits the account. The indicators confirm the setup. The ladder manages the money.</div>
+ </div>`;
+}
+function ladderCounts(q,t1,t2,t3,runner){
+ q=Math.max(0,Math.floor(q));
+ let a=Math.floor(q*t1/100),b=Math.floor(q*t2/100),c=Math.floor(q*t3/100);
+ if(a+b+c>q){c=Math.max(0,q-a-b)}
+ return {t1:a,t2:b,t3:c,runner:Math.max(0,q-a-b-c)}
+}
+
+function renderVisualChart(type,button){
+ const p=currentPlan||calculateTrade();if(!p)return;
+ document.querySelectorAll(".visual-chart-btn").forEach(b=>b.classList.remove("active"));
+ if(button)button.classList.add("active");else{const b=document.querySelector(`[data-visual="${type}"]`);if(b)b.classList.add("active")}
+ const out=document.getElementById("tradeMapOutput");
+ const short=p.direction==="Short";
+ if(type==="trade")out.innerHTML=`<div class="visual-card"><h3>🗺️ TRADE MAP</h3><p class="visual-sub">${esc(p.symbol)} • ${p.direction} • ${p.instrument} • ${p.setupGrade}</p><div class="data-row"><span>🔴 Risk</span><strong>${money(p.dollarRisk)}</strong></div><div class="data-row"><span>🟢 T3 Reward</span><strong>${money(p.dollarRisk*3)}</strong></div><div class="data-row"><span>Entry</span><strong>${money(p.entry)}</strong></div><div class="data-row"><span>Stop</span><strong>${money(p.stop)}</strong></div><div class="data-row"><span>Risk / Unit</span><strong>${money(p.riskPerUnit)}</strong></div><div class="data-row"><span>Position</span><strong>${number(p.positionSizing?.recommended||0,2)} ${p.unitLabel}</strong></div><div class="data-row"><span>R:R to T3</span><strong>1:3.00</strong></div></div>`;
+ else if(type==="long"||type==="short"){
+  const d=type==="short";
+  const stop=d?p.entry+Math.abs(p.entry-p.stop):p.stop,entry=p.entry,r=Math.abs(p.entry-p.stop),t1=d?p.entry-r:p.entry+r,t2=d?p.entry-2*r:p.entry+2*r,t3=d?p.entry-3*r:p.entry+3*r;
+  out.innerHTML=`<div class="visual-card"><h3>${d?"📉 SHORT TRADE MAP":"📈 LONG TRADE MAP"}</h3><p class="visual-sub">${esc(p.symbol)} • Visual execution map • ${d?"Downside":"Upside"} thesis</p><div class="map-levels"><div class="map-level map-stop">🔴 STOP <strong>${money(stop)}</strong></div><div class="map-arrow">↓</div><div class="map-level map-entry">⚪ ENTRY <strong>${money(entry)}</strong></div><div class="map-arrow">↓</div><div class="map-level map-target">🟢 T1 <strong>${money(t1)} • 1:1.00 R</strong></div><div class="map-arrow">↓</div><div class="map-level map-target">🟢 T2 <strong>${money(t2)} • 1:2.00 R</strong></div><div class="map-arrow">↓</div><div class="map-level map-target">🟢 T3 <strong>${money(t3)} • 1:3.00 R</strong></div></div><div class="system-rule" style="margin-top:10px">🧠 STOP → ENTRY → T1 → T2 → T3<br>The setup determines the trade. The risk determines the size. The ladder manages the money.</div></div>`;
+ }else if(type==="ladder"){
+  const q=p.positionSizing?.recommended||0,c=ladderCounts(q,p.ladderT1,p.ladderT2,p.ladderT3,p.runner);
+  out.innerHTML=`<div class="visual-card"><h3>🎯 TARGET LADDER</h3><p class="visual-sub">Scale out according to the predefined ladder.</p><div class="ladder-grid"><div class="ladder-box"><strong>T1 • ${money(p.target1)}</strong><span>EXIT ${pct(p.ladderT1)} • ${c.t1} ${p.unitLabel}</span></div><div class="ladder-box"><strong>T2 • ${money(p.target2)}</strong><span>EXIT ${pct(p.ladderT2)} • ${c.t2} ${p.unitLabel}</span></div><div class="ladder-box"><strong>T3 • ${money(p.target3)}</strong><span>EXIT ${pct(p.ladderT3)} • ${c.t3} ${p.unitLabel}</span></div><div class="ladder-box"><strong>RUNNER</strong><span>${pct(p.runner)} • ${c.runner} ${p.unitLabel}</span></div></div><div class="data-row"><span>Planned Scale-Out Profit</span><strong>${money(p.dollarRisk*(p.ladderT1/100*1+p.ladderT2/100*2+p.ladderT3/100*3))}</strong></div><div class="data-row"><span>T3 Full-Position Profit</span><strong>${money(p.dollarRisk*3)}</strong></div></div>`;
+ }else if(type==="risk"){
+  const s=p.positionSizing||positionGuard(p);
+  out.innerHTML=`<div class="visual-card"><h3>💰 POSITION &amp; RISK</h3><div class="data-row"><span>Risk Budget</span><strong>${money(p.dollarRisk)}</strong></div><div class="data-row"><span>Risk-Only Max</span><strong>${number(p.maxUnits,2)} ${p.unitLabel}</strong></div><div class="data-row"><span>Recommended</span><strong>${number(s.recommended,2)} ${p.unitLabel}</strong></div><div class="data-row"><span>Capital Allocation</span><strong>${pct(s.allocationPercent)}</strong></div><div class="data-row"><span>Cash Remaining</span><strong>${money(s.remainingCash)}</strong></div></div>`;
+ }else{
+  out.innerHTML=`<div class="visual-card"><h3>🧠 EXECUTION MAP</h3><p class="visual-sub">A clean decision path from thesis to journal.</p><div class="ladder-grid"><div class="ladder-box"><strong>1 SETUP</strong><span>Validate the setup grade</span></div><div class="ladder-box"><strong>2 CONFIRM</strong><span>Check direction, chart and indicator stack</span></div><div class="ladder-box"><strong>3 ENTER</strong><span>Execute at the planned entry</span></div><div class="ladder-box"><strong>4 PROTECT</strong><span>Honor the predefined stop</span></div><div class="ladder-box"><strong>5 SCALE</strong><span>T1 → T2 → T3 using the ladder</span></div><div class="ladder-box"><strong>6 REVIEW</strong><span>Record exits, P/L and days held</span></div></div><div class="system-rule" style="margin-top:10px">PLAN → SIZE → LADDER → EXECUTE → JOURNAL → REVIEW</div></div>`;
+ }
+}
+
+function scenarioPosition(account,risk,entry,stop){const rb=Math.max(0,account*risk/100),d=Math.abs(entry-stop);return d>0?Math.floor(rb/d):0}
+function renderPsychology(){
+ const out=document.getElementById("psychologyOutput");if(!out)return;
+ const p=calculateTrade();if(!p){out.innerHTML="";return}
+ const a=Math.max(0,num("whatIfAccount")),r=Math.max(0,num("whatIfRisk")),ws=num("whatIfStop"),prem=Math.max(0,num("whatIfPremium"));
+ const stockShares=scenarioPosition(a,r,p.entry,p.stop),wideShares=scenarioPosition(a,r,p.entry,ws);
+ const optCost=prem*100,optContracts=optCost>0?Math.floor(a*r/100/optCost):0;
+ out.innerHTML=`
+ <div class="scenario"><h3>💵 What if my account is ${money(a)}?</h3><p>Using ${r}% risk with the current entry/stop.</p><div class="scenario-result">Risk budget: <strong>${money(a*r/100)}</strong><br>Stop distance: <strong>${money(Math.abs(p.entry-p.stop))}</strong><br>Stock shares: <strong>${stockShares}</strong><br>🔴 If zero, the stock position does not fit this risk budget.</div></div>
+ <div class="scenario"><h3>📉 What if I risk ${r}%?</h3><p>Same account, same entry and stop.</p><div class="scenario-result">Risk budget: <strong>${money(a*r/100)}</strong><br>Position: <strong>${stockShares} shares</strong><br>RO'LYFE: Lower risk buys survival time; higher risk buys faster consequences.</div></div>
+ <div class="scenario"><h3>🛑 What if my stop is wider?</h3><p>Current stop ${money(p.stop)} • Scenario stop ${money(ws)}.</p><div class="scenario-result">Current risk/share: <strong>${money(Math.abs(p.entry-p.stop))}</strong><br>Wider-stop risk/share: <strong>${money(Math.abs(p.entry-ws))}</strong><br>Current shares: <strong>${stockShares}</strong><br>Wider-stop shares: <strong>${wideShares}</strong></div></div>
+ <div class="scenario"><h3>🎟️ What if one contract is too expensive?</h3><p>Premium/value: ${money(prem)}. One standard option contract controls 100 shares.</p><div class="scenario-result">Cost: <strong>${money(optCost)}</strong><br>Risk budget: <strong>${money(a*r/100)}</strong><br>Max contracts: <strong>${optContracts}</strong><br>${optContracts===0?"🔴 ONE CONTRACT DOES NOT FIT this selected premium/risk budget.":"🟢 At least one contract fits the premium budget."}</div></div>
+ <div class="scenario"><h3>🪜 What happens when T1 is hit?</h3><p>Current ladder: ${p.ladderT1}% / ${p.ladderT2}% / ${p.ladderT3}% / ${p.runner}%.</p><div class="scenario-result">${p.unitLabel}: ${ladderCounts(p.positionSizing?.recommended||0,p.ladderT1,p.ladderT2,p.ladderT3,p.runner).t1} → ${ladderCounts(p.positionSizing?.recommended||0,p.ladderT1,p.ladderT2,p.ladderT3,p.runner).t2} → ${ladderCounts(p.positionSizing?.recommended||0,p.ladderT1,p.ladderT2,p.ladderT3,p.runner).t3} → runner ${ladderCounts(p.positionSizing?.recommended||0,p.ladderT1,p.ladderT2,p.ladderT3,p.runner).runner}.<br><br>Do not improvise because the screen turned green.</div></div>`;
+}
+
+function renderWatchlist(list=watchlistSymbols){
+ const out=document.getElementById("watchlist"),q=(document.getElementById("watchlistSearch")?.value||"").trim().toUpperCase();
+ out.innerHTML=list.filter(s=>s.includes(q)).map(s=>`<button class="watch-item" type="button" onclick="selectWatch('${s}')">${s}</button>`).join("")||'<div class="small-muted">No symbols found.</div>';
+}
+function selectWatch(s){document.getElementById("symbol").value=s;syncSymbolHeader();currentChartSymbol=formatTradingViewSymbol(s);updateChartFromPlanner();document.getElementById("tradePlanOutput").scrollIntoView({behavior:"smooth",block:"start"})}
+function filterWatchlist(){renderWatchlist()}
+
+function getJournal(){try{return JSON.parse(localStorage.getItem("rolyfeJournal")||"[]")}catch(e){return[]}}
+function saveJournal(j){localStorage.setItem("rolyfeJournal",JSON.stringify(j))}
+function saveCurrentPlan(){
+ const p=currentPlan||calculateTrade();if(!p){alert("Create a valid trade plan first.");return}
+ p.positionSizing=positionGuard(p);
+ const j=getJournal();j.unshift({...p,journalSavedAt:new Date().toLocaleString(),tradeDate:new Date().toISOString().slice(0,10)});
+ saveJournal(j);renderJournal();renderPerformanceDashboard();alert("Trade plan saved to the RO'LYFE journal.");
+}
+function strategyRealized(t,entry,exit,qty){
+ const kind=strategyMeta[t.strategy]?.kind||"debit";
+ if(t.instrument==="Stock")return (t.direction==="Long"?exit-entry:entry-exit)*qty;
+ if(t.instrument==="Crypto")return (t.direction==="Long"?exit-entry:entry-exit)*qty;
+ if(t.instrument==="Future")return (t.direction==="Long"?exit-entry:entry-exit)*qty*(Number(t.futuresPointValue)||50);
+ const mult=100;
+ if(kind==="credit"||kind==="credit4"||kind==="cashput")return (entry-exit)*qty*mult;
+ return (exit-entry)*qty*mult;
+}
+function calcRealized(t){
+ const base=Number(t.positionSizing?.recommended||t.maxUnits||0),e1=Number(t.exit1)||0,e2=Number(t.exit2)||0,q1=Number(t.exit1Qty)||0,q2=Number(t.exit2Qty)||0;
+ let realized=0,closed=0,days=[];
+ if(e1&&q1){realized+=strategyRealized(t,t.exitBasis||t.entry,e1,q1);closed+=q1;if(t.exit1Date&&t.tradeDate)days.push((new Date(t.exit1Date)-new Date(t.tradeDate))/(86400000))}
+ if(e2&&q2){realized+=strategyRealized(t,t.exitBasis||t.entry,e2,q2);closed+=q2;if(t.exit2Date&&t.tradeDate)days.push((new Date(t.exit2Date)-new Date(t.tradeDate))/(86400000))}
+ realized-=Number(t.commission)||0;
+ return {realized,closedQty:closed,baseQty:base,days,commission:Number(t.commission)||0};
+}
+function updateJournalTrade(i){
+ const j=getJournal(),t=j[i];if(!t)return;
+ t.tradeDate=document.getElementById(`j_tradeDate_${i}`).value;
+ t.exit1=num(`j_exit1_${i}`);t.exit1Qty=num(`j_exit1Qty_${i}`);t.exit1Date=document.getElementById(`j_exit1Date_${i}`).value;
+ t.exit2=num(`j_exit2_${i}`);t.exit2Qty=num(`j_exit2Qty_${i}`);t.exit2Date=document.getElementById(`j_exit2Date_${i}`).value;
+ t.commission=num(`j_commission_${i}`);saveJournal(j);renderJournal();renderPerformanceDashboard();
+}
+function deleteJournalTrade(i){const j=getJournal();j.splice(i,1);saveJournal(j);renderJournal();renderPerformanceDashboard()}
+function clearJournal(){if(confirm("Clear the entire RO'LYFE journal?")){localStorage.removeItem("rolyfeJournal");renderJournal();renderPerformanceDashboard()}}
+
+function journalMultiplier(t){return t.instrument==="Option"?100:t.instrument==="Future"?(Number(t.futuresPointValue)||50):1}
+function performanceStats(arr){
+ const results=arr.map(calcRealized).map(x=>x.realized),wins=results.filter(x=>x>0),losses=results.filter(x=>x<0);
+ const net=results.reduce((a,b)=>a+b,0),wr=results.length?wins.length/results.length*100:0;
+ const avgWin=wins.length?wins.reduce((a,b)=>a+b,0)/wins.length:0,avgLoss=losses.length?Math.abs(losses.reduce((a,b)=>a+b,0)/losses.length):0;
+ const expectancy=results.length?net/results.length:0;
+ const avgDays=arr.flatMap(calcRealized).length;
+ return {n:results.length,win:wins.length,loss:losses.length,wr,net,winsum:wins.reduce((a,b)=>a+b,0),losssum:losses.reduce((a,b)=>a+b,0),avgWin,avgLoss,expectancy,rr:avgLoss?avgWin/avgLoss:0,kelly:avgLoss&&avgWin?clamp((wr/100-(1-wr/100)/(avgWin/avgLoss))*100,0,100):0};
+}
+function renderPerformanceDashboard(){
+ const j=getJournal(),all=performanceStats(j),beginning=1000,ending=beginning+all.net;
+ const blocks=[];for(let start=0;start<j.length||start===0;start+=25){if(start>=125)break;const block=j.slice(start,start+25),s=performanceStats(block);blocks.push(`<div class="performance-block"><h3>Trades ${start+1}-${start+25}</h3><div class="metric-grid"><div class="metric-card"><span># Trades</span><strong>${s.n}</strong></div><div class="metric-card"><span># Winners</span><strong>${s.win}</strong></div><div class="metric-card"><span># Losers</span><strong>${s.loss}</strong></div><div class="metric-card"><span>Win Rate</span><strong>${pct(s.wr)}</strong></div><div class="metric-card"><span>Avg. $ Win</span><strong>${money(s.avgWin)}</strong></div><div class="metric-card"><span>Avg. $ Loss</span><strong>${money(s.avgLoss)}</strong></div><div class="metric-card"><span>R-to-R</span><strong>1:${number(s.rr,2)}</strong></div><div class="metric-card"><span>Expectancy</span><strong>${money(s.expectancy)}</strong></div><div class="metric-card"><span>Kelly</span><strong>${pct(s.kelly)}</strong></div><div class="metric-card"><span>Net P/L</span><strong>${money(s.net)}</strong></div></div></div>`)}
+ if(!blocks.length)blocks.push(`<div class="performance-block"><h3>Trades 1-25</h3><div class="small-muted">No journal trades yet.</div></div>`);
+ document.getElementById("performanceDashboard").innerHTML=`<div class="metric-grid"><div class="metric-card"><span>Net Gains</span><strong>${money(all.winsum)}</strong></div><div class="metric-card"><span>Net Losses</span><strong>${money(all.losssum)}</strong></div><div class="metric-card"><span>Net Profit/Loss</span><strong>${money(all.net)}</strong></div><div class="metric-card"><span>Win Rate</span><strong>${pct(all.wr)}</strong></div><div class="metric-card"><span>Expectancy / Trade</span><strong>${money(all.expectancy)}</strong></div><div class="metric-card"><span>Beginning Equity</span><strong>${money(beginning)}</strong></div><div class="metric-card"><span>Ending Equity</span><strong>${money(ending)}</strong></div><div class="metric-card"><span>R-to-R Ratio</span><strong>1:${number(all.rr,2)}</strong></div><div class="metric-card"><span>Kelly</span><strong>${pct(all.kelly)}</strong></div></div><div class="performance-blocks">${blocks.join("")}</div>`;
+}
+function renderJournal(){
+ const j=getJournal(),out=document.getElementById("journalOutput");if(!out)return;
+ renderPerformanceDashboard();
+ if(!j.length){out.innerHTML='<div class="journal-empty">📓 No saved trades yet.<br><br>Create a trade plan and save it.</div>';return}
+ out.innerHTML=j.map((t,i)=>{const r=calcRealized(t),status=r.realized>0?"win":r.realized<0?"loss":"";
+ return `<details class="journal-entry"><summary><strong style="color:var(--green)">${esc(t.symbol)} • ${esc(t.direction)} • ${esc(t.strategyName||t.strategy||"")}</strong> <span class="small-muted">${esc(t.journalSavedAt||"")}</span></summary>
+ <div class="data-row"><span>Planned Entry / Stop</span><strong>${money(t.entry)} / ${money(t.stop)}</strong></div>
+ <div class="data-row"><span>Position</span><strong>${number(t.positionSizing?.recommended||t.maxUnits||0,2)} ${esc(t.unitLabel||"Units")}</strong></div>
+ <div class="journal-form">
+  <div><label>Trade Date</label><input id="j_tradeDate_${i}" type="date" value="${esc(t.tradeDate||"")}"></div>
+  <div><label>Exit #1 Value</label><input id="j_exit1_${i}" type="number" step="0.01" value="${t.exit1||""}"></div>
+  <div><label># Exited</label><input id="j_exit1Qty_${i}" type="number" step="1" value="${t.exit1Qty||""}"></div>
+  <div><label>Exit #1 Date</label><input id="j_exit1Date_${i}" type="date" value="${esc(t.exit1Date||"")}"></div>
+  <div><label>Exit #2 Value</label><input id="j_exit2_${i}" type="number" step="0.01" value="${t.exit2||""}"></div>
+  <div><label># Exited</label><input id="j_exit2Qty_${i}" type="number" step="1" value="${t.exit2Qty||""}"></div>
+  <div><label>Exit #2 Date</label><input id="j_exit2Date_${i}" type="date" value="${esc(t.exit2Date||"")}"></div>
+  <div><label>Commission</label><input id="j_commission_${i}" type="number" step="0.01" value="${t.commission||0}"></div>
+  <div class="full-width"><button type="button" class="primary-btn" onclick="updateJournalTrade(${i})">💾 UPDATE TRADE OUTCOME</button></div>
+ </div>
+ <div class="outcome-status ${status}"><strong>Realized Gain/Loss:</strong> ${money(r.realized)} • <strong>Closed:</strong> ${r.closedQty}/${r.baseQty||"—"} • <strong>Days:</strong> ${r.days.length?r.days.map(x=>x.toFixed(1)).join(" / "):"—"}</div>
+ <button type="button" class="danger-btn" onclick="deleteJournalTrade(${i})">Delete Trade</button>
+ </details>`}).join("");
+}
+
+function ensurePlan(){if(!currentPlan)currentPlan=calculateTrade();return currentPlan}
+function planText(p){
+ if(!p)return"No valid trade plan exists.";
+ const d=p.derivative;
+ return [
+ "RO'LYFE TACTICAL INTELLIGENCE CENTER™","MASTER TRADE PLAN","----------------------------------------",
+ `Symbol: ${p.symbol}`,`Direction: ${p.direction}`,`Instrument: ${p.instrument}`,`Strategy: ${p.strategyName||"—"}`,`Setup: ${p.setupGrade}`,
+ `Account: ${money(p.accountSize)}`,`Risk: ${p.riskPercent}% (${money(p.dollarRisk)})`,`Entry: ${money(p.entry)}`,`Stop: ${money(p.stop)}`,
+ `Risk / Unit: ${money(p.riskPerUnit)}`,`Risk-only Maximum: ${number(p.maxUnits,2)} ${p.unitLabel}`,`Recommended Position: ${number(p.positionSizing?.recommended||0,2)} ${p.unitLabel}`,
+ `T1: ${money(p.target1)}`,`T2: ${money(p.target2)}`,`T3: ${money(p.target3)}`,
+ d?`Net Premium: ${money(d.net)}`:"",d?`Defined Max Loss / Contract: ${money(d.defined)}`:"",d?`Stop-Risk Proxy / Contract: ${money(p.baseUnitRisk)}`:"",d?`Expiration: ${p.expiration||"Not Set"}`:"",
+ `Ladder: T1 ${p.ladderT1}% / T2 ${p.ladderT2}% / T3 ${p.ladderT3}% / Runner ${p.runner}%`,
+ "","DISCLOSURE: Educational and informational use only. Not investment, financial, legal, tax, or trading advice."
+ ].filter(x=>x!=="").join("\\n");
+}
+function downloadBlob(filename,content,type){const blob=new Blob([content],{type});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function downloadTradeTicketTXT(){const p=ensurePlan();if(!p){alert("Create a valid trade plan first.");return}downloadBlob(`ROLYFE_${p.symbol}_Trade_Ticket.txt`,planText(p),"text/plain;charset=utf-8")}
+function downloadJournalTXT(){const j=getJournal();if(!j.length){alert("Your journal is empty.");return}downloadBlob("ROLYFE_Trade_Journal.txt",j.map((p,i)=>`TRADE ${i+1}\\n${planText(p)}\\nRealized: ${money(calcRealized(p).realized)}\\n\\n`).join("\\n"),"text/plain;charset=utf-8")}
+function downloadTradePlanHTML(){
+ const p=ensurePlan();if(!p){alert("Create a valid trade plan first.");return}
+ const report=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RO'LYFE ${esc(p.symbol)} Trade Plan</title><style>body{font-family:Arial;background:#07100c;color:#f4f8f5;padding:25px;max-width:850px;margin:auto}h1,h2{color:#00e676}.row{display:flex;justify-content:space-between;gap:20px;padding:9px;border-bottom:1px solid #294234}section{padding:15px;margin:12px 0;background:#0d1811;border:1px solid #294234;border-radius:12px}.notice{line-height:1.6;color:#c7cec9}@media(max-width:600px){.row{flex-direction:column;gap:4px}}</style></head><body><h1>🎯 RO'LYFE Tactical Intelligence Center™</h1><p>PLAN → SIZE → LADDER → EXECUTE → JOURNAL → REVIEW</p><section><h2>${esc(p.symbol)} MASTER TRADE PLAN</h2><div class="row"><span>Direction</span><strong>${esc(p.direction)}</strong></div><div class="row"><span>Instrument</span><strong>${esc(p.instrument)}</strong></div><div class="row"><span>Strategy</span><strong>${esc(p.strategyName||"—")}</strong></div><div class="row"><span>Account / Risk</span><strong>${money(p.accountSize)} / ${p.riskPercent}%</strong></div><div class="row"><span>Entry / Stop</span><strong>${money(p.entry)} / ${money(p.stop)}</strong></div><div class="row"><span>Position</span><strong>${number(p.positionSizing?.recommended||0,2)} ${esc(p.unitLabel)}</strong></div><div class="row"><span>T1 / T2 / T3</span><strong>${money(p.target1)} / ${money(p.target2)} / ${money(p.target3)}</strong></div></section><section><h2>🎯 Strategy</h2><div class="row"><span>Net Premium</span><strong>${p.derivative?money(p.derivative.net):"—"}</strong></div><div class="row"><span>Defined Max Loss / Contract</span><strong>${p.derivative?money(p.derivative.defined):"—"}</strong></div><div class="row"><span>Stop-Risk Proxy / Contract</span><strong>${p.derivative?money(p.baseUnitRisk):"—"}</strong></div><div class="row"><span>Expiration</span><strong>${esc(p.expiration||"Not Set")}</strong></div></section><section><h2>🪜 Exit Ladder</h2><div class="row"><span>T1</span><strong>${p.ladderT1}%</strong></div><div class="row"><span>T2</span><strong>${p.ladderT2}%</strong></div><div class="row"><span>T3</span><strong>${p.ladderT3}%</strong></div><div class="row"><span>Runner</span><strong>${p.runner}%</strong></div></section><section class="notice"><strong>Disclosure:</strong> Educational and informational use only. Options and derivatives involve substantial risk. Market data may be delayed or incomplete.</section></body></html>`;
+ downloadBlob(`ROLYFE_${p.symbol}_Master_Trade_Plan.html`,report,"text/html;charset=utf-8");
+}
+function printCurrentPlan(){
+ const p=ensurePlan();if(!p){alert("Create a valid trade plan first.");return}
+ const w=window.open("","_blank");if(!w){alert("Browser blocked the print window.");return}
+ w.document.write(`<html><head><title>RO'LYFE ${esc(p.symbol)} Trade Plan</title><style>body{font-family:Arial;padding:30px}h1,h2{color:#075f32}.row{display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #ddd}</style></head><body><h1>RO'LYFE Tactical Intelligence Center™</h1><h2>${esc(p.symbol)} MASTER TRADE PLAN</h2>${planText(p).split("\\n").map(x=>`<div class="row">${esc(x)}</div>`).join("")}<p>Educational and informational use only.</p></body></html>`);
+ w.document.close();w.focus();setTimeout(()=>w.print(),300);
+}
+function clearPlan(){currentPlan=null;document.getElementById("tradePlanOutput").innerHTML="";document.getElementById("tradeMapOutput").innerHTML="";updatePositionGuard();renderPsychology()}
+
+/* =========================================================
+   FLOATING RO'LYFE AI — LOCAL CONTEXT ENGINE
+========================================================= */
+function toggleAI(){document.getElementById("aiPanel").classList.toggle("open")}
+function askAI(q){
+ q=q||document.getElementById("aiInput").value||"";
+ if(!q.trim())return;
+ const ans=document.getElementById("aiAnswer");
+ const live=currentPlan||calculateTrade();
+ const low=q.toLowerCase();
+ const symbolMatch=q.match(/ticker\s*(?:is|=|:)??\s*([A-Z][A-Z0-9.!:_-]{0,11})/i);
+ const entryMatch=q.match(/entry(?:\s+price)?\s*(?:is|=|:)??\s*\$?([\d,]+(?:\.\d+)?)/i);
+ const stopMatch=q.match(/stop(?:\s+price)?\s*(?:is|=|:)??\s*\$?([\d,]+(?:\.\d+)?)/i);
+ const accountMatch=q.match(/account(?:\s+size)?\s*(?:is|=|:)??\s*\$?([\d,]+(?:\.\d+)?)/i);
+ const riskMatch=q.match(/risk(?:\s+percentage|\s*%)?\s*(?:is|=|:)??\s*([\d.]+)\s*%?/i);
+ const askedSymbol=symbolMatch?symbolMatch[1].toUpperCase():null;
+ const askedEntry=entryMatch?Number(entryMatch[1].replace(/,/g,"")):null;
+ const askedStop=stopMatch?Number(stopMatch[1].replace(/,/g,"")):null;
+ const askedAccount=accountMatch?Number(accountMatch[1].replace(/,/g,"")):num("accountSize");
+ const askedRisk=riskMatch?Number(riskMatch[1]):num("riskPercent");
+ const hasSizingQuestion=(askedEntry>0&&askedStop>0&&/(share|shares|size|execute|position|risk)/i.test(q));
+ if(hasSizingQuestion){
+  const dist=Math.abs(askedEntry-askedStop),budget=Math.max(0,askedAccount*askedRisk/100);
+  const affordable=askedEntry>0?Math.floor(askedAccount/askedEntry):0;
+  const riskOnly=dist>0?Math.floor(budget/dist):0;
+  const shares=Math.max(0,Math.min(affordable,riskOnly));
+  const cost=shares*askedEntry,plannedRisk=shares*dist;
+  const sym=askedSymbol||getSymbol();
+  const target1=askedEntry+(askedEntry>=askedStop?dist:-dist);
+  const target2=askedEntry+(askedEntry>=askedStop?2*dist:-2*dist);
+  const target3=askedEntry+(askedEntry>=askedStop?3*dist:-3*dist);
+  ans.textContent=`RO'LYFE TRADE ASSISTANT\n\nTicker: ${sym}\nEntry: ${money(askedEntry)}\nHard chart stop: ${money(askedStop)}\nStop distance: ${money(dist)}\nAccount: ${money(askedAccount)}\nRisk: ${number(askedRisk,2)}%\nRisk budget: ${money(budget)}\n\nRecommended stock size: ${shares} shares\nCapital required: ${money(cost)}\nPlanned stop risk: ${money(plannedRisk)}\nRisk-only maximum: ${riskOnly} shares\nAffordable maximum: ${affordable} shares\n\nTargets: T1 ${money(target1)} • T2 ${money(target2)} • T3 ${money(target3)}\n\nRO'LYFE rule: mark the stop first, then size the position. If the size is 0, do not force the trade — change the setup, stop, instrument or wait.`;
+  return;
+ }
+ const p=live;
+ if(!p){ans.textContent="I need a valid Entry Price and Stop Price first. Put those into MASTER TRADE PLAN and I can analyze the setup.";return}
+ const s=p.positionSizing||positionGuard(p),d=p.derivative;
+ let text="";
+ if(low.includes("risk")||low.includes("stop"))text=`Current plan: ${p.symbol} ${p.direction}.\nRisk budget: ${money(p.dollarRisk)}.\nEntry: ${money(p.entry)} • Stop: ${money(p.stop)}.\nUnderlying stop distance: ${money(Math.abs(p.entry-p.stop))}.\nRecommended position: ${number(s.recommended,2)} ${p.unitLabel}.\n\nRO'LYFE rule: the stop is defined before the size. If the stop is too wide for the account, reduce size or change the setup — do not force it.`;
+ else if(low.includes("zero")||low.includes("contract")||low.includes("afford"))text=d?`This strategy is ${p.strategyName}.\nNet premium: ${money(d.net)}.\nDefined max loss/contract: ${money(d.defined)}.\nStop-risk proxy/contract: ${money(p.baseUnitRisk)}.\nSelected risk basis: ${p.riskBasis}.\nRisk budget: ${money(p.dollarRisk)}.\n\nIf the calculation returns 0 contracts, one contract is larger than the selected risk budget. That is a real constraint, not a bug. Change the contract, premium, stop, strategy or wait.`:`Your underlying risk is ${money(p.riskPerUnit)} per ${p.unitLabel.replace("s","")}. The current risk budget supports about ${number(p.maxUnits,2)} ${p.unitLabel}.`;
+ else if(low.includes("ladder")||low.includes("target")){const c=ladderCounts(s.recommended,p.ladderT1,p.ladderT2,p.ladderT3,p.runner);text=`Your ladder is ${p.ladderT1}% / ${p.ladderT2}% / ${p.ladderT3}% / ${p.runner}%.\n\nPlanned exits: T1 ${c.t1}, T2 ${c.t2}, T3 ${c.t3}, Runner ${c.runner} ${p.unitLabel}.\nT1 ${money(p.target1)} • T2 ${money(p.target2)} • T3 ${money(p.target3)}.\n\nIf the position is small, whole-unit rounding keeps the remainder as the runner rather than inventing fractional contracts.`}
+ else if(low.includes("indicator")||low.includes("rsi")||low.includes("macd")||low.includes("stoch")||low.includes("ema")||low.includes("vwap"))text=`RO'LYFE GREEN IGNITION stack:\nEMA 20 → EMA 50 → EMA 200 → VWAP → RSI → MACD → Stochastic RSI.\n\nThe TradingView chart carries the actual studies. The four bias selectors control the RO'LYFE confidence score; they are not fake live readings. Use the chart to judge the current condition and set the bias deliberately.`;
+ else if(low.includes("strategy")||low.includes("spread")||low.includes("call")||low.includes("put"))text=`Current strategy: ${p.strategyName}.\nNet premium/credit: ${d?money(d.net):"—"}.\nDefined max loss/contract: ${d?money(d.defined):"—"}.\nMax profit/contract: ${d?(Number.isFinite(d.maxProfit)?money(d.maxProfit):"path dependent / potentially unlimited"):"—"}.\n\nThe system separates premium/credit from the chart stop. For defined-risk spreads, contractual max loss is shown separately from the underlying-stop delta proxy.`;
+ else if(low.includes("before")||low.includes("entry")||low.includes("check"))text=`RO'LYFE pre-entry check:\n1. Setup grade is acceptable.\n2. Direction matches the thesis.\n3. Entry and hard stop are marked.\n4. Risk budget is known.\n5. Position fits affordability, capital allocation and risk limits.\n6. Strategy premium/credit and max loss are understood.\n7. Ladder totals 100%.\n8. Indicator stack confirms the thesis.\n9. Journal plan is ready.`;
+ else text=`I have the current ${p.symbol} plan loaded.\n\n${p.direction} ${p.strategyName} • ${p.setupGrade} setup\nEntry ${money(p.entry)} • Stop ${money(p.stop)}\nRisk budget ${money(p.dollarRisk)} • Recommended ${number(s.recommended,2)} ${p.unitLabel}\nT1 ${money(p.target1)} • T2 ${money(p.target2)} • T3 ${money(p.target3)}\n\nAsk me about risk, contracts, spreads, calls/puts, the ladder, indicators, the stop, or the pre-entry checklist.`;
+ ans.textContent=text;
+}
+
+function populateQuickStocks(){
+ const sel=document.getElementById("quickStockSelect");
+ sel.innerHTML='<option value="">Select Stock</option>'+watchlistSymbols.map(s=>`<option value="${s}">${s}</option>`).join("");
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+ populateQuickStocks();renderWatchlist();renderJournal();syncSymbolHeader();updateStrategyUI();updateSignalDashboard();updatePositionGuard();renderPsychology();
+ document.getElementById("symbol").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();updateChartFromPlanner()}});
+ ["accountSize","riskPercent","probability","entry","stop","target1","target2","target3","ladderT1","ladderT2","ladderT3","runner","customMaxLoss","leg1Strike","leg1Premium","leg1Delta","leg2Strike","leg2Premium","leg2Delta","leg3Strike","leg3Premium","leg3Delta","leg4Strike","leg4Premium","leg4Delta","strategyTarget1","strategyTarget2","strategyTarget3","capitalAllocationPercent","personalMaxPosition","futuresPointValue","futuresMargin","whatIfAccount","whatIfRisk","whatIfStop","whatIfPremium"].forEach(id=>{const e=document.getElementById(id);if(e)e.addEventListener("input",()=>{updateSignalDashboard();updatePositionGuard();renderPsychology()})});
+ document.getElementById("direction").addEventListener("change",refreshCalculations);
+ document.getElementById("riskBasis").addEventListener("change",refreshCalculations);
+ setTimeout(loadTradingViewChart,350);
+ setTimeout(()=>renderVisualChart("trade"),500);
+});
+</script>
+</body>
+</html>
