@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#050b09" />
+  <meta name="description" content="RO'Lyfe Tactical Intelligence Center — Live Market Scanner, Multi-Timeframe Chart, Risk Map and Trade Ladder." />
+  <title>RO'LYFE RTIC — Live Market Scanner & Chart</title>
+  <script src="https://unpkg.com/lightweight-charts@5.2.1/dist/lightweight-charts.standalone.production.js"></script>
+  <style>
+    :root{
+      --bg:#050b09; --panel:#0b1512; --panel2:#0f1b17; --line:#1d332a; --text:#edf7f1; --muted:#90aa9c;
+      --green:#19d58b; --green2:#0e8a5d; --yellow:#f3c969; --red:#ff6f72; --blue:#61a9ff; --cyan:#51ddd0;
+      --shadow:0 14px 40px rgba(0,0,0,.28); --radius:16px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:radial-gradient(circle at 20% 0%,#0d1d17 0,#050b09 40%,#030706 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    body{min-height:100vh}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .wrap{max-width:1600px;margin:0 auto;padding:20px}
+    .topbar{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:44px;height:44px;border:1px solid var(--line);border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#0f281f,#0a120f);box-shadow:inset 0 0 0 1px rgba(25,213,139,.06)}
+    .brand h1{font-size:19px;letter-spacing:.04em;margin:0}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}
+    .statusrow{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+    .pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:8px 11px;background:rgba(14,31,25,.7);font-size:12px;color:var(--muted)}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px rgba(25,213,139,.65)}
+    .dot.warn{background:var(--yellow);box-shadow:0 0 10px rgba(243,201,105,.5)}
+    .dot.bad{background:var(--red);box-shadow:0 0 10px rgba(255,111,114,.45)}
+    .btn{border:1px solid var(--line);background:#0c1b16;color:var(--text);padding:9px 12px;border-radius:11px;transition:.18s}
+    .btn:hover{transform:translateY(-1px);border-color:#345444}.btn.primary{border-color:#13744f;background:linear-gradient(180deg,#124e39,#0c3226)}
+    .btn.ghost{background:transparent}.btn.small{padding:7px 10px;font-size:12px}
+    .grid{display:grid;gap:14px}.grid.main{grid-template-columns:1.45fr .9fr}.grid.scan{grid-template-columns:1fr 1.3fr}
+    @media(max-width:1100px){.grid.main,.grid.scan{grid-template-columns:1fr}}
+    .card{background:linear-gradient(180deg,rgba(14,27,22,.94),rgba(7,15,12,.94));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .card .hd{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+    .card .hd h2{font-size:14px;margin:0;letter-spacing:.035em}.sub{font-size:11px;color:var(--muted);margin-top:4px}
+    .card .bd{padding:14px 16px}
+    .controls{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px}
+    @media(max-width:900px){.controls{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:520px){.wrap{padding:11px}.controls{grid-template-columns:1fr}.brand h1{font-size:16px}}
+    label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:5px}
+    input,select,textarea{width:100%;background:#07110e;border:1px solid #203a2f;color:var(--text);border-radius:10px;padding:9px 10px;outline:none}
+    input:focus,select:focus,textarea:focus{border-color:#347a5b;box-shadow:0 0 0 3px rgba(52,122,91,.14)}
+    .actionbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+    .scanner-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+    .chips{display:flex;gap:7px;flex-wrap:wrap}.chip{border:1px solid var(--line);background:#08120f;border-radius:999px;padding:6px 9px;font-size:11px;color:#cde5da}
+    .tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}.table{width:100%;border-collapse:collapse;min-width:850px}.table th,.table td{padding:9px 9px;border-bottom:1px solid rgba(29,51,42,.7);text-align:left;font-size:12px}.table th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:#09130f;position:sticky;top:0}.table tr{cursor:pointer}.table tbody tr:hover{background:#0d1c17}.table tr.sel{background:#10271d}
+    .score{font-weight:800}.score.green{color:var(--green)}.score.yellow{color:var(--yellow)}.score.red{color:var(--red)}
+    .tag{display:inline-flex;padding:4px 7px;border-radius:7px;font-size:10px;font-weight:800;letter-spacing:.04em}.tag.green{background:rgba(25,213,139,.11);color:var(--green);border:1px solid rgba(25,213,139,.25)}.tag.yellow{background:rgba(243,201,105,.1);color:var(--yellow);border:1px solid rgba(243,201,105,.23)}.tag.red{background:rgba(255,111,114,.08);color:var(--red);border:1px solid rgba(255,111,114,.2)}
+    .chart-card{min-height:550px}.chart-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.chartbox{height:470px;position:relative}.chartbox #chart{position:absolute;inset:0}
+    .timebar{display:flex;gap:6px;flex-wrap:wrap}.timebar button{border:1px solid var(--line);background:#08120f;color:#b7cabe;border-radius:8px;padding:6px 9px;font-size:11px}.timebar button.active{background:#124a35;border-color:#267858;color:#effaf5}
+    .quotegrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.metric{border:1px solid var(--line);border-radius:11px;background:#08120f;padding:10px}.metric .k{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.07em}.metric .v{font-size:17px;font-weight:800;margin-top:4px}.metric .s{font-size:10px;color:var(--muted);margin-top:2px}
+    @media(max-width:600px){.quotegrid{grid-template-columns:repeat(2,1fr)}}
+    .map{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.box{border:1px solid var(--line);border-radius:11px;padding:10px;background:#08120f}.box .k{font-size:10px;color:var(--muted);text-transform:uppercase}.box .v{font-size:15px;font-weight:800;margin-top:4px}
+    .indgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.ind{border:1px solid var(--line);border-radius:9px;padding:8px;background:#07110e}.ind b{display:block;font-size:10px;color:var(--muted);font-weight:700}.ind span{display:block;margin-top:4px;font-size:12px;font-weight:800}
+    @media(max-width:1000px){.indgrid{grid-template-columns:repeat(3,1fr)}}@media(max-width:520px){.indgrid{grid-template-columns:repeat(2,1fr)}}
+    .ladder{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.lad{border:1px solid var(--line);border-radius:11px;padding:10px;background:#07110e}.lad .n{font-size:10px;color:var(--muted);text-transform:uppercase}.lad strong{display:block;margin-top:5px;font-size:15px}.lad small{display:block;margin-top:3px;color:var(--muted)}
+    .settings{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;place-items:center;padding:18px;z-index:40}.settings.open{display:grid}.modal{width:min(720px,100%);background:#08120f;border:1px solid var(--line);border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.5);overflow:hidden}.modal .hd,.modal .bd{padding:15px 17px}.modal .hd{display:flex;justify-content:space-between;border-bottom:1px solid var(--line)}.modal .bd{display:grid;gap:12px}.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}@media(max-width:600px){.modal-grid{grid-template-columns:1fr}}
+    .notice{border:1px solid #274235;background:#0a1913;color:#b8cec3;border-radius:11px;padding:10px 11px;font-size:11px;line-height:1.5}.notice strong{color:#ecfff5}
+    .footer{margin:14px 0 0;color:#6d887a;font-size:10px;line-height:1.5}.muted{color:var(--muted)}.right{margin-left:auto}.hide{display:none!important}
+    .spark{font-size:11px}.up{color:var(--green)}.down{color:var(--red)}
+    .loading{animation:pulse 1.2s infinite}@keyframes pulse{50%{opacity:.45}}
+    .error{color:var(--red);font-size:11px}.ok{color:var(--green);font-size:11px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">🎯</div>
+      <div><h1>RO'LYFE TACTICAL INTELLIGENCE CENTER™</h1><p>LIVE SCAN → MAP → STOP → RISK → VEHICLE → LADDER → PROTECT → RUNNER</p></div>
+    </div>
+    <div class="statusrow">
+      <span class="pill"><span class="dot" id="statusDot"></span><span id="statusText">SYSTEM READY</span></span>
+      <span class="pill" id="marketState">Checking market…</span>
+      <button class="btn small" id="settingsBtn">⚙ Data Settings</button>
+      <button class="btn small primary" id="scanBtn">⚡ LIVE SCAN</button>
+    </div>
+  </header>
+
+  <section class="card" style="margin-bottom:14px">
+    <div class="hd"><div><h2>RTIC SCAN CONTROL</h2><div class="sub">Build the candidate list first. The engine scores the chart, then you decide the trade map.</div></div><div class="chips"><span class="chip">6M / 1D</span><span class="chip">4H</span><span class="chip">1H</span><span class="chip">15M</span><span class="chip">5M</span><span class="chip">0.8–2.0% risk band</span></div></div>
+    <div class="bd">
+      <div class="controls">
+        <div><label>Universe</label><select id="universe"><option value="stocks">Stocks $1–$10</option><option value="all-stocks">Stocks — custom universe</option><option value="crypto">Crypto</option><option value="all">Stocks + Crypto</option></select></div>
+        <div><label>Setup</label><select id="setupMode"><option value="long">Long bias</option><option value="both">Long + Short</option><option value="short">Short bias</option></select></div>
+        <div><label>Min RTIC Score</label><input id="minScore" type="number" min="0" max="100" value="70"></div>
+        <div><label>Min Liquidity</label><input id="minLiquidity" type="number" min="0" max="10" value="6"></div>
+        <div><label>Price Min</label><input id="priceMin" type="number" step="0.01" value="1"></div>
+        <div><label>Price Max</label><input id="priceMax" type="number" step="0.01" value="10"></div>
+      </div>
+      <div class="actionbar">
+        <input id="stockUniverse" value="PLUG,ACHR,JOBY,OPEN,LCID,RIVN,SOFI,SIRI,WBD,BBAI,SOUN,DNA,CHPT,BLNK,NVTS,GPRO,MARA,RIOT,BITF,HUT,CLSK,CIFR,IREN,TELL,VLD,ENVX,WKHS,IONQ,GRAB,AI" style="flex:1;min-width:300px" aria-label="Stock universe">
+        <span class="muted" style="font-size:11px">Stocks use the list above; price filter narrows to your $1–$10 lane.</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid main">
+    <section class="card">
+      <div class="hd"><div><h2>QUALIFIED CANDIDATES</h2><div class="sub" id="scanMeta">No scan run yet.</div></div><div class="chips"><span class="chip" id="countChip">0 qualified</span><span class="chip" id="dataChip">No data</span></div></div>
+      <div class="bd">
+        <div class="tablewrap"><table class="table"><thead><tr><th>Symbol</th><th>Price</th><th>Bias</th><th>RTIC</th><th>Liq</th><th>RVOL</th><th>Trend</th><th>Momentum</th><th>Status</th></tr></thead><tbody id="resultsBody"><tr><td colspan="9" class="muted">Run LIVE SCAN.</td></tr></tbody></table></div>
+      </div>
+    </section>
+
+    <section class="card chart-card">
+      <div class="hd"><div><h2 id="chartTitle">CHART — NVDA</h2><div class="sub" id="chartSub">Select a scanner row to load its map.</div></div><div class="chart-head"><div class="timebar" id="timebar"><button data-tf="D" class="active">1D</button><button data-tf="240">4H</button><button data-tf="60">1H</button><button data-tf="15">15M</button><button data-tf="5">5M</button></div></div></div>
+      <div class="bd"><div class="chartbox"><div id="chart"></div></div></div>
+    </section>
+  </div>
+
+  <div class="grid scan" style="margin-top:14px">
+    <section class="card">
+      <div class="hd"><div><h2>MARKET / SIGNAL MAP</h2><div class="sub">The same fields your RTIC trade plan is built around.</div></div></div>
+      <div class="bd">
+        <div class="quotegrid">
+          <div class="metric"><div class="k">Last</div><div class="v" id="mPrice">—</div><div class="s" id="mChange">—</div></div>
+          <div class="metric"><div class="k">RTIC Score</div><div class="v" id="mScore">—</div><div class="s" id="mGrade">—</div></div>
+          <div class="metric"><div class="k">Liquidity</div><div class="v" id="mLiq">—</div><div class="s" id="mDollarVol">—</div></div>
+          <div class="metric"><div class="k">ATR</div><div class="v" id="mATR">—</div><div class="s">Daily risk range</div></div>
+        </div>
+        <div class="map" style="margin-bottom:9px">
+          <div class="box"><div class="k">Trend</div><div class="v" id="mapTrend">—</div></div>
+          <div class="box"><div class="k">Momentum</div><div class="v" id="mapMomentum">—</div></div>
+          <div class="box"><div class="k">Support</div><div class="v" id="mapSupport">—</div></div>
+          <div class="box"><div class="k">Resistance</div><div class="v" id="mapResistance">—</div></div>
+        </div>
+        <div class="indgrid" id="indGrid"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="hd"><div><h2>TRADE LADDER + RISK</h2><div class="sub">Stock determines invalidation. Vehicle determines execution.</div></div></div>
+      <div class="bd">
+        <div class="controls" style="grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:10px">
+          <div><label>Account</label><input id="account" type="number" value="10000"></div>
+          <div><label>Risk %</label><input id="riskPct" type="number" value="1" min="0.1" max="2" step="0.1"></div>
+          <div><label>Entry</label><input id="entry" type="number" step="0.01"></div>
+          <div><label>Hard Stop</label><input id="stop" type="number" step="0.01"></div>
+        </div>
+        <div class="ladder" style="margin-bottom:10px">
+          <div class="lad"><div class="n">1R</div><strong id="r1">—</strong><small>first objective</small></div>
+          <div class="lad"><div class="n">2R</div><strong id="r2">—</strong><small>second objective</small></div>
+          <div class="lad"><div class="n">3R</div><strong id="r3">—</strong><small>third objective</small></div>
+          <div class="lad"><div class="n">Risk</div><strong id="riskDollars">—</strong><small>account risk</small></div>
+        </div>
+        <div class="map">
+          <div class="box"><div class="k">Shares @ Risk</div><div class="v" id="shares">—</div></div>
+          <div class="box"><div class="k">Stop %</div><div class="v" id="stopPct">—</div></div>
+          <div class="box"><div class="k">Vehicle</div><div class="v" id="vehicle">Stock / Option</div></div>
+          <div class="box"><div class="k">Mode</div><div class="v" id="mode">GREEN IGNITION™</div></div>
+        </div>
+        <div class="notice" style="margin-top:10px">This page maps risk mechanically from the hard chart stop. It does not guarantee a trade outcome and it does not place orders.</div>
+      </div>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:14px">
+    <div class="hd"><div><h2>RTIC ENGINE</h2><div class="sub">Local indicator engine modeled around the existing RO’Lyfe scoring architecture.</div></div><div class="chips"><span class="chip">200MA 10</span><span class="chip">50MA 10</span><span class="chip">5/10/20 10</span><span class="chip">MACD 10</span><span class="chip">RSI 10</span><span class="chip">Stoch 5</span><span class="chip">CCI 10</span><span class="chip">Squeeze 10</span><span class="chip">Volume 10</span><span class="chip">S/R 10</span></div></div>
+    <div class="bd"><div class="notice"><strong>How qualification works:</strong> price must be inside the scanner lane, RTIC score must clear the selected threshold, liquidity must clear the selected floor, and the directional setup must agree with the selected scan mode. The chart remains the final execution check.</div></div>
+  </section>
+
+  <div class="footer">RO’Lyfe Tactical Intelligence Center™ · Charting powered by TradingView Lightweight Charts. Live stock data requires your own market-data key; crypto market data can run directly from Binance public market-data endpoints. Keep API keys client-side only and do not commit secrets to GitHub.</div>
+</div>
+
+<div class="settings" id="settings">
+  <div class="modal">
+    <div class="hd"><div><strong>DATA SETTINGS</strong><div class="sub">Optional stock connection + scanner behavior.</div></div><button class="btn small" id="closeSettings">Close</button></div>
+    <div class="bd">
+      <div><label>Finnhub API key</label><input id="apiKey" type="password" placeholder="Paste your Finnhub key"></div>
+      <div class="modal-grid">
+        <div><label>Stock refresh (seconds)</label><input id="refreshSec" type="number" min="15" max="300" value="60"></div>
+        <div><label>Crypto refresh (seconds)</label><input id="cryptoRefreshSec" type="number" min="5" max="60" value="10"></div>
+      </div>
+      <div class="notice"><strong>Important:</strong> this is a static GitHub Pages application. There is no server here to hide credentials. The key is kept in this browser's local storage only. For stronger security, move the data layer to a small backend later.</div>
+      <div class="actionbar"><button class="btn primary" id="saveSettings">Save Settings</button><button class="btn" id="clearKey">Clear Key</button><span id="settingsMsg" class="muted"></span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const cfg = {
+    stockBase: 'https://finnhub.io/api/v1',
+    cryptoBase: 'https://data-api.binance.vision/api/v3',
+    wsBase: 'wss://data-stream.binance.vision/ws',
+    defaultCrypto: ['BTC','ETH','SOL','XRP','ADA','AVAX','DOGE'],
+    storage: 'rolyfe-rtic-live-v1'
+  };
+  const state = {
+    apiKey: localStorage.getItem(cfg.storage + '-key') || '',
+    refreshSec: Number(localStorage.getItem(cfg.storage + '-refresh') || 60),
+    cryptoRefreshSec: Number(localStorage.getItem(cfg.storage + '-crypto-refresh') || 10),
+    results: [], selected: null, selectedMeta: null, selectedBars: [], timeframe: 'D', chart:null, candle:null, lines:{}, ws:null, wsTf:null, lastScanAt:null
+  };
+
+  $('apiKey').value = state.apiKey;
+  $('refreshSec').value = state.refreshSec;
+  $('cryptoRefreshSec').value = state.cryptoRefreshSec;
+
+  function fmt(n, digits=2){ if(n===null || n===undefined || Number.isNaN(n)) return '—'; return Number(n).toLocaleString(undefined,{minimumFractionDigits:digits,maximumFractionDigits:digits}); }
+  function pct(n,d=2){ return n===null||n===undefined||Number.isNaN(n) ? '—' : (n>=0?'+':'') + Number(n).toFixed(d)+'%'; }
+  function clsScore(s){ return s>=70?'green':s>=55?'yellow':'red'; }
+  function grade(s){ return s>=70?'GREEN':s>=55?'YELLOW':'RED'; }
+  function setStatus(text, mode='ok'){
+    $('statusText').textContent=text;
+    $('statusDot').className='dot'+(mode==='warn'?' warn':mode==='bad'?' bad':'');
+  }
+  function series(arr, n){ return arr.slice(Math.max(0,arr.length-n)); }
+  function sma(vals,n){
+    const out=[]; let sum=0; const q=[];
+    for(let i=0;i<vals.length;i++){ const v=Number(vals[i]); if(!Number.isFinite(v)){out.push(null);continue;} q.push(v); sum+=v; if(q.length>n) sum-=q.shift(); out.push(q.length===n?sum/n:null); }
+    return out;
+  }
+  function ema(vals,n){
+    const out=Array(vals.length).fill(null), k=2/(n+1); let prev=null;
+    for(let i=0;i<vals.length;i++){ const v=Number(vals[i]); if(!Number.isFinite(v)) continue; if(prev===null){ if(i<n-1) continue; const seed=vals.slice(i-n+1,i+1).reduce((a,b)=>a+Number(b),0)/n; prev=seed; out[i]=seed; } else { prev=v*k+prev*(1-k); out[i]=prev; } }
+    return out;
+  }
+  function rsi(vals,n=14){
+    const out=Array(vals.length).fill(null); if(vals.length<=n) return out;
+    let gains=0, losses=0;
+    for(let i=1;i<=n;i++){ const d=vals[i]-vals[i-1]; if(d>=0) gains+=d; else losses-=d; }
+    let ag=gains/n, al=losses/n; out[n]=al===0?100:100-100/(1+ag/al);
+    for(let i=n+1;i<vals.length;i++){ const d=vals[i]-vals[i-1]; const g=Math.max(d,0), l=Math.max(-d,0); ag=(ag*(n-1)+g)/n; al=(al*(n-1)+l)/n; out[i]=al===0?100:100-100/(1+ag/al); }
+    return out;
+  }
+  function stoch(high,low,close,n=14,kS=3){
+    const k=Array(close.length).fill(null), d=Array(close.length).fill(null);
+    for(let i=n-1;i<close.length;i++){ const hi=Math.max(...high.slice(i-n+1,i+1)), lo=Math.min(...low.slice(i-n+1,i+1)); k[i]=hi===lo?50:((close[i]-lo)/(hi-lo))*100; }
+    const dk=sma(k.map(v=>v??NaN),kS); for(let i=0;i<d.length;i++) d[i]=dk[i]; return {k,d};
+  }
+  function cci(high,low,close,n=20){
+    const tp=close.map((_,i)=>(high[i]+low[i]+close[i])/3), out=Array(close.length).fill(null);
+    for(let i=n-1;i<close.length;i++){ const win=tp.slice(i-n+1,i+1), m=win.reduce((a,b)=>a+b,0)/n; const md=win.reduce((a,b)=>a+Math.abs(b-m),0)/n; out[i]=md===0?0:(tp[i]-m)/(0.015*md); } return out;
+  }
+  function macd(vals){ const e12=ema(vals,12), e26=ema(vals,26), line=vals.map((_,i)=>e12[i]!=null&&e26[i]!=null?e12[i]-e26[i]:null); const signal=ema(line.map(v=>v??NaN),9); const hist=line.map((v,i)=>v!=null&&signal[i]!=null?v-signal[i]:null); return {line,signal,hist}; }
+  function atr(high,low,close,n=14){
+    const tr=close.map((_,i)=>i===0?high[i]-low[i]:Math.max(high[i]-low[i],Math.abs(high[i]-close[i-1]),Math.abs(low[i]-close[i-1])));
+    return sma(tr,n);
+  }
+  function bollinger(vals,n=20,m=2){
+    const mid=sma(vals,n), up=Array(vals.length).fill(null), dn=Array(vals.length).fill(null);
+    for(let i=n-1;i<vals.length;i++){ const win=vals.slice(i-n+1,i+1), mean=mid[i]; const sd=Math.sqrt(win.reduce((a,b)=>a+(b-mean)*(b-mean),0)/n); up[i]=mean+m*sd; dn[i]=mean-m*sd; } return {mid,up,dn};
+  }
+  function keltner(high,low,close,n=20,m=1.5){ const mid=ema(close,n), a=atr(high,low,close,n), up=Array(close.length).fill(null), dn=Array(close.length).fill(null); for(let i=0;i<close.length;i++){if(mid[i]!=null&&a[i]!=null){up[i]=mid[i]+m*a[i];dn[i]=mid[i]-m*a[i];}} return {mid,up,dn}; }
+  function indicators(b){
+    const close=b.map(x=>x.c), high=b.map(x=>x.h), low=b.map(x=>x.l), vol=b.map(x=>x.v);
+    const ma5=sma(close,5), ma10=sma(close,10), ma20=sma(close,20), ma50=sma(close,50), ma200=sma(close,200);
+    const m=macd(close), r=rsi(close,14), st=stoch(high,low,close,14,3), c=cci(high,low,close,20), a=atr(high,low,close,14);
+    const bb=bollinger(close,20,2), kc=keltner(high,low,close,20,1.5); const avgVol=sma(vol,20);
+    const last=close.length-1, prev=last-1;
+    const squeeze = bb.up[last]!=null && kc.up[last]!=null && bb.up[last] < kc.up[last] && bb.dn[last] > kc.dn[last];
+    const momentum = m.hist[last] ?? 0;
+    return {close,high,low,vol,ma5,ma10,ma20,ma50,ma200,macd:m,rsi:r,stoch:st,cci:c,atr:a,bb,kc,avgVol,squeeze,momentum,last,prev};
+  }
+  function scoreIndicators(ind){
+    const i=ind.last, p=ind.prev, c=ind.close[i];
+    let bull=0, bear=0;
+    const add=(cond,pts,dir)=>{if(cond){if(dir!=='bear')bull+=pts;if(dir!=='bull')bear+=pts;}};
+    if(ind.ma200[i]!=null){ if(c>ind.ma200[i]) bull+=10; if(c<ind.ma200[i]) bear+=10; }
+    if(ind.ma50[i]!=null){ if(c>ind.ma50[i] && (p<0 || ind.ma50[i]>=ind.ma50[Math.max(0,i-5)])) bull+=10; if(c<ind.ma50[i] && ind.ma50[i]<=ind.ma50[Math.max(0,i-5)]) bear+=10; }
+    if(ind.ma5[i]!=null&&ind.ma10[i]!=null&&ind.ma20[i]!=null){
+      if(ind.ma5[i]>ind.ma10[i]&&ind.ma10[i]>ind.ma20[i]) bull+=10; else if(ind.ma5[i]>ind.ma20[i]) bull+=5;
+      if(ind.ma5[i]<ind.ma10[i]&&ind.ma10[i]<ind.ma20[i]) bear+=10; else if(ind.ma5[i]<ind.ma20[i]) bear+=5;
+    }
+    if(ind.macd.line[i]!=null&&ind.macd.signal[i]!=null){ if(ind.macd.line[i]>ind.macd.signal[i]&&ind.macd.hist[i]>=0) bull+=10; if(ind.macd.line[i]<ind.macd.signal[i]&&ind.macd.hist[i]<=0) bear+=10; }
+    if(ind.rsi[i]!=null){ if(ind.rsi[i]>=50&&ind.rsi[i]<=70) bull+=10; else if(ind.rsi[i]>45&&ind.rsi[i]<80) bull+=5; if(ind.rsi[i]<=50&&ind.rsi[i]>=30) bear+=10; else if(ind.rsi[i]<55&&ind.rsi[i]>20) bear+=5; }
+    if(ind.stoch.k[i]!=null&&ind.stoch.d[i]!=null){ if(ind.stoch.k[i]>ind.stoch.d[i]&&ind.stoch.k[i]>=20&&ind.stoch.k[i]<=85) bull+=5; if(ind.stoch.k[i]<ind.stoch.d[i]&&ind.stoch.k[i]>=15&&ind.stoch.k[i]<=80) bear+=5; }
+    if(ind.cci[i]!=null){ if(ind.cci[i]>0 && ind.cci[i]>=ind.cci[Math.max(0,i-1)]) bull+=10; else if(ind.cci[i]>0) bull+=5; if(ind.cci[i]<0&&ind.cci[i]<=ind.cci[Math.max(0,i-1)]) bear+=10; else if(ind.cci[i]<0) bear+=5; }
+    if(ind.squeeze){ if(ind.momentum>0) bull+=5; if(ind.momentum<0) bear+=5; }
+    else { if(ind.momentum>0) bull+=10; if(ind.momentum<0) bear+=10; }
+    const rv = ind.avgVol[i] ? ind.vol[i]/ind.avgVol[i] : 0; if(rv>=1.5){bull+=10;bear+=10}else if(rv>=1.0){bull+=7;bear+=7}else if(rv>=.7){bull+=4;bear+=4}
+    const win=ind.close.slice(Math.max(0,i-20),i+1), hi=Math.max(...win), lo=Math.min(...win); const pos=(c-lo)/(hi-lo||1); if(pos>=.75)bull+=10; else if(pos>=.5)bull+=5; if(pos<=.25)bear+=10; else if(pos<=.5)bear+=5;
+    return {bull:Math.min(100,bull),bear:Math.min(100,bear),rvol:rv};
+  }
+  function liquidity(ind){
+    const avgv=sma(ind.vol,20)[ind.last]||0; const dollar=avgv*ind.close[ind.last]; let s=dollar>=50000000?7:dollar>=20000000?6:dollar>=5000000?5:dollar>=1000000?3:1; const rv=ind.avgVol[ind.last]?ind.vol[ind.last]/ind.avgVol[ind.last]:0; s+=rv>=1.5?3:rv>=1?2:rv>=.7?1:0; return {score:Math.min(10,s),avgDollar: dollar,rv};
+  }
+  function analyzeBars(bars){
+    if(!bars || bars.length<60) throw new Error('Not enough bars');
+    const ind=indicators(bars), s=scoreIndicators(ind), l=liquidity(ind); const bull=s.bull, bear=s.bear; const direction=bull>=bear?'LONG':'SHORT'; const score=Math.max(bull,bear); const trend = bull>=70?'Bull alignment':bear>=70?'Bear alignment':ind.close[ind.last]>(ind.ma20[ind.last]||Infinity)?'Mixed / improving':'Mixed / weak'; const momentum=ind.momentum>0?'Positive':ind.momentum<0?'Negative':'Flat';
+    const stopLong=ind.close[ind.last]-(ind.atr[ind.last]||ind.close[ind.last]*.03), stopShort=ind.close[ind.last]+(ind.atr[ind.last]||ind.close[ind.last]*.03);
+    const support=Math.min(...ind.low.slice(Math.max(0,ind.last-20),ind.last+1)), resistance=Math.max(...ind.high.slice(Math.max(0,ind.last-20),ind.last+1));
+    return {ind, bull,bear,score,direction,trend,momentum,liquidity:l,support,resistance,stop:direction==='LONG'?stopLong:stopShort};
+  }
+  function fhUrl(path, params={}){ const q=new URLSearchParams({...params,token:state.apiKey}); return cfg.stockBase+path+'?'+q.toString(); }
+  async function fetchJson(url){ const r=await fetch(url); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json(); return j; }
+  async function stockCandles(symbol,resolution,days){ if(!state.apiKey) throw new Error('Finnhub key required'); const to=Math.floor(Date.now()/1000), from=to-days*86400; const j=await fetchJson(fhUrl('/stock/candle',{symbol,resolution,from,to})); if(j.s&&j.s!=='ok') throw new Error(j.s); const bars=(j.t||[]).map((t,i)=>({time:Number(t)*1000,o:+j.o[i],h:+j.h[i],l:+j.l[i],c:+j.c[i],v:+j.v[i]})); return bars.filter(x=>[x.o,x.h,x.l,x.c,x.v].every(Number.isFinite)); }
+  async function stockQuote(symbol){ if(!state.apiKey) throw new Error('Finnhub key required'); return fetchJson(fhUrl('/quote',{symbol})); }
+  function normalizeBinance(rows){ return rows.map(x=>({time:+x[0],o:+x[1],h:+x[2],l:+x[3],c:+x[4],v:+x[5]})); }
+  async function cryptoCandles(symbol,interval,limit=500){ const j=await fetchJson(cfg.cryptoBase+'/uiKlines?'+new URLSearchParams({symbol:symbol+'USDT',interval,limit})); return normalizeBinance(j); }
+  async function cryptoTicker(){ const j=await fetchJson(cfg.cryptoBase+'/ticker/24hr'); return j.filter(x=>cfg.defaultCrypto.includes(String(x.symbol).replace('USDT',''))); }
+  function aggregateHours(bars,hours=4){
+    const step=hours; const out=[]; let bucket=null; for(const b of bars){ const t=new Date(b.time); const key=Math.floor(t.getTime()/(3600000*step)); if(!bucket || bucket.key!==key){ if(bucket) out.push(bucket.bar); bucket={key,bar:{time:b.time,o:b.o,h:b.h,l:b.l,c:b.c,v:b.v}}; } else { bucket.bar.h=Math.max(bucket.bar.h,b.h); bucket.bar.l=Math.min(bucket.bar.l,b.l); bucket.bar.c=b.c; bucket.bar.v+=b.v; } } if(bucket) out.push(bucket.bar); return out;
+  }
+  async function loadBars(symbol,kind,tf){
+    if(kind==='crypto'){
+      const map={'5':'5m','15':'15m','60':'1h','240':'4h','D':'1d'}; return cryptoCandles(symbol,map[tf]||'1d',500);
+    }
+    const map={'5':'5','15':'15','60':'60','D':'D'};
+    if(tf==='240'){ const one=await stockCandles(symbol,'60',70); return aggregateHours(one,4); }
+    return stockCandles(symbol,map[tf]||'D',tf==='D'?420:12);
+  }
+  function toChartData(bars){ return bars.map(b=>({time:Math.floor(b.time/1000),open:b.o,high:b.h,low:b.l,close:b.c})); }
+  function initChart(){
+    const el=$('chart'); state.chart=LightweightCharts.createChart(el,{layout:{background:{type:'solid',color:'#07110e'},textColor:'#9fb5aa'},grid:{vertLines:{color:'#12251d'},horzLines:{color:'#12251d'}},crosshair:{mode:LightweightCharts.CrosshairMode.Normal},rightPriceScale:{borderColor:'#203a2f'},timeScale:{borderColor:'#203a2f',timeVisible:true,secondsVisible:false},attributionLogo:{visible:true}});
+    state.candle=state.chart.addSeries(LightweightCharts.CandlestickSeries,{upColor:'#19d58b',downColor:'#ff6f72',borderVisible:false,wickUpColor:'#19d58b',wickDownColor:'#ff6f72'});
+    ['5','10','20','50','200'].forEach(n=>{state.lines[n]=state.chart.addSeries(LightweightCharts.LineSeries,{color:n==='200'?'#f3c969':n==='50'?'#61a9ff':n==='20'?'#51ddd0':'#b28cff',lineWidth:n==='200'?2:1,priceLineVisible:false,lastValueVisible:false});});
+    new ResizeObserver(()=>{state.chart.resize(el.clientWidth,el.clientHeight)}).observe(el);
+  }
+  function drawChart(bars){
+    state.selectedBars=bars; state.candle.setData(toChartData(bars)); const close=bars.map(b=>b.c);
+    for(const n of ['5','10','20','50','200']){ const ma=sma(close,+n); state.lines[n].setData(bars.map((b,i)=>({time:Math.floor(b.time/1000),value:ma[i]})).filter(x=>x.value!=null)); }
+    state.chart.timeScale().fitContent();
+  }
+  function renderIndicators(a){
+    const i=a.ind.last; const rows=[
+      ['200 MA',a.ind.ma200[i]?'$'+fmt(a.ind.ma200[i],2):'—'],['50 MA',a.ind.ma50[i]?'$'+fmt(a.ind.ma50[i],2):'—'],['5/10/20',a.ind.ma5[i]&&a.ind.ma10[i]&&a.ind.ma20[i]? (a.ind.ma5[i]>a.ind.ma10[i]&&a.ind.ma10[i]>a.ind.ma20[i]?'Aligned ↑':a.ind.ma5[i]<a.ind.ma10[i]&&a.ind.ma10[i]<a.ind.ma20[i]?'Aligned ↓':'Mixed'):'—'],['MACD',a.ind.macd.hist[i]!=null?(a.ind.macd.hist[i]>=0?'Bull '+fmt(a.ind.macd.hist[i],3):'Bear '+fmt(a.ind.macd.hist[i],3)):'—'],['RSI',a.ind.rsi[i]!=null?fmt(a.ind.rsi[i],1):'—'],['Stoch',a.ind.stoch.k[i]!=null?fmt(a.ind.stoch.k[i],1):'—'],['CCI',a.ind.cci[i]!=null?fmt(a.ind.cci[i],0):'—'],['Squeeze',a.ind.squeeze?'ON':'OFF'],['RVOL',fmt(a.liquidity.rv,2)+'x'],['S/R', '$'+fmt(a.support,2)+' / $'+fmt(a.resistance,2)]
+    ]; $('indGrid').innerHTML=rows.map(([k,v])=>`<div class="ind"><b>${k}</b><span>${v}</span></div>`).join('');
+  }
+  function renderMeta(symbol,meta,kind='stock',bars=null){
+    const price=bars?.at(-1)?.c ?? meta?.price ?? 0; $('chartTitle').textContent='CHART — '+symbol; $('chartSub').textContent=(kind==='crypto'?'BINANCE public market data':'Finnhub stock data')+' · '+new Date().toLocaleTimeString();
+    if(bars && bars.length>=60){ const a=analyzeBars(bars); state.selectedAnalysis=a; const li=a.liquidity; $('mPrice').textContent='$'+fmt(price,price<1?4:2); $('mScore').textContent=a.score; $('mScore').className='v score '+clsScore(a.score); $('mGrade').textContent=grade(a.score)+' · '+a.direction; $('mLiq').textContent=li.score+'/10'; $('mDollarVol').textContent='$'+fmt(li.avgDollar/1e6,1)+'M avg $ vol'; $('mATR').textContent='$'+fmt(a.ind.atr[a.ind.last],price<10?3:2); $('mapTrend').textContent=a.trend; $('mapMomentum').textContent=a.momentum; $('mapSupport').textContent='$'+fmt(a.support,price<10?3:2); $('mapResistance').textContent='$'+fmt(a.resistance,price<10?3:2); renderIndicators(a); setRiskMap(a); }
+  }
+  function setRiskMap(a){
+    const p=a.ind.close[a.ind.last], dir=a.direction, st=dir==='LONG'?Math.min(a.stop,p*.99):Math.max(a.stop,p*1.01); $('entry').value=p.toFixed(p<10?4:2); $('stop').value=st.toFixed(p<10?4:2); calcRisk();
+  }
+  function calcRisk(){
+    const entry=Number($('entry').value), stop=Number($('stop').value), account=Number($('account').value), rp=Math.min(2,Math.max(.1,Number($('riskPct').value)||1)); if(!Number.isFinite(entry)||!Number.isFinite(stop)||entry<=0||account<=0||entry===stop){return}
+    const riskPerShare=Math.abs(entry-stop), dollars=account*rp/100, shares=Math.floor(dollars/riskPerShare), sign=entry>stop?1:-1, r1=entry+sign*riskPerShare, r2=entry+sign*2*riskPerShare, r3=entry+sign*3*riskPerShare; $('r1').textContent='$'+fmt(r1,entry<10?4:2); $('r2').textContent='$'+fmt(r2,entry<10?4:2); $('r3').textContent='$'+fmt(r3,entry<10?4:2); $('riskDollars').textContent='$'+fmt(dollars,2); $('shares').textContent=shares.toLocaleString(); $('stopPct').textContent=pct(((stop-entry)/entry)*100,2); $('vehicle').textContent='Stock + option map';
+    if(state.candle){ for(const [name,price] of [['STOP',stop],['1R',r1],['2R',r2],['3R',r3]]){ if(!state.lines[name]) state.lines[name]=state.candle.createPriceLine({price,color:name==='STOP'?'#ff6f72':name==='1R'?'#19d58b':name==='2R'?'#51ddd0':'#f3c969',lineWidth:name==='STOP'?2:1,lineStyle:LightweightCharts.LineStyle.Dashed,title:name}); else state.lines[name].applyOptions({price,title:name}); } }
+  }
+  async function scanStocks(symbols){
+    if(!state.apiKey) throw new Error('Add a Finnhub API key in Data Settings to scan stocks live. Crypto is available without a key.');
+    const out=[]; for(const symbol of symbols){ try{ const q=await stockQuote(symbol); const bars=await stockCandles(symbol,'D',420); if(bars.length<60) continue; const a=analyzeBars(bars), price=q.c||bars.at(-1).c; if(price<Number($('priceMin').value)||price>Number($('priceMax').value)) continue; const mode=$('setupMode').value; const qualified= a.score>=Number($('minScore').value)&&a.liquidity.score>=Number($('minLiquidity').value)&&(mode==='both'||(mode==='long'&&a.direction==='LONG')||(mode==='short'&&a.direction==='SHORT')); out.push({symbol,kind:'stock',price,change:q.dp??null,score:a.score,liq:a.liquidity.score,rv:a.liquidity.rv,trend:a.trend,momentum:a.momentum,status:qualified?'QUALIFIED':'FILTERED',bars,meta:q}); }catch(e){ console.warn(symbol,e.message); } }
+    return out;
+  }
+  async function scanCrypto(){
+    const ticks=await cryptoTicker(); const out=[]; for(const t of ticks){ const symbol=String(t.symbol).replace('USDT',''); if(!cfg.defaultCrypto.includes(symbol)) continue; try{ const bars=await cryptoCandles(symbol,'1d',300); const a=analyzeBars(bars), price=+t.lastPrice; const mode=$('setupMode').value; const qualified=a.score>=Number($('minScore').value)&&a.liquidity.score>=Number($('minLiquidity').value)&&(mode==='both'||(mode==='long'&&a.direction==='LONG')||(mode==='short'&&a.direction==='SHORT')); out.push({symbol,kind:'crypto',price,change:+t.priceChangePercent,score:a.score,liq:a.liquidity.score,rv:a.liquidity.rv,trend:a.trend,momentum:a.momentum,status:qualified?'QUALIFIED':'FILTERED',bars,meta:t}); }catch(e){ console.warn('crypto',symbol,e.message); } } return out;
+  }
+  function renderResults(rows){
+    const sorted=[...rows].sort((a,b)=>b.score-a.score); state.results=sorted; const q=sorted.filter(r=>r.status==='QUALIFIED'); $('countChip').textContent=q.length+' qualified'; $('dataChip').textContent=sorted.length+' scored'; $('resultsBody').innerHTML=sorted.length?sorted.map((r,idx)=>`<tr data-idx="${idx}" class="${state.selected===r.symbol?'sel':''}"><td><b>${r.symbol}</b><div class="muted">${r.kind}</div></td><td>$${fmt(r.price,r.price<1?4:2)}<div class="spark ${r.change>=0?'up':'down'}">${r.change==null?'—':pct(r.change)}</div></td><td><span class="tag ${r.score>=70?'green':r.score>=55?'yellow':'red'}">${r.direction||'MAP'}</span></td><td class="score ${clsScore(r.score)}">${r.score}</td><td>${r.liq}/10</td><td>${fmt(r.rv,2)}x</td><td>${r.trend}</td><td>${r.momentum}</td><td><span class="tag ${r.status==='QUALIFIED'?'green':'yellow'}">${r.status}</span></td></tr>`).join(''):`<tr><td colspan="9" class="muted">No candidates matched the current filters.</td></tr>`;
+    document.querySelectorAll('#resultsBody tr[data-idx]').forEach(tr=>tr.addEventListener('click',()=>selectResult(sorted[Number(tr.dataset.idx)])));
+  }
+  async function selectResult(r){
+    state.selected=r.symbol; state.selectedMeta=r; renderResults(state.results); setStatus('LOADING '+r.symbol+'…','warn'); try{ const bars=await loadBars(r.symbol,r.kind,r.kind==='crypto'?'D':state.timeframe); drawChart(bars); renderMeta(r.symbol,r.meta,r.kind,bars); connectStream(r.symbol,r.kind); setStatus('LIVE / '+r.symbol,'ok'); }catch(e){ setStatus('DATA ERROR','bad'); $('chartSub').textContent=e.message; }
+  }
+  function closeWS(){ if(state.ws){try{state.ws.close()}catch{} state.ws=null;} }
+  function connectStream(symbol,kind){ closeWS(); if(kind==='stock' && !state.apiKey) return; if(kind==='crypto'){
+      const s=symbol.toLowerCase()+'usdt'; const interval=({5:'5m',15:'15m',60:'1h',240:'4h',D:'1d'})[state.timeframe]||'1m'; state.ws=new WebSocket(cfg.wsBase+'/'+s+'@kline_'+interval); state.ws.onmessage=(ev)=>{ try{const j=JSON.parse(ev.data), k=j.k; if(!k||!state.candle) return; const b={time:+k.t,o:+k.o,h:+k.h,l:+k.l,c:+k.c,v:+k.v}; state.candle.update({time:Math.floor(b.time/1000),open:b.o,high:b.h,low:b.l,close:b.c}); $('mPrice').textContent='$'+fmt(b.c,b.c<1?4:2); }catch{} };
+    } else if(state.apiKey){ state.ws=new WebSocket('wss://ws.finnhub.io?token='+encodeURIComponent(state.apiKey)); state.ws.onopen=()=>state.ws.send(JSON.stringify({type:'subscribe',symbol})); state.ws.onmessage=(ev)=>{ try{const j=JSON.parse(ev.data); if(j.type!=='trade')return; const last=j.data?.at(-1); if(last){$('mPrice').textContent='$'+fmt(last.p,last.p<1?4:2);}}catch{} }; }
+  }
+  async function runScan(){
+    const universe=$('universe').value; setStatus('SCANNING…','warn'); $('scanMeta').textContent='Fetching market data and calculating RTIC scores…'; const all=[]; try{
+      if(universe==='crypto'||universe==='all'){ const c=await scanCrypto(); all.push(...c); }
+      if(universe==='stocks'||universe==='all-stocks'||universe==='all'){ const syms=$('stockUniverse').value.split(',').map(s=>s.trim().toUpperCase()).filter(Boolean).slice(0,50); const s=await scanStocks(syms); all.push(...s); }
+      renderResults(all); state.lastScanAt=new Date(); $('scanMeta').textContent='Last scan '+state.lastScanAt.toLocaleString()+' · '+all.length+' symbols processed'; $('marketState').textContent=universe==='crypto'?'CRYPTO 24/7':'STOCKS: '+(isWeekend()?'CLOSED / LAST SESSION':'OPEN / LIVE CAPABLE'); setStatus('SYSTEM ONLINE','ok'); if(all.length){ const q=all.find(x=>x.status==='QUALIFIED')||all[0]; await selectResult(q); }
+    }catch(e){ setStatus('SCAN BLOCKED','bad'); $('scanMeta').textContent=e.message; }
+  }
+  function isWeekend(){ const d=new Date().getDay(); return d===0||d===6; }
+  document.querySelectorAll('#timebar button').forEach(b=>b.addEventListener('click',async()=>{document.querySelectorAll('#timebar button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); state.timeframe=b.dataset.tf; if(state.selected&&state.selectedMeta){ try{ const kind=state.selectedMeta?.kind||'crypto'; const bars=await loadBars(state.selected,kind,state.timeframe); drawChart(bars); renderMeta(state.selected,state.selectedMeta,kind,bars); connectStream(state.selected,kind);}catch(e){$('chartSub').textContent=e.message;} }}));
+  ['entry','stop','account','riskPct'].forEach(id=>$(id).addEventListener('input',calcRisk));
+  $('scanBtn').addEventListener('click',runScan);
+  $('settingsBtn').addEventListener('click',()=> $('settings').classList.add('open'));
+  $('closeSettings').addEventListener('click',()=> $('settings').classList.remove('open'));
+  $('saveSettings').addEventListener('click',()=>{ state.apiKey=$('apiKey').value.trim(); state.refreshSec=Math.max(15,Number($('refreshSec').value)||60); state.cryptoRefreshSec=Math.max(5,Number($('cryptoRefreshSec').value)||10); localStorage.setItem(cfg.storage+'-key',state.apiKey); localStorage.setItem(cfg.storage+'-refresh',state.refreshSec); localStorage.setItem(cfg.storage+'-crypto-refresh',state.cryptoRefreshSec); $('settingsMsg').textContent='Saved in this browser.'; setTimeout(()=>{$('settingsMsg').textContent=''},2500); });
+  $('clearKey').addEventListener('click',()=>{state.apiKey='';localStorage.removeItem(cfg.storage+'-key');$('apiKey').value='';$('settingsMsg').textContent='Key cleared.'});
+  $('universe').addEventListener('change',()=>{ const u=$('universe').value; const stockMode=u!=='crypto'; $('stockUniverse').disabled=!stockMode; });
+  initChart();
+  $('marketState').textContent=isWeekend()?'WEEKEND · STOCKS CLOSED':'CHECKING…';
+  setStatus('SYSTEM READY','ok');
+  // Auto refresh: crypto when page is used; stock scan requires saved key.
+  setInterval(()=>{ if(document.visibilityState==='visible' && $('universe').value!=='crypto') runScan(); }, state.refreshSec*1000);
+  // Load a first crypto view so the page has a working live chart without credentials.
+  (async()=>{ try{ const bars=await cryptoCandles('BTC','1d',300); state.selected='BTC'; state.selectedMeta={symbol:'BTC',kind:'crypto'}; drawChart(bars); renderMeta('BTC',state.selectedMeta,'crypto',bars); connectStream('BTC','crypto'); setStatus('LIVE / BTC','ok'); }catch(e){ setStatus('READY — ADD STOCK KEY','warn'); } })();
+})();
+</script>
+</body>
+</html>
+
