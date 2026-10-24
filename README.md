@@ -51,3 +51,15 @@ The score is a local implementation of the existing RO'Lyfe scoring architecture
 ## Attribution
 
 Chart rendering uses TradingView Lightweight Charts.
+
+
+## Secure live-data panel (current build)
+
+The main dashboard includes a **Secure Market Data & RTIC Scanner** section:
+- Tickerbot historical OHLCV bars feed a transparent, equal-weight 10-category technical snapshot (EMA 5/10/20/50/200, MACD, RSI, Stochastic, CCI, squeeze/momentum proxy, RVOL, and 20-bar support/resistance).
+- The scan displays a 0–100 directional summary and a 0–10 average-dollar-volume liquidity proxy. These are descriptive indicators, not a probability of success or a trade recommendation.
+- Finnhub and Alpha Vantage provide quotes; CoinGecko supports BTC, ETH, SOL, XRP, LINK, and HYPE quotes.
+- The frontend calls the `market-data` and `market-data-status` Supabase Edge Functions. Provider credentials are read from server-side Edge Function secrets: `TICKERBOT_API_KEY`, `FINNHUB_API_KEY`, `ALPHA_VANTAGE_API_KEY`, and `COINGECKO_API_KEY`. Never place these provider keys in GitHub files or browser JavaScript.
+- `market-data-status` reports whether each secret is configured; it does not prove data-provider connectivity. The data panel separately reports when a provider actually responds.
+
+Before relying on results, verify timestamps, exchange/session coverage, provider plan limits, and quote latency. Average dollar volume is not options-chain liquidity. The embedded TradingView chart remains a separate charting view; scanner data depends on the selected provider and interval.
