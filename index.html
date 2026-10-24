@@ -151,6 +151,25 @@ button:hover{opacity:.92;transform:translateY(-1px)}
 .app-footer{padding:22px 14px 95px;text-align:center;color:var(--muted);font-size:11px;line-height:1.8}
 .hidden{display:none!important}
 
+
+/* Secure server-side market data + transparent RTIC scan */
+.rtic-data-intro{color:var(--muted);font-size:12px;line-height:1.6;margin:0 0 12px}
+.rtic-data-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:9px}
+.rtic-data-status{padding:12px;border:1px solid var(--border);border-radius:10px;background:#08120c;color:var(--muted);font-size:12px;line-height:1.55;margin:10px 0}
+.rtic-data-status.good{border-color:var(--green2);color:#d8ffeb}.rtic-data-status.warn{border-color:var(--yellow);color:#ffeaa0}.rtic-data-status.bad{border-color:var(--red);color:#ffc6c6}
+.rtic-provider-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:7px;margin:10px 0}
+.rtic-provider{padding:9px;background:#08120c;border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted)}
+.rtic-provider strong{display:block;margin-top:4px;color:#fff;font-size:12px}
+.rtic-data-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin-top:10px}
+.rtic-data-metric{padding:12px;background:#0a130e;border:1px solid var(--border);border-radius:10px;min-width:0}
+.rtic-data-metric span{display:block;color:var(--muted);font-size:10px;font-weight:900}
+.rtic-data-metric strong{display:block;margin-top:5px;color:#fff;font-size:18px;overflow-wrap:anywhere}
+.rtic-scan-score{border-color:var(--border2);background:linear-gradient(145deg,rgba(0,230,118,.08),rgba(4,12,7,.97))}
+.rtic-scan-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:7px;margin-top:10px}
+.rtic-scan-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px;background:#08120c;border:1px solid var(--border);border-radius:8px;font-size:11px}
+.rtic-vote{font-weight:900;white-space:nowrap}.rtic-vote.bullish{color:var(--green)}.rtic-vote.bearish{color:var(--red)}.rtic-vote.neutral{color:var(--yellow)}
+@media(max-width:420px){.rtic-data-controls,.rtic-data-metrics{grid-template-columns:1fr 1fr}.rtic-data-metric strong{font-size:16px}}
+
 /* Floating RO'LYFE AI */
 .ai-fab{position:fixed;right:16px;bottom:16px;z-index:9999;width:62px;height:62px;min-height:62px;margin:0;padding:0;border-radius:50%;background:linear-gradient(135deg,var(--green),#00a956);color:#041009;border:2px solid rgba(255,255,255,.35);box-shadow:0 10px 30px rgba(0,0,0,.45);font-size:25px}
 .ai-fab:hover{transform:scale(1.04)}
@@ -218,6 +237,35 @@ button:hover{opacity:.92;transform:translateY(-1px)}
  </div>
  <div class="help">You can also type a symbol in the Master Trade Plan or use TradingView's own symbol search inside the chart.</div>
 </section>
+
+
+<!-- RTIC SECURE DATA PANEL -->
+<details class="section-drop" id="rticSecureData" open>
+ <summary>📡 SECURE MARKET DATA &amp; RTIC SCANNER</summary>
+ <div class="drop-body">
+  <p class="rtic-data-intro">Pull provider data through the RO’Lyfe Supabase Edge Function. Provider API keys stay server-side. Tickerbot OHLCV powers a transparent 10-category technical snapshot; quote providers return a quote only. This is a research aid, not a prediction or trade signal.</p>
+  <div class="rtic-data-controls">
+   <div><label for="rticDataProvider">Data Provider</label><select id="rticDataProvider">
+    <option value="tickerbot">Tickerbot — Historical Bars + RTIC Scan</option>
+    <option value="finnhub">Finnhub — Quote</option>
+    <option value="alphavantage">Alpha Vantage — Quote</option>
+    <option value="coingecko">CoinGecko — Crypto Quote</option>
+   </select></div>
+   <div><label for="rticDataSymbol">Symbol</label><input id="rticDataSymbol" value="NVDA" autocomplete="off" maxlength="20" placeholder="NVDA, SPY, BTC"></div>
+   <div><label for="rticDataInterval">Scan Timeframe</label><select id="rticDataInterval">
+    <option value="1d" selected>1D — Swing Context</option><option value="4h">4H — Structure</option>
+    <option value="1h">1H — Trend</option><option value="15m">15M — Setup</option><option value="5m">5M — Timing</option>
+   </select></div>
+   <div><label for="rticDataLimit">Historical Bars</label><select id="rticDataLimit"><option value="200">200 bars</option><option value="300" selected>300 bars</option><option value="500">500 bars</option></select></div>
+  </div>
+  <div class="action-grid"><button type="button" id="rticFetchButton" class="primary-btn" onclick="ROLYFEData.refresh()">📡 PULL SECURE MARKET DATA</button><button type="button" class="secondary-btn" onclick="ROLYFEData.usePlannerSymbol()">↔ USE MASTER PLAN SYMBOL</button></div>
+  <div id="rticProviderStatus" class="rtic-provider-list" aria-live="polite"><div class="rtic-provider">Data service<strong>Checking configuration…</strong></div></div>
+  <div id="rticDataStatus" class="rtic-data-status" aria-live="polite">Ready. Press “Pull Secure Market Data” to request data.</div>
+  <div id="rticQuoteOutput" class="rtic-data-metrics"></div>
+  <div id="rticScanOutput"></div>
+  <p class="help">Data timestamps and entitlement depend on the provider plan. Average dollar volume is a stock liquidity proxy, not options-chain liquidity. Validate price, spread, open interest, earnings/news, and the chart before planning an order.</p>
+ </div>
+</details>
 
 <!-- MASTER PLAN -->
 <details class="section-drop" open>
@@ -974,7 +1022,8 @@ function downloadTradeTicketTXT(){const p=ensurePlan();if(!p){alert("Create a va
 function downloadJournalTXT(){const j=getJournal();if(!j.length){alert("Your journal is empty.");return}downloadBlob("ROLYFE_Trade_Journal.txt",j.map((p,i)=>`TRADE ${i+1}\\n${planText(p)}\\nRealized: ${money(calcRealized(p).realized)}\\n\\n`).join("\\n"),"text/plain;charset=utf-8")}
 function downloadTradePlanHTML(){
  const p=ensurePlan();if(!p){alert("Create a valid trade plan first.");return}
- const report=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RO'LYFE ${esc(p.symbol)} Trade Plan</title><style>body{font-family:Arial;background:#07100c;color:#f4f8f5;padding:25px;max-width:850px;margin:auto}h1,h2{color:#00e676}.row{display:flex;justify-content:space-between;gap:20px;padding:9px;border-bottom:1px solid #294234}section{padding:15px;margin:12px 0;background:#0d1811;border:1px solid #294234;border-radius:12px}.notice{line-height:1.6;color:#c7cec9}@media(max-width:600px){.row{flex-direction:column;gap:4px}}</style></head><body><h1>🎯 RO'LYFE Tactical Intelligence Center™</h1><p>PLAN → SIZE → LADDER → EXECUTE → JOURNAL → REVIEW</p><section><h2>${esc(p.symbol)} MASTER TRADE PLAN</h2><div class="row"><span>Direction</span><strong>${esc(p.direction)}</strong></div><div class="row"><span>Instrument</span><strong>${esc(p.instrument)}</strong></div><div class="row"><span>Strategy</span><strong>${esc(p.strategyName||"—")}</strong></div><div class="row"><span>Account / Risk</span><strong>${money(p.accountSize)} / ${p.riskPercent}%</strong></div><div class="row"><span>Entry / Stop</span><strong>${money(p.entry)} / ${money(p.stop)}</strong></div><div class="row"><span>Position</span><strong>${number(p.positionSizing?.recommended||0,2)} ${esc(p.unitLabel)}</strong></div><div class="row"><span>T1 / T2 / T3</span><strong>${money(p.target1)} / ${money(p.target2)} / ${money(p.target3)}</strong></div></section><section><h2>🎯 Strategy</h2><div class="row"><span>Net Premium</span><strong>${p.derivative?money(p.derivative.net):"—"}</strong></div><div class="row"><span>Defined Max Loss / Contract</span><strong>${p.derivative?money(p.derivative.defined):"—"}</strong></div><div class="row"><span>Stop-Risk Proxy / Contract</span><strong>${p.derivative?money(p.baseUnitRisk):"—"}</strong></div><div class="row"><span>Expiration</span><strong>${esc(p.expiration||"Not Set")}</strong></div></section><section><h2>🪜 Exit Ladder</h2><div class="row"><span>T1</span><strong>${p.ladderT1}%</strong></div><div class="row"><span>T2</span><strong>${p.ladderT2}%</strong></div><div class="row"><span>T3</span><strong>${p.ladderT3}%</strong></div><div class="row"><span>Runner</span><strong>${p.runner}%</strong></div></section><section class="notice"><strong>Disclosure:</strong> Educational and informational use only. Options and derivatives involve substantial risk. Market data may be delayed or incomplete.</section></body></html>`;
+ const report=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RO'LYFE ${esc(p.symbol)} Trade Plan</title><style>body{font-family:Arial;background:#07100c;color:#f4f8f5;padding:25px;max-width:850px;margin:auto}h1,h2{color:#00e676}.row{display:flex;justify-content:space-between;gap:20px;padding:9px;border-bottom:1px solid #294234}section{padding:15px;margin:12px 0;background:#0d1811;border:1px solid #294234;border-radius:12px}.notice{line-height:1.6;color:#c7cec9}@media(max-width:600px){.row{flex-direction:column;gap:4px}}</style></head><body><h1>🎯 RO'LYFE Tactical Intelligence Center™</h1><p>PLAN → SIZE → LADDER → EXECUTE → JOURNAL → REVIEW</p><section><h2>${esc(p.symbol)} MASTER TRADE PLAN</h2><div class="row"><span>Direction</span><strong>${esc(p.direction)}</strong></div><div class="row"><span>Instrument</span><strong>${esc(p.instrument)}</strong></div><div class="row"><span>Strategy</span><strong>${esc(p.strategyName||"—")}</strong></div><div class="row"><span>Account / Risk</span><strong>${money(p.accountSize)} / ${p.riskPercent}%</strong></div><div class="row"><span>Entry / Stop</span><strong>${money(p.entry)} / ${money(p.stop)}</strong></div><div class="row"><span>Position</span><strong>${number(p.positionSizing?.recommended||0,2)} ${esc(p.unitLabel)}</strong></div><div class="row"><span>T1 / T2 / T3</span><strong>${money(p.target1)} / ${money(p.target2)} / ${money(p.target3)}</strong></div></section><section><h2>🎯 Strategy</h2><div class="row"><span>Net Premium</span><strong>${p.derivative?money(p.derivative.net):"—"}</strong></div><div class="row"><span>Defined Max Loss / Contract</span><strong>${p.derivative?money(p.derivative.defined):"—"}</strong></div><div class="row"><span>Stop-Risk Proxy / Contract</span><strong>${p.derivative?money(p.baseUnitRisk):"—"}</strong></div><div class="row"><span>Expiration</span><strong>${esc(p.expiration||"Not Set")}</strong></div></section><section><h2>🪜 Exit Ladder</h2><div class="row"><span>T1</span><strong>${p.ladderT1}%</strong></div><div class="row"><span>T2</span><strong>${p.ladderT2}%</strong></div><div class="row"><span>T3</span><strong>${p.ladderT3}%</strong></div><div class="row"><span>Runner</span><strong>${p.runner}%</strong></div></section><section class="notice"><strong>Disclosure:</strong> Educational and informational use only. Options and derivatives involve substantial risk. Market data may be delayed or incomplete.</section><script src="./js/rtic-data-engine.js"></script>
+</body></html>`;
  downloadBlob(`ROLYFE_${p.symbol}_Master_Trade_Plan.html`,report,"text/html;charset=utf-8");
 }
 function printCurrentPlan(){
