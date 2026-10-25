@@ -128,6 +128,13 @@
    try{
      const data=provider==="tickerbot"?await callData("market-data",{provider,symbol,interval,limit}):await callData("market-data",{provider,symbol});
      if(id!==requestId)return;
+     // Never display a provider response under the wrong requested ticker.
+     const normalizeSymbol=v=>String(v||"").trim().toUpperCase().replace(/^.*:/,"").replace(/(USDT|USD)$/ ,"");
+     const returnedSymbol=normalizeSymbol(data.symbol||symbol),requestedSymbol=normalizeSymbol(symbol);
+     if(returnedSymbol!==requestedSymbol){
+       byId("rticQuoteOutput").innerHTML="";byId("rticScanOutput").innerHTML="";
+       throw new Error("Symbol mismatch: requested "+symbol+" but provider returned "+(data.symbol||"an unnamed symbol")+". Results cleared; check the provider or try Tickerbot.");
+     }
      const time=data.asOf?String(data.asOf):data.timestamp?new Date(Number(data.timestamp)*1000).toLocaleString():data.lastUpdatedAt?new Date(Number(data.lastUpdatedAt)*1000).toLocaleString():new Date().toLocaleString();
      let price=n(data.price??data.bars?.[data.bars.length-1]?.c??data.bars?.[data.bars.length-1]?.close);
      const change=n(data.changePercent??data.changePercent24h),changeText=Number.isFinite(change)?(change>0?"+":"")+fmt(change,2)+"%":"—";
@@ -144,7 +151,15 @@
    }catch(e){if(id!==requestId)return;byId("rticScanOutput").innerHTML="";status(e?.message||"Market-data request failed. Check provider configuration and data entitlement.","bad");}
    finally{if(id===requestId&&button){button.disabled=false;button.textContent="📡 PULL SECURE MARKET DATA";}}
  }
- function usePlannerSymbol(){const a=byId("symbol"),b=byId("rticDataSymbol");if(a&&b)b.value=a.value.trim().toUpperCase();}
- window.ROLYFEData={refresh:refresh,usePlannerSymbol:usePlannerSymbol,checkConfig:checkConfig};
+ function setSymbol(value){
+   const b=byId("rticDataSymbol");if(!b)return;
+   const next=String(value||"").trim().toUpperCase();if(!next)return;
+   if(b.value.trim().toUpperCase()!==next){
+     b.value=next;byId("rticQuoteOutput")&&(byId("rticQuoteOutput").innerHTML="");byId("rticScanOutput")&&(byId("rticScanOutput").innerHTML="");
+     status("Symbol changed to "+next+". Pull Secure Market Data to fetch a fresh quote or scan.","warn");
+   }
+ }
+ function usePlannerSymbol(){const a=byId("symbol");if(a)setSymbol(a.value);}
+ window.ROLYFEData={refresh:refresh,usePlannerSymbol:usePlannerSymbol,setSymbol:setSymbol,checkConfig:checkConfig};
  document.addEventListener("DOMContentLoaded",function(){usePlannerSymbol();checkConfig();});
 })();
