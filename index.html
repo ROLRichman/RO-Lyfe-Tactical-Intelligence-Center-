@@ -1234,7 +1234,62 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 
 
-<!-- RO'LYFE CLARITY PASS: indicator explanations, chart connection, and simpler sizing -->
+<!-- RO'LYFE 
+<!-- RO'Lyfe optional debit-spread comparison: manual premiums only -->
+<style>
+.rtic-debit-compare{margin:12px 0;padding:12px;border:1px solid var(--border2);border-radius:12px;background:rgba(0,230,118,.035)}
+.rtic-debit-compare button{margin:6px 6px 6px 0}
+.rtic-debit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.rtic-debit-grid label{display:block;font-size:.9rem;margin-bottom:4px}
+.rtic-debit-grid input{width:100%;box-sizing:border-box}
+.rtic-debit-results{margin-top:10px;padding:10px;border-radius:8px;background:rgba(0,0,0,.2);line-height:1.55}
+@media(max-width:600px){.rtic-debit-grid{grid-template-columns:1fr}}
+</style>
+<script>
+(function(){
+ const $=id=>document.getElementById(id);
+ const money=n=>Number.isFinite(n)?n.toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits:2}):"—";
+ const num=id=>{const e=$(id);return e?Number(e.value):NaN};
+ function install(){
+  const help=$("strategyHelp"); if(!help||$("rticDebitCompare"))return;
+  const box=document.createElement("section");box.id="rticDebitCompare";box.className="rtic-debit-compare";
+  box.innerHTML='<strong>Optional: Compare a Long Option with a Debit Spread</strong><p class="help">Enter the short-leg strike and premium manually. No live option prices are assumed. Standard 100-share contract multiplier; fees and slippage excluded.</p><button type="button" id="rticCompareToggle">Compare debit spread</button><div id="rticCompareFields" hidden><div class="rtic-debit-grid"><div><label id="rticShortStrikeLabel" for="rticShortStrike">Short-leg strike</label><input id="rticShortStrike" type="number" step="0.01" placeholder="Enter strike"></div><div><label for="rticShortPremium">Short-leg premium received</label><input id="rticShortPremium" type="number" min="0" step="0.01" placeholder="Enter premium"></div></div><button type="button" id="rticCalculateCompare">Calculate comparison</button><button type="button" id="rticUseSpread">Use spread in main plan</button><div id="rticCompareResults" class="rtic-debit-results" aria-live="polite">Open comparison and enter the short-leg details to calculate.</div></div>';
+  help.insertAdjacentElement("afterend",box);
+  $("rticCompareToggle").addEventListener("click",()=>{$("rticCompareFields").hidden=!$("rticCompareFields").hidden; refreshCompare();});
+  ["leg1Strike","leg1Premium","rticShortStrike","rticShortPremium","strategy"].forEach(id=>{if($(id))$(id).addEventListener("input",refreshCompare);});
+  $("rticCalculateCompare").addEventListener("click",refreshCompare);
+  $("rticUseSpread").addEventListener("click",useSpread);
+  refreshCompare();
+ }
+ function refreshCompare(){
+  if(!$("rticCompareResults"))return;
+  const s=$("strategy").value, call=s==="LONG_CALL", put=s==="LONG_PUT";
+  if(!call&&!put){$("rticCompareResults").textContent="Choose Long Call or Long Put in Strategy to compare a matching debit spread.";return;}
+  $("rticShortStrikeLabel").textContent=call?"Short call strike (above long strike)":"Short put strike (below long strike)";
+  const k=num("leg1Strike"),p=num("leg1Premium"),ks=num("rticShortStrike"),ps=num("rticShortPremium");
+  if(!(k>0)||!(p>=0)){ $("rticCompareResults").textContent="Enter a valid long-leg strike and premium in Strategy Legs & Premiums.";return;}
+  const singleCost=p*100, singleBE=call?k+p:k-p, singleMax=call?Infinity:Math.max(0,(k-p)*100);
+  const singleText="<b>Single "+(call?"long call":"long put")+"</b><br>Upfront cost / maximum loss: "+money(singleCost)+"<br>Breakeven at expiration: "+money(singleBE)+"<br>Maximum profit: "+(call?"Unlimited in theory":money(singleMax));
+  if(!(ks>0)||!(ps>=0)){ $("rticCompareResults").innerHTML=singleText+"<hr>Enter the short-leg strike and premium to compare the spread.";return;}
+  const width=call?ks-k:k-ks, debit=p-ps;
+  if(!(width>0)){ $("rticCompareResults").innerHTML=singleText+"<hr><b>Check strike order:</b> a bull call spread uses a higher short-call strike; a bear put spread uses a lower short-put strike.";return;}
+  if(!(debit>0)||debit>=width){ $("rticCompareResults").innerHTML=singleText+"<hr><b>Check premiums:</b> net debit must be greater than $0 and less than the strike width ("+money(width)+").";return;}
+  const spreadMaxLoss=debit*100,spreadMaxProfit=(width-debit)*100,spreadBE=call?k+debit:k-debit;
+  $("rticCompareResults").innerHTML=singleText+"<hr><b>"+(call?"Bull call debit spread":"Bear put debit spread")+"</b><br>Upfront cost / maximum loss: "+money(spreadMaxLoss)+"<br>Maximum profit: "+money(spreadMaxProfit)+"<br>Breakeven at expiration: "+money(spreadBE)+"<br>Maximum reward / risk: "+(spreadMaxProfit/spreadMaxLoss).toFixed(2)+" : 1<br><span class=\"help\">These are expiration payoff calculations, not probability-of-profit estimates. Compare the capped spread profit with the single option’s potential; neither structure is automatically better.</span>";
+ }
+ function useSpread(){
+  const s=$("strategy").value,call=s==="LONG_CALL",put=s==="LONG_PUT";if(!call&&!put){refreshCompare();return;}
+  const k=num("leg1Strike"),p=num("leg1Premium"),ks=num("rticShortStrike"),ps=num("rticShortPremium"),width=call?ks-k:k-ks,debit=p-ps;
+  if(!(width>0)||!(debit>0)||debit>=width){refreshCompare();return;}
+  $("strategy").value=call?"BULL_CALL_SPREAD":"BEAR_PUT_SPREAD";$("leg2Strike").value=ks;$("leg2Premium").value=ps;
+  if(typeof updateStrategyUI==="function")updateStrategyUI();
+  const status=$("rticCompareResults");status.innerHTML+="<p><b>Spread copied to the main plan.</b> Review all fields and risk settings before using the plan.</p>";
+ }
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install);else install();
+})();
+</script>
+
+CLARITY PASS: indicator explanations, chart connection, and simpler sizing -->
 <style>
 .rtic-explain{margin:10px 0;padding:12px;border:1px solid var(--border2);border-radius:12px;background:rgba(0,230,118,.045);color:var(--text,#e8f5ec);line-height:1.5}
 .rtic-explain strong{color:var(--green,#00e676)}
