@@ -1099,73 +1099,6 @@ function downloadTradePlanHTML(){
  const p=ensurePlan();if(!p){alert("Create a valid trade plan first.");return}
  const report=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RO'LYFE ${esc(p.symbol)} Trade Plan</title><style>body{font-family:Arial;background:#07100c;color:#f4f8f5;padding:25px;max-width:850px;margin:auto}h1,h2{color:#00e676}.row{display:flex;justify-content:space-between;gap:20px;padding:9px;border-bottom:1px solid #294234}section{padding:15px;margin:12px 0;background:#0d1811;border:1px solid #294234;border-radius:12px}.notice{line-height:1.6;color:#c7cec9}@media(max-width:600px){.row{flex-direction:column;gap:4px}}</style></head><body><h1>🎯 RO'LYFE Tactical Intelligence Center™</h1><p>PLAN → SIZE → LADDER → EXECUTE → JOURNAL → REVIEW</p><section><h2>${esc(p.symbol)} MASTER TRADE PLAN</h2><div class="row"><span>Direction</span><strong>${esc(p.direction)}</strong></div><div class="row"><span>Instrument</span><strong>${esc(p.instrument)}</strong></div><div class="row"><span>Strategy</span><strong>${esc(p.strategyName||"—")}</strong></div><div class="row"><span>Account / Risk</span><strong>${money(p.accountSize)} / ${p.riskPercent}%</strong></div><div class="row"><span>Entry / Stop</span><strong>${money(p.entry)} / ${money(p.stop)}</strong></div><div class="row"><span>Position</span><strong>${number(p.positionSizing?.recommended||0,2)} ${esc(p.unitLabel)}</strong></div><div class="row"><span>T1 / T2 / T3</span><strong>${money(p.target1)} / ${money(p.target2)} / ${money(p.target3)}</strong></div></section><section><h2>🎯 Strategy</h2><div class="row"><span>Net Premium</span><strong>${p.derivative?money(p.derivative.net):"—"}</strong></div><div class="row"><span>Defined Max Loss / Contract</span><strong>${p.derivative?money(p.derivative.defined):"—"}</strong></div><div class="row"><span>Stop-Risk Proxy / Contract</span><strong>${p.derivative?money(p.baseUnitRisk):"—"}</strong></div><div class="row"><span>Expiration</span><strong>${esc(p.expiration||"Not Set")}</strong></div></section><section><h2>🪜 Exit Ladder</h2><div class="row"><span>T1</span><strong>${p.ladderT1}%</strong></div><div class="row"><span>T2</span><strong>${p.ladderT2}%</strong></div><div class="row"><span>T3</span><strong>${p.ladderT3}%</strong></div><div class="row"><span>Runner</span><strong>${p.runner}%</strong></div></section><section class="notice"><strong>Disclosure:</strong> Educational and informational use only. Options and derivatives involve substantial risk. Market data may be delayed or incomplete.</section><!-- live data engine is not included in standalone report -->
 
-<script>
-/* RO'Lyfe workspace navigation: focused views, no lost calculators */
-(function(){
- const views={
-  home:{label:"OVERVIEW",show:["market","scanner","chart","watchlist"],intro:true},
-  market:{label:"MARKET CONTROL",show:["market"]},
-  scanner:{label:"MARKET SCANNER",show:["market","scanner"]},
-  studies:{label:"STUDIES & CHARTS",show:["scanner","indicators","chart","visual"]},
-  execute:{label:"TRADE EXECUTION",show:["plan","visual","export"]},
-  whatif:{label:"WHAT-IF LAB",show:["whatif","plan"]},
-  watchlist:{label:"WATCHLIST",show:["watchlist","market"]},
-  review:{label:"JOURNAL & PERFORMANCE",show:["performance","journal"]},
-  resources:{label:"MARKET RESOURCES",show:["resources","disclosure"]}
- };
- let current="home",nodes=[];
- function category(el){
-  const t=(el.innerText||el.textContent||"").toLowerCase();
-  if(el.id==="rticSecureData")return "scanner";
-  if(t.includes("market control center"))return "market";
-  if(t.includes("master trade plan"))return "plan";
-  if(t.includes("what-if psychology engine"))return "whatif";
-  if(t.includes("green ignition"))return "indicators";
-  if(t.includes("live market chart"))return "chart";
-  if(t.includes("visual charts"))return "visual";
-  if(t.includes("download / export center"))return "export";
-  if(t.includes("master watchlist"))return "watchlist";
-  if(t.includes("market intelligence center"))return "resources";
-  if(t.includes("performance dashboard"))return "performance";
-  if(t.includes("trade journal"))return "journal";
-  if(t.includes("disclosure"))return "disclosure";
-  return "other";
- }
- function collect(){nodes=Array.from(document.querySelector("main.container").children).filter(el=>!el.classList.contains("rtic-workspace-intro")&&!el.classList.contains("rtic-quick-actions")).map(el=>({el,cat:category(el)}));}
- function setView(view,writeHash){
-  if(!views[view])view="home";current=view;
-  const cfg=views[view];
-  if(!nodes.length)collect();
-  nodes.forEach(({el,cat})=>{
-   const show=cfg.show.includes(cat)||(view==="home"&&cat==="other");
-   el.classList.toggle("rtic-section-hidden",!show);
-   if(show&&el.tagName==="DETAILS"&&["scanner","plan","whatif","chart","indicators","visual","watchlist","journal","performance","resources"].includes(cat))el.open=true;
-  });
-  const intro=document.getElementById("rticOverviewIntro"),actions=document.getElementById("rticHomeActions");
-  if(intro)intro.classList.toggle("rtic-section-hidden",!cfg.intro);
-  if(actions)actions.classList.toggle("rtic-section-hidden",!cfg.intro);
-  const label=document.getElementById("rticCurrentView");if(label)label.textContent=cfg.label;
-  document.querySelectorAll(".rtic-nav-link").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
-  toggleMenu(false);
-  if(writeHash)history.replaceState(null,"","#"+view);
-  window.scrollTo({top:0,behavior:"smooth"});
- }
- function toggleMenu(force){
-  const side=document.getElementById("rticSidebar"),scrim=document.getElementById("rticNavScrim");
-  const open=typeof force==="boolean"?force:!side.classList.contains("open");
-  side.classList.toggle("open",open);scrim.classList.toggle("open",open);
-  document.body.style.overflow=open?"hidden":"";
- }
- function go(view){setView(view,true)}
- window.ROLYFEWorkspace={go,toggleMenu};
- document.addEventListener("keydown",e=>{if(e.key==="Escape")toggleMenu(false)});
- document.addEventListener("DOMContentLoaded",()=>{
-  collect();
-  const requested=location.hash.replace("#","");
-  setView(views[requested]?requested:"home",false);
- });
-})();
-</script>
 </body></html>`;
  downloadBlob(`ROLYFE_${p.symbol}_Master_Trade_Plan.html`,report,"text/html;charset=utf-8");
 }
@@ -1241,5 +1174,64 @@ document.addEventListener("DOMContentLoaded",()=>{
 });
 </script>
 <script src="./js/rtic-data-engine.js"></script>
+
+<script>
+/* RO'Lyfe workspace navigation: focused views, no lost calculators */
+(function(){
+ const views={
+  home:{label:"OVERVIEW",show:["market","scanner","chart","watchlist"],intro:true},
+  market:{label:"MARKET CONTROL",show:["market"]},
+  scanner:{label:"MARKET SCANNER",show:["market","scanner"]},
+  studies:{label:"STUDIES & CHARTS",show:["scanner","indicators","chart","visual"]},
+  execute:{label:"TRADE EXECUTION",show:["plan","visual","export"]},
+  whatif:{label:"WHAT-IF LAB",show:["whatif","plan"]},
+  watchlist:{label:"WATCHLIST",show:["watchlist","market"]},
+  review:{label:"JOURNAL & PERFORMANCE",show:["performance","journal"]},
+  resources:{label:"MARKET RESOURCES",show:["resources","disclosure"]}
+ };
+ let current="home",nodes=[];
+ function category(el){
+  const t=(el.innerText||el.textContent||"").toLowerCase();
+  if(el.id==="rticSecureData")return "scanner";
+  if(t.includes("market control center"))return "market";
+  if(t.includes("master trade plan"))return "plan";
+  if(t.includes("what-if psychology engine"))return "whatif";
+  if(t.includes("green ignition"))return "indicators";
+  if(t.includes("live market chart"))return "chart";
+  if(t.includes("visual charts"))return "visual";
+  if(t.includes("download / export center"))return "export";
+  if(t.includes("master watchlist"))return "watchlist";
+  if(t.includes("market intelligence center"))return "resources";
+  if(t.includes("performance dashboard"))return "performance";
+  if(t.includes("trade journal"))return "journal";
+  if(t.includes("disclosure"))return "disclosure";
+  return "other";
+ }
+ function collect(){nodes=Array.from(document.querySelector("main.container").children).filter(el=>!el.classList.contains("rtic-workspace-intro")&&!el.classList.contains("rtic-quick-actions")).map(el=>({el,cat:category(el)}));}
+ function setView(view,writeHash){
+  if(!views[view])view="home";current=view;const cfg=views[view];if(!nodes.length)collect();
+  nodes.forEach(({el,cat})=>{
+   const show=cfg.show.includes(cat)||(view==="home"&&cat==="other");
+   el.classList.toggle("rtic-section-hidden",!show);
+   if(show&&el.tagName==="DETAILS"&&["scanner","plan","whatif","chart","indicators","visual","watchlist","journal","performance","resources"].includes(cat))el.open=true;
+  });
+  const intro=document.getElementById("rticOverviewIntro"),actions=document.getElementById("rticHomeActions");
+  if(intro)intro.classList.toggle("rtic-section-hidden",!cfg.intro);if(actions)actions.classList.toggle("rtic-section-hidden",!cfg.intro);
+  const label=document.getElementById("rticCurrentView");if(label)label.textContent=cfg.label;
+  document.querySelectorAll(".rtic-nav-link").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
+  toggleMenu(false);if(writeHash)history.replaceState(null,"","#"+view);window.scrollTo({top:0,behavior:"smooth"});
+ }
+ function toggleMenu(force){
+  const side=document.getElementById("rticSidebar"),scrim=document.getElementById("rticNavScrim");
+  const open=typeof force==="boolean"?force:!side.classList.contains("open");
+  side.classList.toggle("open",open);scrim.classList.toggle("open",open);document.body.style.overflow=open?"hidden":"";
+ }
+ function go(view){setView(view,true)}
+ window.ROLYFEWorkspace={go,toggleMenu};
+ document.addEventListener("keydown",e=>{if(e.key==="Escape")toggleMenu(false)});
+ document.addEventListener("DOMContentLoaded",()=>{collect();const requested=location.hash.replace("#","");setView(views[requested]?requested:"home",false)});
+})();
+</script>
+
 </body>
 </html>
