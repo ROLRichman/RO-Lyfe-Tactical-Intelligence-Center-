@@ -1233,5 +1233,100 @@ document.addEventListener("DOMContentLoaded",()=>{
 })();
 </script>
 
+
+<!-- RO'LYFE CLARITY PASS: indicator explanations, chart connection, and simpler sizing -->
+<style>
+.rtic-explain{margin:10px 0;padding:12px;border:1px solid var(--border2);border-radius:12px;background:rgba(0,230,118,.045);color:var(--text,#e8f5ec);line-height:1.5}
+.rtic-explain strong{color:var(--green,#00e676)}
+.rtic-mini-details{margin-top:8px;border:1px solid var(--border);border-radius:9px;padding:8px 10px;background:rgba(0,0,0,.16)}
+.rtic-mini-details summary{cursor:pointer;font-weight:700}
+.rtic-mini-details p{margin:8px 0 2px;font-size:.92rem}
+.rtic-indicator-detail{margin-top:8px;width:100%;font-size:.9rem}
+.rtic-result-guide{margin:10px 0;padding:12px;border-radius:10px;background:#101f16;border:1px solid #31563d}
+.rtic-result-guide ul{margin:7px 0 0;padding-left:20px}
+.rtic-result-guide li{margin:4px 0}
+.rtic-advanced-legs{margin:12px 0}
+.rtic-advanced-legs>summary{padding:12px;border:1px solid var(--border2);border-radius:10px;cursor:pointer;font-weight:700;background:rgba(0,230,118,.05)}
+.rtic-advanced-legs[open]>summary{margin-bottom:10px}
+.rtic-label-help{display:block;font-size:.82rem;opacity:.82;margin-top:4px;line-height:1.4}
+@media(max-width:600px){.rtic-explain,.rtic-result-guide{padding:10px}.rtic-indicator-detail{font-size:.86rem}}
+</style>
+<script>
+(function(){
+ const $=(sel,root=document)=>root.querySelector(sel);
+ const $$=(sel,root=document)=>Array.from(root.querySelectorAll(sel));
+ function addDetails(target,title,body){
+  if(!target||target.querySelector(':scope > .rtic-mini-details'))return;
+  const d=document.createElement('details');d.className='rtic-mini-details';
+  const sum=document.createElement('summary');sum.textContent=title;
+  const p=document.createElement('p');p.textContent=body;
+  d.append(sum,p);target.appendChild(d);
+ }
+ function setup(){
+  // Explain what each indicator says, right beside the indicator card.
+  const defs=[
+   ['ema20Value','EMA 20','Short-term direction: price above a rising EMA 20 is a bullish short-term clue; below a falling line is bearish. Sideways/crossing price is neutral.'],
+   ['ema50Value','EMA 50','Intermediate trend filter: compare price and EMA 20 with this line. EMA 20 above EMA 50 supports bullish structure; below supports bearish structure.'],
+   ['ema200Value','EMA 200','Major trend context: price above a rising EMA 200 generally favors bullish conditions; below a falling EMA 200 favors bearish conditions. It is not an entry by itself.'],
+   ['vwapValue','VWAP','Intraday average price weighted by volume. Above VWAP can show buyers in control; below can show sellers in control. VWAP usually resets each session.'],
+   ['rsiValue','RSI (14)','Momentum from 0–100. Above 50 often supports positive momentum; below 50 negative momentum. Near/above 70 may be overbought and near/below 30 oversold—neither guarantees reversal.'],
+   ['macdValue','MACD','Compares moving averages to gauge momentum and trend changes. Rising/positive MACD can support bullish momentum; falling/negative can support bearish momentum. Confirm on chart.'],
+   ['stochRsiValue','Stochastic RSI','A fast timing oscillator. High readings can mean momentum is stretched; low readings can mean weak/oversold momentum. Use its turn/crossover with the trend, not alone.']
+  ];
+  defs.forEach(([id,title,body])=>{
+   const el=document.getElementById(id);if(!el)return;
+   const card=el.closest('.indicator-card');if(!card)return;
+   addDetails(card,'What does '+title+' mean?',body);
+  });
+  const indicatorSection=$$('.section-drop').find(d=>(d.innerText||'').includes('GREEN IGNITION')&&(d.innerText||'').includes('Core confirmation stack'));
+  if(indicatorSection&&!$('#rticIndicatorSummary',indicatorSection)){
+   const guide=document.createElement('div');guide.className='rtic-result-guide';guide.id='rticIndicatorSummary';
+   guide.innerHTML='<strong>How to read this section</strong><ul><li><b>Bullish:</b> several indicators support upward direction.</li><li><b>Bearish:</b> several indicators support downward direction.</li><li><b>Neutral / mixed:</b> signals disagree or candles/data are insufficient—wait for clearer evidence.</li></ul><span class="rtic-label-help">“ON CHART” means the line/indicator is drawn on the chart; the Bias/Status below it is the interpretation. The indicator values are calculated from loaded candles when available, not typed by you.</span>';
+   const grid=$('.indicator-grid',indicatorSection);if(grid)grid.insertAdjacentElement('afterend',guide);
+  }
+  // Clarify symbol selectors and make it explicit that changing one updates the chart symbol.
+  const market=$$('.card,section').find(el=>(el.innerText||'').includes('MARKET CONTROL CENTER')&&$('select',el));
+  if(market&&!$('#rticChartConnectionNote',market)){
+   const note=document.createElement('div');note.className='rtic-explain';note.id='rticChartConnectionNote';
+   note.innerHTML='<strong>How the chart connects:</strong> choose a Crypto, Futures, Sector, or Quick Stock symbol to switch the TradingView chart to that market. The selected symbol is a chart symbol—not an automatic trade recommendation. After choosing it, open <b>Studies &amp; Charts</b> to inspect the candles and indicators, then enter the same symbol in your trade plan if you want to calculate position size. If the chart does not change, tap <b>Update Live Chart</b> in the trade plan.';
+   market.appendChild(note);
+  }
+  // Put the advanced multi-leg options inputs behind a clear disclosure.
+  const legHeading=$$('h3').find(h=>(h.innerText||'').includes('Strategy Legs')&&(h.innerText||'').includes('Premiums'));
+  if(legHeading){
+   const panel=legHeading.closest('.plan-section');
+   const holder=panel&&panel.parentElement;
+   if(panel&&holder&&!holder.querySelector(':scope > .rtic-advanced-legs')){
+    const d=document.createElement('details');d.className='rtic-advanced-legs';
+    const sum=document.createElement('summary');sum.textContent='Advanced options only: strategy legs, strikes and premiums';
+    const note=document.createElement('div');note.className='rtic-explain';note.innerHTML='<strong>Do I need to fill this in?</strong> Only for an options strategy. Enter the strike and premium from your chosen option contract or option chain. Each leg is one part of a multi-leg strategy. If you are sizing a stock or crypto position, leave this section closed; these option-leg fields are not used for ordinary share sizing.';
+    d.append(sum,note,panel);holder.insertBefore(d,holder.firstChild);
+   }
+  }
+  // Add plain-language notes to confusing sizing inputs.
+  const labelNotes={
+   capitalAllocationPercent:'Percent of your available account cash you are willing to allocate to this position—not a contract count.',
+   personalMaxPosition:'Optional personal cap on shares/contracts/units. Enter 0 if you do not want an extra cap.',
+   futuresPointValue:'For futures only: dollar value of a 1.00-point move in one contract. Check the specific contract specs.',
+   futuresMargin:'For futures only: estimated broker margin required to open one contract. This is not your total account balance; confirm the current amount with your broker.',
+   desiredContracts:'How many shares, coins, or contracts you would like to take. The risk guard may recommend fewer.',
+   customMaxLoss:'Optional maximum dollar loss you allow per options contract. Leave 0 to use the app’s calculated estimate when available.'
+  };
+  Object.entries(labelNotes).forEach(([id,txt])=>{
+   const input=document.getElementById(id);if(!input)return;
+   const lab=input.closest('div')&&$('label',input.closest('div'));
+   if(lab&&!lab.querySelector('.rtic-label-help')){const span=document.createElement('span');span.className='rtic-label-help';span.textContent=txt;lab.appendChild(span)}
+  });
+  const output=$('#positionSizingOutput');
+  if(output&&!$('#rticSizingGuide')){
+   const guide=document.createElement('div');guide.id='rticSizingGuide';guide.className='rtic-result-guide';
+   guide.innerHTML='<strong>Where does this result come from?</strong><ul><li><b>Recommended:</b> the maximum position size after the app checks the risk limit, capital allocation, affordability and personal cap.</li><li><b>Cost/Unit:</b> estimated cash cost for one share/unit or contract, depending on the selected instrument and strategy.</li><li><b>Cash Remaining:</b> account cash minus the estimated position cost.</li><li><b>Risk Limit:</b> units allowed by your risk budget and stop distance.</li><li><b>Capital Limit:</b> units allowed by the capital-allocation percentage.</li><li><b>Affordable:</b> units your entered account cash can cover at the estimated cost.</li></ul><span class="rtic-label-help">These are calculations from your inputs and selected instrument, not live broker buying power. Check the symbol, account cash, entry, stop and contract details before relying on them.</span>';
+   output.insertAdjacentElement('afterend',guide);
+  }
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
+})();
+</script>
+
 </body>
 </html>
