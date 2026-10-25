@@ -347,7 +347,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
  <summary>🎯 MASTER TRADE PLAN</summary>
  <div class="drop-body">
   <div class="form-grid">
-   <div><label>Symbol</label><input id="symbol" value="NVDA" autocomplete="off" oninput="syncSymbolHeader()"></div>
+   <div><label>Symbol</label><input id="symbol" value="NVDA" autocomplete="off" oninput="syncSymbolHeader(); if(window.ROLYFEData)ROLYFEData.setSymbol(this.value)"></div>
    <div><label>Instrument</label><select id="instrument" onchange="onInstrumentChange()"><option>Stock</option><option>Option</option><option>Crypto</option><option>Future</option></select></div>
    <div><label>Direction</label><select id="direction" onchange="refreshCalculations()"><option value="Long">📈 Long</option><option value="Short">📉 Short</option></select></div>
    <div><label>Setup Grade</label><div class="setup-options">
@@ -686,6 +686,7 @@ function changeMarketSymbol(symbol){
  const raw=symbol.includes(":")?symbol.split(":").pop():symbol;
  const clean=raw.replace(/USDT$|USD$/,"").replace(/1!$/,"");
  document.getElementById("symbol").value=clean;
+ if(window.ROLYFEData)ROLYFEData.setSymbol(clean);
  syncSymbolHeader();
  currentChartSymbol=symbol;
  updateChartFromPlanner();
