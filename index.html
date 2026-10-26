@@ -250,7 +250,7 @@ html,body{max-width:100%;overflow-x:hidden}.tradingview-shell{width:100%;max-wid
 #tradingview_chart iframe,#tradingview_chart .tradingview-widget-container iframe{display:block;width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;border:0!important}
 .rtic-chart-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin:8px 0}
 .rtic-chart-tools .help{flex:1 1 180px}
-.rtic-chart-expand,.rtic-chart-focus-close{width:auto;min-height:40px;margin:0;padding:9px 12px;background:#143321;border:1px solid var(--border2);color:var(--green);font-size:12px}
+.rtic-chart-sync,.rtic-chart-expand,.rtic-chart-focus-close{width:auto;min-height:40px;margin:0;padding:9px 12px;background:#143321;border:1px solid var(--border2);color:var(--green);font-size:12px}
 #tradingview_chart.chart-focus-mode{position:fixed!important;inset:0!important;z-index:14000!important;width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;min-height:0!important;margin:0!important;border:0!important;border-radius:0!important;background:#07100c!important;overflow:hidden!important;contain:strict}
 #tradingview_chart.chart-focus-mode .tradingview-widget-container,#tradingview_chart.chart-focus-mode .tradingview-widget-container__widget{height:100%!important;width:100%!important}
 .rtic-chart-focus-close{display:none;position:fixed;z-index:14002;right:8px;top:8px;box-shadow:0 2px 16px rgba(0,0,0,.7)}
@@ -537,7 +537,7 @@ body.rtic-chart-focused{overflow:hidden!important}
    <button class="tf-btn" onclick="changeTimeframe('D',this)">1D</button>
    <button class="tf-btn" onclick="changeTimeframe('W',this)">1W</button>
   </div>
-  <div class="rtic-chart-tools"><span class="help">Phone tip: expand the chart for more room; use the panels below to tune MACD and Stochastic.</span><button id="rticChartExpandBtn" type="button" class="rtic-chart-expand" onclick="toggleChartFocus(true)">⛶ Expand chart</button></div>
+  <div class="rtic-chart-tools"><span class="help">Phone tip: expand the chart for more room. Sync the separate MACD/Stochastic panels to the selected chart timeframe when needed.</span><button id="rticChartSyncBtn" type="button" class="rtic-chart-sync" onclick="syncIndicatorPanelsToChart()">↻ Sync panels to chart</button><button id="rticChartExpandBtn" type="button" class="rtic-chart-expand" onclick="toggleChartFocus(true)">⛶ Expand chart</button></div>
   <div id="tradingview_chart" class="tradingview-shell"></div><button id="rticChartFocusClose" type="button" class="rtic-chart-focus-close" onclick="toggleChartFocus(false)">✕ Exit expanded chart</button>
   <div class="chart-actions">
    <a id="tvOpenLink" href="https://www.tradingview.com/chart/" target="_blank" rel="noopener">↗ Open Current Symbol in TradingView</a>
@@ -807,6 +807,17 @@ document.addEventListener("click",function(e){if(e.target.closest(".indicator-gu
 document.addEventListener("keydown",function(e){if((e.key==="Enter"||e.key===" ")&&e.target.classList.contains("indicator-card")){e.preventDefault();const n=e.target.querySelector(".indicator-name");if(n){const label=n.textContent.replace(/^[^A-Z0-9]+/,"").trim();showIndicatorVisual(label==="STOCH RSI"?"Stochastic RSI":label)}}});
 
 
+function syncIndicatorPanelsToChart(){
+ const map={"5":"5m","15":"15m","60":"1h","240":"4h","D":"1d","W":"1d"};
+ const labels={"5":"5m","15":"15m","60":"1H","240":"4H","D":"1D","W":"1W"};
+ const interval=map[currentTimeframe]||"1d";
+ const intervalSelect=document.getElementById("rticDataInterval"),providerSelect=document.getElementById("rticDataProvider");
+ if(intervalSelect)intervalSelect.value=interval;
+ if(providerSelect&&providerSelect.value!=="tickerbot")providerSelect.value="tickerbot";
+ const source=document.getElementById("rticOscSource");
+ if(source)source.textContent="Syncing RTIC oscillator panels to "+labels[currentTimeframe]+" chart context using Tickerbot historical candles…";
+ if(window.ROLYFEData)window.ROLYFEData.refresh();
+}
 function toggleChartFocus(force){
  const chart=document.getElementById("tradingview_chart");if(!chart)return;
  const open=typeof force==="boolean"?force:!chart.classList.contains("chart-focus-mode");
@@ -841,7 +852,7 @@ function renderRticOscillators(detail){
  if(ml)ml.textContent=settings.macdFast+" / "+settings.macdSlow+" / "+settings.macdSignal;
  if(sl)sl.textContent=settings.stochPeriod+" / "+settings.stochSmooth;
  const source=document.getElementById("rticOscSource");
- if(source)source.textContent=points.length?"Source: "+(detail.symbol||"selected symbol")+" • "+(detail.interval||"")+" candles • locally calculated from RTIC historical bars. Settings save on this browser; scanner score keeps standard default parameters.":"No historical-bar scan loaded yet. Use Pull Secure Market Data to populate these panels.";
+ if(source)source.textContent=points.length?"Source: "+(detail.symbol||"selected symbol")+" • "+(detail.interval||"")+" candles • locally calculated from RTIC historical bars."+(currentTimeframe==="W"&&detail.interval==="1d"?" • chart is 1W; panel candles are daily":"")+". Settings save on this browser; scanner score keeps standard default parameters.":"No historical-bar scan loaded yet. Use Pull Secure Market Data to populate these panels.";
  if(detail.cleared){
   const symbol=detail.symbol||"the selected ticker";
   macdPlot.innerHTML='<p>Waiting for a fresh historical scan for '+symbol+'. The previous symbol’s lines have been cleared.</p>';
