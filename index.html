@@ -1498,73 +1498,7 @@ function downloadTradePlanHTML(){
  const report=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RO'LYFE ${esc(p.symbol)} Trade Plan</title><style>body{font-family:Arial;background:#07100c;color:#f4f8f5;padding:25px;max-width:850px;margin:auto}h1,h2{color:#00e676}.row{display:flex;justify-content:space-between;gap:20px;padding:9px;border-bottom:1px solid #294234}section{padding:15px;margin:12px 0;background:#0d1811;border:1px solid #294234;border-radius:12px}.notice{line-height:1.6;color:#c7cec9}@media(max-width:600px){.row{flex-direction:column;gap:4px}}</style></head><body><h1>🎯 RO'LYFE Tactical Intelligence Center™</h1><p>PLAN → SIZE → LADDER → EXECUTE → JOURNAL → REVIEW</p><section><h2>${esc(p.symbol)} MASTER TRADE PLAN</h2><div class="row"><span>Direction</span><strong>${esc(p.direction)}</strong></div><div class="row"><span>Instrument</span><strong>${esc(p.instrument)}</strong></div><div class="row"><span>Strategy</span><strong>${esc(p.strategyName||"—")}</strong></div><div class="row"><span>Account / Risk</span><strong>${money(p.accountSize)} / ${p.riskPercent}%</strong></div><div class="row"><span>Entry / Stop</span><strong>${money(p.entry)} / ${money(p.stop)}</strong></div><div class="row"><span>Position</span><strong>${number(p.positionSizing?.recommended||0,2)} ${esc(p.unitLabel)}</strong></div><div class="row"><span>T1 / T2 / T3</span><strong>${money(p.target1)} / ${money(p.target2)} / ${money(p.target3)}</strong></div></section><section><h2>🎯 Strategy</h2><div class="row"><span>Net Premium</span><strong>${p.derivative?money(p.derivative.net):"—"}</strong></div><div class="row"><span>Defined Max Loss / Contract</span><strong>${p.derivative?money(p.derivative.defined):"—"}</strong></div><div class="row"><span>Stop-Risk Proxy / Contract</span><strong>${p.derivative?money(p.baseUnitRisk):"—"}</strong></div><div class="row"><span>Expiration</span><strong>${esc(p.expiration||"Not Set")}</strong></div></section><section><h2>🪜 Exit Ladder</h2><div class="row"><span>T1</span><strong>${p.ladderT1}%</strong></div><div class="row"><span>T2</span><strong>${p.ladderT2}%</strong></div><div class="row"><span>T3</span><strong>${p.ladderT3}%</strong></div><div class="row"><span>Runner</span><strong>${p.runner}%</strong></div></section><section class="notice"><strong>Disclosure:</strong> Educational and informational use only. Options and derivatives involve substantial risk. Market data may be delayed or incomplete.</section><!-- live data engine is not included in standalone report -->
 
 
-<style>
-.rtic-options-overlay{position:fixed;inset:0;z-index:10050;background:rgba(2,8,7,.97);overflow:auto;padding:16px;display:none;color:var(--text,#edf8f1)}
-.rtic-options-overlay.open{display:block}.rtic-options-shell{max-width:900px;margin:0 auto;padding:16px;border:1px solid var(--border2);border-radius:16px;background:#0b1711}
-.rtic-options-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}.rtic-options-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
-.rtic-options-grid label{display:block;font-size:.9rem;margin-bottom:5px}.rtic-options-grid input,.rtic-options-grid select,.rtic-options-grid textarea{width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid var(--border2);background:#101f17;color:inherit}
-.rtic-options-result{padding:14px;border:1px solid var(--border2);border-radius:12px;line-height:1.7;background:rgba(0,230,118,.045);margin:12px 0}
-.rtic-options-actions{display:flex;flex-wrap:wrap;gap:9px}.rtic-options-actions button{min-height:42px}.rtic-options-disclaimer{font-size:.88rem;opacity:.85;line-height:1.5}
-@media(max-width:620px){.rtic-options-overlay{padding:8px}.rtic-options-shell{padding:12px}.rtic-options-grid{grid-template-columns:1fr}}
-</style>
-<div class="rtic-options-overlay" id="rticOptionsLab" role="dialog" aria-modal="true" aria-labelledby="rticOptionsTitle">
- <div class="rtic-options-shell">
-  <div class="rtic-options-head"><div><p class="eyebrow">INSTRUMENT-SPECIFIC WORKSPACE</p><h2 id="rticOptionsTitle">RO’Lyfe Options Execution Lab™</h2><p class="help">Options only · Contract-level planning · Review before acting</p></div><button type="button" class="secondary-btn" onclick="ROLYFEOptionsLab.close()">✕ Back to Trade Plan</button></div>
-  <p class="help"><strong>Keep the layers separate:</strong> study the underlying chart and invalidation first, then review the option contract, premium, expiration and contract-level risk. No live option-chain data or order submission.</p>
-  <div class="rtic-options-grid">
-   <div><label for="rolOptSymbol">Underlying symbol</label><input id="rolOptSymbol" maxlength="16" placeholder="e.g. NVDA"></div>
-   <div><label for="rolOptType">Contract type</label><select id="rolOptType"><option value="call">Long Call</option><option value="put">Long Put</option></select></div>
-   <div><label for="rolOptStrike">Strike price ($)</label><input id="rolOptStrike" type="number" min="0.01" step="0.01" placeholder="Enter strike"></div>
-   <div><label for="rolOptExpiry">Expiration date</label><input id="rolOptExpiry" type="date"></div>
-   <div><label for="rolOptPremium">Premium per share ($)</label><input id="rolOptPremium" type="number" min="0" step="0.01" placeholder="Enter premium"></div>
-   <div><label for="rolOptContracts">Number of contracts</label><input id="rolOptContracts" type="number" min="1" step="1" value="1"></div>
-   <div><label for="rolOptUnderlyingEntry">Underlying planned entry ($)</label><input id="rolOptUnderlyingEntry" type="number" min="0" step="0.01" placeholder="Underlying chart entry"></div>
-   <div><label for="rolOptInvalidation">Chart invalidation ($)</label><input id="rolOptInvalidation" type="number" min="0" step="0.01" placeholder="Underlying chart stop"></div>
-   <div style="grid-column:1/-1"><label for="rolOptThesis">Setup thesis / exit rules</label><textarea id="rolOptThesis" rows="3" placeholder="Chart structure, setup reason, exit ladder and invalidation"></textarea></div>
-  </div>
-  <div class="rtic-options-actions"><button type="button" class="primary-btn" onclick="ROLYFEOptionsLab.calculate()">🧮 CALCULATE CONTRACT RISK</button><button type="button" class="secondary-btn" onclick="ROLYFEOptionsLab.save()">💾 SAVE OPTIONS PLAN</button><button type="button" class="secondary-btn" onclick="ROLYFEOptionsLab.download()">⬇ DOWNLOAD OPTIONS PLAN</button><button type="button" class="secondary-btn" onclick="ROLYFEOptionsLab.email()">✉ EMAIL OPTIONS PLAN</button></div>
-  <div class="rtic-options-result" id="rticOptionsResult" aria-live="polite">Enter contract details and calculate a review-only payoff summary.</div>
-  <p class="rtic-options-disclaimer">Educational estimate only. Assumes a standard equity-option multiplier of 100; confirm contract specs. Maximum loss for a long option is premium paid plus fees. Break-even is an expiration calculation, not a forecast. Time decay, implied volatility, spreads and gaps affect outcomes. No order is submitted.</p>
- </div>
-</div>
-<script id="ROLYFEOptionsAndExport">
-(function(){
- const $=id=>document.getElementById(id),emails="Richman@rootoflyfe.com,Richmoneybroker@gmail.com";
- const v=id=>(($(id)&&$(id).value)||"").trim(),n=id=>Number(v(id));
- const money=x=>Number.isFinite(x)?x.toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits:2}):"—";
- function download(name,content,type){const a=document.createElement("a"),u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1200)}
- function optionData(){
-  return {product:"RO’Lyfe Options Execution Lab",savedAt:new Date().toISOString(),symbol:v("rolOptSymbol").toUpperCase(),contractType:v("rolOptType"),strike:n("rolOptStrike"),expiration:v("rolOptExpiry"),premium:n("rolOptPremium"),contracts:n("rolOptContracts"),underlyingEntry:n("rolOptUnderlyingEntry"),chartInvalidation:n("rolOptInvalidation"),thesis:v("rolOptThesis"),result:$("rticOptionsResult").innerText,disclaimer:"Educational only; no live option prices or order submission."};
- }
- function textPlan(d){return ["RO’Lyfe Options Execution Lab™","Saved: "+d.savedAt,"Underlying: "+(d.symbol||"—"),"Contract: "+d.contractType,"Strike: "+(Number.isFinite(d.strike)?money(d.strike):"—"),"Expiration: "+(d.expiration||"—"),"Premium/share: "+(Number.isFinite(d.premium)?money(d.premium):"—"),"Contracts: "+(Number.isFinite(d.contracts)?d.contracts:"—"),"Underlying entry: "+(Number.isFinite(d.underlyingEntry)?money(d.underlyingEntry):"—"),"Chart invalidation: "+(Number.isFinite(d.chartInvalidation)?money(d.chartInvalidation):"—"),"Thesis: "+(d.thesis||"—"),"",d.result,"",d.disclaimer].join("\n")}
- function calculate(){
-  const d=optionData(),k=d.strike,p=d.premium,q=d.contracts;
-  if(!d.symbol||!(k>0)||!(p>=0)||!(q>=1)||!Number.isInteger(q)){$("rticOptionsResult").textContent="Enter an underlying symbol, positive strike, non-negative premium and whole-number contract count.";return null}
-  const cost=p*100*q,be=d.contractType==="call"?k+p:k-p;
-  const maxProfit=d.contractType==="call"?"Unlimited in theory":money(Math.max(0,k-p)*100*q);
-  const days=d.expiration?Math.ceil((new Date(d.expiration+"T00:00:00")-new Date())/86400000):null;
-  const rows=["<strong>Contract cost / maximum planned loss:</strong> "+money(cost),"<strong>Break-even at expiration:</strong> "+money(be),"<strong>Maximum profit:</strong> "+maxProfit,"<strong>Underlying entry / invalidation:</strong> "+(d.underlyingEntry>0?money(d.underlyingEntry):"—")+" / "+(d.chartInvalidation>0?money(d.chartInvalidation):"—"),"<strong>Expiration:</strong> "+(d.expiration||"Not entered")+(days!==null?" · "+days+" calendar days from today":"")];
-  if(d.contractType==="put"&&k<p)rows.push("<strong>Note:</strong> premium exceeds strike; verify contract details.");
-  $("rticOptionsResult").innerHTML=rows.join("<br>");return optionData();
- }
- const api={
-  open(){if($("symbol")&&!v("rolOptSymbol"))$("rolOptSymbol").value=$("symbol").value;$("rticOptionsLab").classList.add("open");document.body.style.overflow="hidden";},
-  close(){$("rticOptionsLab").classList.remove("open");document.body.style.overflow="";},
-  calculate,
-  save(){const d=calculate();if(!d)return;try{localStorage.setItem("rolyfe-options-plan",JSON.stringify(d));$("rticOptionsResult").insertAdjacentHTML("beforeend","<p><strong>Saved on this device.</strong> Download a copy for separate backup.</p>")}catch(e){alert("Local save unavailable. Use Download Options Plan.")}},
-  download(){const d=calculate();if(d)download("ROLyfe_"+d.symbol+"_Options_Plan.json",JSON.stringify(d,null,2),"application/json;charset=utf-8")},
-  email(){const d=calculate();if(d)location.href="mailto:"+emails+"?subject="+encodeURIComponent("RO’Lyfe Options Plan — "+d.symbol)+"&body="+encodeURIComponent(textPlan(d).slice(0,9000))}
- };
- window.ROLYFEOptionsLab=api;
- window.ROLYFEExport={
-  saveWorkspace(){try{localStorage.setItem("rolyfe-tactical-workspace-backup",JSON.stringify({savedAt:new Date().toISOString(),page:location.href,inputs:Array.from(document.querySelectorAll("main input,main select,main textarea")).filter(x=>x.id).map(x=>({id:x.id,value:x.value})),plan:typeof ensurePlan==="function"&&typeof planText==="function"?planText(ensurePlan()):""}));alert("Workspace inputs saved in this browser/device. Download a backup for a separate copy.")}catch(e){alert("Local save unavailable. Use Download Workspace Backup.")}},
-  downloadWorkspace(){const d={savedAt:new Date().toISOString(),page:location.href,inputs:Array.from(document.querySelectorAll("main input,main select,main textarea")).filter(x=>x.id).map(x=>({id:x.id,value:x.value})),plan:typeof ensurePlan==="function"&&typeof planText==="function"?planText(ensurePlan()):""};download("ROLyfe_Tactical_Workspace_Backup.json",JSON.stringify(d,null,2),"application/json;charset=utf-8")},
-  emailPlan(){const p=typeof ensurePlan==="function"?ensurePlan():null,body=typeof planText==="function"?planText(p):"RO’Lyfe Tactical Intelligence Center workspace backup";location.href="mailto:"+emails+"?subject="+encodeURIComponent("RO’Lyfe Tactical Trade Plan")+"&body="+encodeURIComponent(body.slice(0,9000))}
- };
- document.addEventListener("keydown",e=>{if(e.key==="Escape")api.close()});
- if($("symbol")&&$("rolOptSymbol"))$("rolOptSymbol").value=$("symbol").value||"";
-})();
-</script>
+
 
 </body></html>`;
  downloadBlob(`ROLYFE_${p.symbol}_Master_Trade_Plan.html`,report,"text/html;charset=utf-8");
@@ -1912,5 +1846,72 @@ window.addEventListener("rolyfe:rtic-scan",function(event){
 });
 </script>
 
+<style>
+.rtic-options-overlay{position:fixed;inset:0;z-index:10050;background:rgba(2,8,7,.97);overflow:auto;padding:16px;display:none;color:var(--text,#edf8f1)}
+.rtic-options-overlay.open{display:block}.rtic-options-shell{max-width:900px;margin:0 auto;padding:16px;border:1px solid var(--border2);border-radius:16px;background:#0b1711}
+.rtic-options-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}.rtic-options-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+.rtic-options-grid label{display:block;font-size:.9rem;margin-bottom:5px}.rtic-options-grid input,.rtic-options-grid select,.rtic-options-grid textarea{width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid var(--border2);background:#101f17;color:inherit}
+.rtic-options-result{padding:14px;border:1px solid var(--border2);border-radius:12px;line-height:1.7;background:rgba(0,230,118,.045);margin:12px 0}
+.rtic-options-actions{display:flex;flex-wrap:wrap;gap:9px}.rtic-options-actions button{min-height:42px}.rtic-options-disclaimer{font-size:.88rem;opacity:.85;line-height:1.5}
+@media(max-width:620px){.rtic-options-overlay{padding:8px}.rtic-options-shell{padding:12px}.rtic-options-grid{grid-template-columns:1fr}}
+</style>
+<div class="rtic-options-overlay" id="rticOptionsLab" role="dialog" aria-modal="true" aria-labelledby="rticOptionsTitle">
+ <div class="rtic-options-shell">
+  <div class="rtic-options-head"><div><p class="eyebrow">INSTRUMENT-SPECIFIC WORKSPACE</p><h2 id="rticOptionsTitle">RO’Lyfe Options Execution Lab™</h2><p class="help">Options only · Contract-level planning · Review before acting</p></div><button type="button" class="secondary-btn" onclick="ROLYFEOptionsLab.close()">✕ Back to Trade Plan</button></div>
+  <p class="help"><strong>Keep the layers separate:</strong> study the underlying chart and invalidation first, then review the option contract, premium, expiration and contract-level risk. No live option-chain data or order submission.</p>
+  <div class="rtic-options-grid">
+   <div><label for="rolOptSymbol">Underlying symbol</label><input id="rolOptSymbol" maxlength="16" placeholder="e.g. NVDA"></div>
+   <div><label for="rolOptType">Contract type</label><select id="rolOptType"><option value="call">Long Call</option><option value="put">Long Put</option></select></div>
+   <div><label for="rolOptStrike">Strike price ($)</label><input id="rolOptStrike" type="number" min="0.01" step="0.01" placeholder="Enter strike"></div>
+   <div><label for="rolOptExpiry">Expiration date</label><input id="rolOptExpiry" type="date"></div>
+   <div><label for="rolOptPremium">Premium per share ($)</label><input id="rolOptPremium" type="number" min="0" step="0.01" placeholder="Enter premium"></div>
+   <div><label for="rolOptContracts">Number of contracts</label><input id="rolOptContracts" type="number" min="1" step="1" value="1"></div>
+   <div><label for="rolOptUnderlyingEntry">Underlying planned entry ($)</label><input id="rolOptUnderlyingEntry" type="number" min="0" step="0.01" placeholder="Underlying chart entry"></div>
+   <div><label for="rolOptInvalidation">Chart invalidation ($)</label><input id="rolOptInvalidation" type="number" min="0" step="0.01" placeholder="Underlying chart stop"></div>
+   <div style="grid-column:1/-1"><label for="rolOptThesis">Setup thesis / exit rules</label><textarea id="rolOptThesis" rows="3" placeholder="Chart structure, setup reason, exit ladder and invalidation"></textarea></div>
+  </div>
+  <div class="rtic-options-actions"><button type="button" class="primary-btn" onclick="ROLYFEOptionsLab.calculate()">🧮 CALCULATE CONTRACT RISK</button><button type="button" class="secondary-btn" onclick="ROLYFEOptionsLab.save()">💾 SAVE OPTIONS PLAN</button><button type="button" class="secondary-btn" onclick="ROLYFEOptionsLab.download()">⬇ DOWNLOAD OPTIONS PLAN</button><button type="button" class="secondary-btn" onclick="ROLYFEOptionsLab.email()">✉ EMAIL OPTIONS PLAN</button></div>
+  <div class="rtic-options-result" id="rticOptionsResult" aria-live="polite">Enter contract details and calculate a review-only payoff summary.</div>
+  <p class="rtic-options-disclaimer">Educational estimate only. Assumes a standard equity-option multiplier of 100; confirm contract specs. Maximum loss for a long option is premium paid plus fees. Break-even is an expiration calculation, not a forecast. Time decay, implied volatility, spreads and gaps affect outcomes. No order is submitted.</p>
+ </div>
+</div>
+<script id="ROLYFEOptionsAndExport">
+(function(){
+ const $=id=>document.getElementById(id),emails="Richman@rootoflyfe.com,Richmoneybroker@gmail.com";
+ const v=id=>(($(id)&&$(id).value)||"").trim(),n=id=>Number(v(id));
+ const money=x=>Number.isFinite(x)?x.toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits:2}):"—";
+ function download(name,content,type){const a=document.createElement("a"),u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1200)}
+ function optionData(){
+  return {product:"RO’Lyfe Options Execution Lab",savedAt:new Date().toISOString(),symbol:v("rolOptSymbol").toUpperCase(),contractType:v("rolOptType"),strike:n("rolOptStrike"),expiration:v("rolOptExpiry"),premium:n("rolOptPremium"),contracts:n("rolOptContracts"),underlyingEntry:n("rolOptUnderlyingEntry"),chartInvalidation:n("rolOptInvalidation"),thesis:v("rolOptThesis"),result:$("rticOptionsResult").innerText,disclaimer:"Educational only; no live option prices or order submission."};
+ }
+ function textPlan(d){return ["RO’Lyfe Options Execution Lab™","Saved: "+d.savedAt,"Underlying: "+(d.symbol||"—"),"Contract: "+d.contractType,"Strike: "+(Number.isFinite(d.strike)?money(d.strike):"—"),"Expiration: "+(d.expiration||"—"),"Premium/share: "+(Number.isFinite(d.premium)?money(d.premium):"—"),"Contracts: "+(Number.isFinite(d.contracts)?d.contracts:"—"),"Underlying entry: "+(Number.isFinite(d.underlyingEntry)?money(d.underlyingEntry):"—"),"Chart invalidation: "+(Number.isFinite(d.chartInvalidation)?money(d.chartInvalidation):"—"),"Thesis: "+(d.thesis||"—"),"",d.result,"",d.disclaimer].join("\n")}
+ function calculate(){
+  const d=optionData(),k=d.strike,p=d.premium,q=d.contracts;
+  if(!d.symbol||!(k>0)||!(p>=0)||!(q>=1)||!Number.isInteger(q)){$("rticOptionsResult").textContent="Enter an underlying symbol, positive strike, non-negative premium and whole-number contract count.";return null}
+  const cost=p*100*q,be=d.contractType==="call"?k+p:k-p;
+  const maxProfit=d.contractType==="call"?"Unlimited in theory":money(Math.max(0,k-p)*100*q);
+  const days=d.expiration?Math.ceil((new Date(d.expiration+"T00:00:00")-new Date())/86400000):null;
+  const rows=["<strong>Contract cost / maximum planned loss:</strong> "+money(cost),"<strong>Break-even at expiration:</strong> "+money(be),"<strong>Maximum profit:</strong> "+maxProfit,"<strong>Underlying entry / invalidation:</strong> "+(d.underlyingEntry>0?money(d.underlyingEntry):"—")+" / "+(d.chartInvalidation>0?money(d.chartInvalidation):"—"),"<strong>Expiration:</strong> "+(d.expiration||"Not entered")+(days!==null?" · "+days+" calendar days from today":"")];
+  if(d.contractType==="put"&&k<p)rows.push("<strong>Note:</strong> premium exceeds strike; verify contract details.");
+  $("rticOptionsResult").innerHTML=rows.join("<br>");return optionData();
+ }
+ const api={
+  open(){if($("symbol")&&!v("rolOptSymbol"))$("rolOptSymbol").value=$("symbol").value;$("rticOptionsLab").classList.add("open");document.body.style.overflow="hidden";},
+  close(){$("rticOptionsLab").classList.remove("open");document.body.style.overflow="";},
+  calculate,
+  save(){const d=calculate();if(!d)return;try{localStorage.setItem("rolyfe-options-plan",JSON.stringify(d));$("rticOptionsResult").insertAdjacentHTML("beforeend","<p><strong>Saved on this device.</strong> Download a copy for separate backup.</p>")}catch(e){alert("Local save unavailable. Use Download Options Plan.")}},
+  download(){const d=calculate();if(d)download("ROLyfe_"+d.symbol+"_Options_Plan.json",JSON.stringify(d,null,2),"application/json;charset=utf-8")},
+  email(){const d=calculate();if(d)location.href="mailto:"+emails+"?subject="+encodeURIComponent("RO’Lyfe Options Plan — "+d.symbol)+"&body="+encodeURIComponent(textPlan(d).slice(0,9000))}
+ };
+ window.ROLYFEOptionsLab=api;
+ window.ROLYFEExport={
+  saveWorkspace(){try{localStorage.setItem("rolyfe-tactical-workspace-backup",JSON.stringify({savedAt:new Date().toISOString(),page:location.href,inputs:Array.from(document.querySelectorAll("main input,main select,main textarea")).filter(x=>x.id).map(x=>({id:x.id,value:x.value})),plan:typeof ensurePlan==="function"&&typeof planText==="function"?planText(ensurePlan()):""}));alert("Workspace inputs saved in this browser/device. Download a backup for a separate copy.")}catch(e){alert("Local save unavailable. Use Download Workspace Backup.")}},
+  downloadWorkspace(){const d={savedAt:new Date().toISOString(),page:location.href,inputs:Array.from(document.querySelectorAll("main input,main select,main textarea")).filter(x=>x.id).map(x=>({id:x.id,value:x.value})),plan:typeof ensurePlan==="function"&&typeof planText==="function"?planText(ensurePlan()):""};download("ROLyfe_Tactical_Workspace_Backup.json",JSON.stringify(d,null,2),"application/json;charset=utf-8")},
+  emailPlan(){const p=typeof ensurePlan==="function"?ensurePlan():null,body=typeof planText==="function"?planText(p):"RO’Lyfe Tactical Intelligence Center workspace backup";location.href="mailto:"+emails+"?subject="+encodeURIComponent("RO’Lyfe Tactical Trade Plan")+"&body="+encodeURIComponent(body.slice(0,9000))}
+ };
+ document.addEventListener("keydown",e=>{if(e.key==="Escape")api.close()});
+ if($("symbol")&&$("rolOptSymbol"))$("rolOptSymbol").value=$("symbol").value||"";
+})();
+</script>
 </body>
 </html>
