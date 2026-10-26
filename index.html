@@ -240,6 +240,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .indicator-modal{display:none;position:fixed;inset:0;z-index:12000;align-items:center;justify-content:center;padding:14px}.indicator-modal.open{display:flex}.indicator-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.8)}.indicator-modal-card{position:relative;z-index:1;width:min(520px,100%);max-height:88dvh;overflow:auto;padding:18px;background:#08120d;border:1px solid var(--green);border-radius:18px;box-shadow:0 20px 70px #000}.indicator-modal-card h3{margin:4px 45px 14px 0;font-size:21px}.indicator-modal-card p{line-height:1.55}.indicator-modal-close{position:absolute;right:12px;top:12px;width:40px;min-height:40px;margin:0;padding:6px;background:#14231a;color:#fff}.indicator-modal-visual{min-height:120px;padding:8px;background:#050b08;border:1px solid var(--border);border-radius:12px;overflow:hidden}.indicator-modal-visual svg{display:block;width:100%;height:auto}.indicator-modal-note{color:var(--muted);font-size:11px}.eyebrow{color:var(--green);font-size:10px;font-weight:900;letter-spacing:.12em}
 html,body{max-width:100%;overflow-x:hidden}.tradingview-shell{width:100%;max-width:100%;height:clamp(420px,70vh,700px);min-width:0;position:relative;overflow:hidden;contain:layout paint}.tradingview-widget-container,.tradingview-widget-container__widget{width:100%!important;max-width:100%!important;min-width:0!important;height:100%!important;overflow:hidden!important}.tradingview-widget-container iframe{width:100%!important;max-width:100%!important;border:0!important}.drop-body,.section-drop{min-width:0;max-width:100%}
 @media(max-width:600px){.tradingview-shell{height:clamp(390px,64svh,540px);border-radius:8px}.indicator-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.indicator-card{padding:10px 6px}.indicator-modal{padding:9px}.indicator-modal-card{padding:15px}}
+.rtic-scan-dropdown{border-bottom:1px solid var(--line);margin:0}.rtic-scan-dropdown>summary{list-style:none;cursor:pointer;gap:10px}.rtic-scan-dropdown>summary::-webkit-details-marker{display:none}.rtic-scan-dropdown>summary:after{content:"＋";color:var(--green);font-weight:800;align-self:center}.rtic-scan-dropdown[open]>summary:after{content:"−"}.rtic-scan-dropdown .rtic-scan-row{border-bottom:0}.rtic-expand-hint{display:block;color:var(--muted);font-size:11px;margin-top:5px}.rtic-scan-explain{padding:12px 14px 14px;background:rgba(80,110,130,.09);border-top:1px solid var(--line);font-size:13px;line-height:1.55}.rtic-scan-explain p{margin:6px 0}.rtic-scan-explain .small-muted{font-size:11px}
 </style>
 <style>
 /* Mobile-safe, expandable chart and independently calculated oscillator panes */
@@ -1378,7 +1379,7 @@ document.addEventListener("DOMContentLoaded",()=>{
  setTimeout(()=>renderVisualChart("trade"),500);
 });
 </script>
-<script src="./js/rtic-data-engine.js?v=20261026-rtic5"></script>
+<script src="./js/rtic-data-engine.js?v=20261026-rtic6"></script>
 
 <script>
 /* RO'Lyfe workspace navigation: focused views, no lost calculators */
