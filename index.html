@@ -566,13 +566,18 @@ body.rtic-chart-focused{overflow:hidden!important}
  <summary>📈 LIVE MARKET CHART</summary>
  <div class="drop-body">
   <p class="chart-description">Live market view for <strong id="chartSymbolLabel">NASDAQ:NVDA</strong> <span class="badge badge-green">LIVE WIDGET</span></p>
-  <div class="timeframe-bar">
-   <button class="tf-btn" onclick="changeTimeframe('5',this)">5m</button>
-   <button class="tf-btn active" onclick="changeTimeframe('15',this)">15m</button>
-   <button class="tf-btn" onclick="changeTimeframe('60',this)">1H</button>
-   <button class="tf-btn" onclick="changeTimeframe('240',this)">4H</button>
-   <button class="tf-btn" onclick="changeTimeframe('D',this)">1D</button>
-   <button class="tf-btn" onclick="changeTimeframe('W',this)">1W</button>
+  <div class="timeframe-bar" aria-label="Chart timeframe and visible range">
+   <button class="tf-btn" data-tf="5" onclick="changeTimeframe('5',this)">5m</button>
+   <button class="tf-btn" data-tf="10" onclick="changeTimeframe('10',this)">10m</button>
+   <button class="tf-btn active" data-tf="15" onclick="changeTimeframe('15',this)">15m</button>
+   <button class="tf-btn" data-tf="60" onclick="changeTimeframe('60',this)">1H</button>
+   <button class="tf-btn" data-tf="240" onclick="changeTimeframe('240',this)">4H</button>
+   <button class="tf-btn" data-tf="D" onclick="changeTimeframe('D',this)">1D</button>
+   <button class="tf-btn" data-tf="W" onclick="changeTimeframe('W',this)">1W</button>
+   <button class="tf-btn" data-range="1M" onclick="changeChartRange('1M',this)">1M · Daily</button>
+   <button class="tf-btn" data-range="3M" onclick="changeChartRange('3M',this)">3M · Daily</button>
+   <button class="tf-btn" data-range="6M" onclick="changeChartRange('6M',this)">6M · Daily</button>
+   <button class="tf-btn" data-range="12M" onclick="changeChartRange('12M',this)">1Y · Daily</button>
   </div>
   <div class="rtic-chart-tools"><span class="help">Phone tip: expand the chart for more room. Sync the separate MACD/Stochastic panels to the selected chart timeframe when needed.</span><button id="rticChartSyncBtn" type="button" class="rtic-chart-sync" onclick="syncIndicatorPanelsToChart()">↻ Sync panels to chart</button><button id="rticChartExpandBtn" type="button" class="rtic-chart-expand" onclick="toggleChartFocus(true)">⛶ Expand chart</button></div>
   <div id="tradingview_chart" class="tradingview-shell"></div><button id="rticChartFocusClose" type="button" class="rtic-chart-focus-close" onclick="toggleChartFocus(false)">✕ Exit expanded chart</button>
@@ -745,6 +750,7 @@ body.rtic-chart-focused{overflow:hidden!important}
 ========================================================= */
 let currentChartSymbol="NASDAQ:NVDA";
 let currentTimeframe="15";
+let currentChartRange="";
 let currentSetupGrade="GREEN";
 let currentPlan=null;
 let tvLoadTimer=null;
@@ -813,7 +819,13 @@ function changeMarketSymbol(symbol){
  document.getElementById("symbol").scrollIntoView({behavior:"smooth",block:"center"});
 }
 function changeTimeframe(tf,button){
- currentTimeframe=tf;
+ currentTimeframe=tf;currentChartRange="";
+ document.querySelectorAll(".tf-btn").forEach(b=>b.classList.remove("active"));
+ if(button)button.classList.add("active");
+ loadTradingViewChart();
+}
+function changeChartRange(range,button){
+ currentTimeframe="D";currentChartRange=range;
  document.querySelectorAll(".tf-btn").forEach(b=>b.classList.remove("active"));
  if(button)button.classList.add("active");
  loadTradingViewChart();
@@ -850,8 +862,8 @@ document.addEventListener("keydown",function(e){if((e.key==="Enter"||e.key===" "
 
 
 function syncIndicatorPanelsToChart(){
- const map={"5":"5m","15":"15m","60":"1h","240":"4h","D":"1d","W":"1d"};
- const labels={"5":"5m","15":"15m","60":"1H","240":"4H","D":"1D","W":"1W"};
+ const map={"5":"5m","10":"10m","15":"15m","60":"1h","240":"4h","D":"1d","W":"1d"};
+ const labels={"5":"5m","10":"10m","15":"15m","60":"1H","240":"4H","D":"1D","W":"1W"};
  const interval=map[currentTimeframe]||"1d";
  const intervalSelect=document.getElementById("rticDataInterval"),providerSelect=document.getElementById("rticDataProvider");
  if(intervalSelect)intervalSelect.value=interval;
@@ -984,7 +996,7 @@ function loadTradingViewChart(){
  script.src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
  script.async=true;
  script.innerHTML=JSON.stringify({
-  autosize:true,symbol:raw,interval:currentTimeframe,timezone:"America/New_York",theme:"dark",style:"1",
+  autosize:true,symbol:raw,interval:currentTimeframe,range:currentChartRange||undefined,timezone:"America/New_York",theme:"dark",style:"1",
   locale:"en",backgroundColor:"rgba(7,16,12,1)",enable_publishing:false,allow_symbol_change:true,
   save_image:true,hide_top_toolbar:false,hide_side_toolbar:false,hide_legend:false,withdateranges:true,
   details:true,hotlist:true,calendar:false,show_popup_button:true,popup_width:"1000",popup_height:"650",
