@@ -11,7 +11,7 @@
  const money=v=>Number.isFinite(v)?"$"+fmt(v,2):"—";
  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const names={tickerbot:"Tickerbot",finnhub:"Finnhub",alphavantage:"Alpha Vantage",coingecko:"CoinGecko"};
- let requestId=0;
+ let requestId=0,lastScannedBars=[],lastScanSymbol="",lastScanInterval="1d";
  async function callData(path,params={}) {
    const url=new URL(FUNCTION_ROOT+path);
    Object.keys(params).forEach(k=>url.searchParams.set(k,String(params[k])));
@@ -77,17 +77,44 @@
    const series=stochasticSeries(bars,k,3);
    return {k:series.k.at(-1)??NaN,d:series.d.at(-1)??NaN};
  }
+ function intSetting(value,fallback,min,max){
+   const parsed=Number(value);
+   return Number.isFinite(parsed)?Math.max(min,Math.min(max,Math.round(parsed))):fallback;
+ }
+ function calculateOscillatorSeries(bars,settings={}){
+   const macdFast=intSetting(settings.macdFast,12,2,50);
+   const macdSlowRaw=intSetting(settings.macdSlow,26,3,100);
+   const macdSlow=macdSlowRaw>macdFast?macdSlowRaw:Math.min(100,macdFast+1);
+   const macdSignalPeriod=intSetting(settings.macdSignal,9,2,50);
+   const stochPeriod=intSetting(settings.stochPeriod,14,2,50);
+   const stochSmooth=intSetting(settings.stochSmooth,3,1,20);
+   const closes=bars.map(b=>b.close),length=bars.length;
+   const fast=emaSeries(closes,macdFast),slow=emaSeries(closes,macdSlow);
+   const macdLine=closes.map((_,i)=>Number.isFinite(fast[i])&&Number.isFinite(slow[i])?fast[i]-slow[i]:NaN);
+   const validMacd=macdLine.filter(Number.isFinite),signalValues=emaSeries(validMacd,macdSignalPeriod),signalLine=Array(length).fill(NaN);
+   let index=0;
+   for(let i=0;i<length;i++){if(Number.isFinite(macdLine[i])){signalLine[i]=signalValues[index]??NaN;index++;}}
+   const histogram=macdLine.map((v,i)=>Number.isFinite(v)&&Number.isFinite(signalLine[i])?v-signalLine[i]:NaN);
+   const stoch=stochasticSeries(bars,stochPeriod,stochSmooth);
+   const plotStart=Math.max(0,length-120);
+   const points=bars.slice(plotStart).map((bar,j)=>{
+     const i=plotStart+j,asValue=v=>Number.isFinite(v)?Number(v.toFixed(6)):null;
+     return {time:bar.time,close:bar.close,macd:asValue(macdLine[i]),signal:asValue(signalLine[i]),histogram:asValue(histogram[i]),stochK:asValue(stoch.k[i]),stochD:asValue(stoch.d[i])};
+   });
+   const latest=points.length?points[points.length-1]:{};
+   return {
+     points,
+     latest:{macd:latest.macd,signal:latest.signal,histogram:latest.histogram,stochK:latest.stochK,stochD:latest.stochD},
+     settings:{macdFast,macdSlow,macdSignal:macdSignalPeriod,stochPeriod,stochSmooth}
+   };
+ }
  function scanBars(bars){
    const closes=bars.map(b=>b.close),volumes=bars.map(b=>Math.max(0,b.volume||0)),last=bars[bars.length-1],prev=bars[bars.length-2],length=bars.length;
    const e5=emaSeries(closes,5).at(-1),e10=emaSeries(closes,10).at(-1),e20=emaSeries(closes,20).at(-1),e50=emaSeries(closes,50).at(-1),e200=emaSeries(closes,200).at(-1);
-   const a12=emaSeries(closes,12),a26=emaSeries(closes,26);
-   const macdLine=closes.map((x,i)=>Number.isFinite(a12[i])&&Number.isFinite(a26[i])?a12[i]-a26[i]:NaN);
-   const macdCompact=macdLine.filter(Number.isFinite),signalCompact=emaSeries(macdCompact,9),signalLine=Array(length).fill(NaN);
-   let macdIndex=0;
-   for(let i=0;i<length;i++){if(Number.isFinite(macdLine[i])){signalLine[i]=signalCompact[macdIndex]??NaN;macdIndex++;}}
-   const histogram=macdLine.map((v,i)=>Number.isFinite(v)&&Number.isFinite(signalLine[i])?v-signalLine[i]:NaN);
-   const macd=macdLine.at(-1),signal=signalLine.at(-1);
-   const rv=rsi(closes),stSeries=stochasticSeries(bars,14,3),st={k:stSeries.k.at(-1)??NaN,d:stSeries.d.at(-1)??NaN},cv=cci(bars),seg=bars.slice(-20);
+   const oscillatorData=calculateOscillatorSeries(bars);
+   const macd=oscillatorData.latest.macd,signal=oscillatorData.latest.signal;
+   const st={k:oscillatorData.latest.stochK??NaN,d:oscillatorData.latest.stochD??NaN};
+   const rv=rsi(closes),cv=cci(bars),seg=bars.slice(-20);
    const low20=Math.min(...seg.map(b=>b.low)),high20=Math.max(...seg.map(b=>b.high)),range=high20-low20,pos=range?(last.close-low20)/range:.5;
    const volWindow=volumes.slice(Math.max(0,length-21),length-1),avgVol=volWindow.length?volWindow.reduce((x,y)=>x+y,0)/volWindow.length:NaN;
    const rvol=avgVol>0?last.volume/avgVol:NaN;
@@ -112,13 +139,7 @@
    ];
    const active=tests.filter(t=>t.vote!==null),sum=active.reduce((s,t)=>s+t.vote,0),score=active.length?Math.round(50+50*sum/active.length):50;
    const liquidity=dollarVol>=25000000?10:dollarVol>=5000000?8:dollarVol>=1000000?6:dollarVol>=500000?4:dollarVol>=100000?2:0;
-   const plotStart=Math.max(0,length-120);
-   const oscillatorPoints=bars.slice(plotStart).map((bar,j)=>{
-     const i=plotStart+j;
-     const val=v=>Number.isFinite(v)?Number(v.toFixed(6)):null;
-     return {time:bar.time,close:bar.close,macd:val(macdLine[i]),signal:val(signalLine[i]),histogram:val(histogram[i]),stochK:val(stSeries.k[i]),stochD:val(stSeries.d[i])};
-   });
-   return {last,score,available:active.length,tests,dollarVol,rvol,e5,e10,e20,e50,e200,liquidity,oscillatorPoints};
+   return {last,score,available:active.length,tests,dollarVol,rvol,e5,e10,e20,e50,e200,liquidity,oscillatorPoints:oscillatorData.points,oscillatorLatest:oscillatorData.latest};
  }
  function renderQuote(items){
    const out=byId("rticQuoteOutput");if(!out)return;
@@ -163,8 +184,10 @@
      if(provider==="tickerbot"){
        const bars=toBars(data.bars);
        if(bars.length<25)throw new Error("Only "+bars.length+" usable historical bars returned; at least 25 are needed for a scan.");
+       lastScannedBars=bars;lastScanSymbol=symbol;lastScanInterval=interval;
        const scan=scanBars(bars);renderScan(scan,bars,interval);
        window.dispatchEvent(new CustomEvent("rolyfe:rtic-scan",{detail:{symbol,interval,scan}}));
+       window.dispatchEvent(new CustomEvent("rolyfe:oscillators",{detail:{symbol,interval,...calculateOscillatorSeries(bars)}}));
        status(names[provider]+" responded for "+(data.symbol||symbol)+". "+bars.length+" usable OHLCV bars • "+time+". Quote and RTIC scan rendered below. Verify session, freshness, and plan entitlement before use.","good");
        const results=byId("rticScanOutput");if(results)results.scrollIntoView({behavior:"smooth",block:"nearest"});
      }else{
@@ -183,6 +206,18 @@
    }
  }
  function usePlannerSymbol(){const a=byId("symbol");if(a)setSymbol(a.value);}
- window.ROLYFEData={refresh:refresh,usePlannerSymbol:usePlannerSymbol,setSymbol:setSymbol,checkConfig:checkConfig};
+ function setOscillatorSettings(){
+   if(!lastScannedBars.length){status("Run a Tickerbot historical-bar scan first to populate MACD and Stochastic panels.","warn");return;}
+   const settings={
+     macdFast:byId("rticMacdFast")?.value,
+     macdSlow:byId("rticMacdSlow")?.value,
+     macdSignal:byId("rticMacdSignal")?.value,
+     stochPeriod:byId("rticStochPeriod")?.value,
+     stochSmooth:byId("rticStochSmooth")?.value
+   };
+   const result=calculateOscillatorSeries(lastScannedBars,settings);
+   window.dispatchEvent(new CustomEvent("rolyfe:oscillators",{detail:{symbol:lastScanSymbol,interval:lastScanInterval,...result,customSettings:true}}));
+ }
+ window.ROLYFEData={refresh:refresh,usePlannerSymbol:usePlannerSymbol,setSymbol:setSymbol,checkConfig:checkConfig,setOscillatorSettings:setOscillatorSettings};
  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){usePlannerSymbol();checkConfig();});}else{usePlannerSymbol();checkConfig();}
 })();
