@@ -326,6 +326,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     <option value="alphavantage">Alpha Vantage — Quote</option>
     <option value="coingecko">CoinGecko — Crypto Quote</option>
    </select></div>
+   <div><label for="rticWatchlistPick">Scan from Master Watchlist</label><select id="rticWatchlistPick" onchange="ROLYFEData.setSymbol(this.value)"><option value="">Choose a watchlist symbol…</option></select></div>
    <div><label for="rticDataSymbol">Symbol</label><input id="rticDataSymbol" value="NVDA" autocomplete="off" maxlength="20" placeholder="NVDA, SPY, BTC"></div>
    <div><label for="rticDataInterval">Scan Timeframe</label><select id="rticDataInterval">
     <option value="1d" selected>1D — Swing Context</option><option value="4h">4H — Structure</option>
@@ -1001,7 +1002,7 @@ function renderWatchlist(list=watchlistSymbols){
  const out=document.getElementById("watchlist"),q=(document.getElementById("watchlistSearch")?.value||"").trim().toUpperCase();
  out.innerHTML=list.filter(s=>s.includes(q)).map(s=>`<button class="watch-item" type="button" onclick="selectWatch('${s}')">${s}</button>`).join("")||'<div class="small-muted">No symbols found.</div>';
 }
-function selectWatch(s){document.getElementById("symbol").value=s;syncSymbolHeader();currentChartSymbol=formatTradingViewSymbol(s);updateChartFromPlanner();document.getElementById("tradePlanOutput").scrollIntoView({behavior:"smooth",block:"start"})}
+function selectWatch(s){document.getElementById("symbol").value=s;syncSymbolHeader();if(window.ROLYFEData)ROLYFEData.setSymbol(s);const pick=document.getElementById("rticWatchlistPick");if(pick)pick.value=s;currentChartSymbol=formatTradingViewSymbol(s);updateChartFromPlanner();const scanner=document.getElementById("rticSecureData");if(scanner){scanner.open=true;scanner.scrollIntoView({behavior:"smooth",block:"start"})}}
 function filterWatchlist(){renderWatchlist()}
 
 function getJournal(){try{return JSON.parse(localStorage.getItem("rolyfeJournal")||"[]")}catch(e){return[]}}
@@ -1127,6 +1128,7 @@ function askAI(q){
  const accountMatch=q.match(/account(?:\s+size)?\s*(?:is|=|:)??\s*\$?([\d,]+(?:\.\d+)?)/i);
  const riskMatch=q.match(/risk(?:\s+percentage|\s*%)?\s*(?:is|=|:)??\s*([\d.]+)\s*%?/i);
  const askedSymbol=symbolMatch?symbolMatch[1].toUpperCase():null;
+  if(askedSymbol){document.getElementById("symbol").value=askedSymbol;syncSymbolHeader();if(window.ROLYFEData)ROLYFEData.setSymbol(askedSymbol);const pick=document.getElementById("rticWatchlistPick");if(pick&&watchlistSymbols.includes(askedSymbol))pick.value=askedSymbol;}
  const askedEntry=entryMatch?Number(entryMatch[1].replace(/,/g,"")):null;
  const askedStop=stopMatch?Number(stopMatch[1].replace(/,/g,"")):null;
  const askedAccount=accountMatch?Number(accountMatch[1].replace(/,/g,"")):num("accountSize");
@@ -1161,8 +1163,10 @@ function askAI(q){
 
 function populateQuickStocks(){
  const sel=document.getElementById("quickStockSelect");
- sel.innerHTML='<option value="">Select Stock</option>'+watchlistSymbols.map(s=>`<option value="${s}">${s}</option>`).join("");
+ if(sel)sel.innerHTML='<option value="">Select Stock</option>'+watchlistSymbols.map(s=>`<option value="${s}">${s}</option>`).join("");
+ populateScannerWatchlist();
 }
+function populateScannerWatchlist(){const sel=document.getElementById("rticWatchlistPick");if(!sel)return;const current=document.getElementById("rticDataSymbol")?.value||"";sel.innerHTML='<option value="">Choose a watchlist symbol…</option>'+watchlistSymbols.map(s=>`<option value="${s}">${s}</option>`).join("");if(watchlistSymbols.includes(current))sel.value=current;}
 
 document.addEventListener("DOMContentLoaded",()=>{
  populateQuickStocks();renderWatchlist();renderJournal();syncSymbolHeader();updateStrategyUI();updateSignalDashboard();updatePositionGuard();renderPsychology();
