@@ -103,10 +103,12 @@
  }
  function renderQuote(items){
    const out=byId("rticQuoteOutput");if(!out)return;
+   out.style.display="grid";out.style.visibility="visible";out.style.minHeight="48px";
    out.innerHTML=items.map(x=>'<div class="rtic-data-metric"><span>'+esc(x[0])+'</span><strong>'+esc(x[1])+'</strong></div>').join("");
  }
  function renderScan(scan,bars,interval){
    const out=byId("rticScanOutput");if(!out)return;
+   out.style.display="block";out.style.visibility="visible";out.style.minHeight="80px";
    const color=scan.score>=65?"bullish":scan.score<=35?"bearish":"neutral";
    const bias=scan.score>=65?"BULLISH BIAS":scan.score<=35?"BEARISH BIAS":"MIXED / NEUTRAL";
    out.innerHTML='<div class="rtic-data-metrics">'+
@@ -143,7 +145,8 @@
        const bars=toBars(data.bars);
        if(bars.length<25)throw new Error("Only "+bars.length+" usable historical bars returned; at least 25 are needed for a scan.");
        const scan=scanBars(bars);renderScan(scan,bars,interval);
-       status(names[provider]+" responded for "+(data.symbol||symbol)+". "+bars.length+" usable OHLCV bars • "+time+". Verify session, freshness, and plan entitlement before use.","good");
+       status(names[provider]+" responded for "+(data.symbol||symbol)+". "+bars.length+" usable OHLCV bars • "+time+". Quote and RTIC scan rendered below. Verify session, freshness, and plan entitlement before use.","good");
+       const results=byId("rticScanOutput");if(results)results.scrollIntoView({behavior:"smooth",block:"nearest"});
      }else{
        byId("rticScanOutput").innerHTML='<div class="rtic-data-status warn">Quote received. Select “Tickerbot — Historical Bars + RTIC Scan” to run the 10-category technical scan.</div>';
        status(names[provider]+" responded for "+(data.symbol||symbol)+". This response does not confirm an exchange-real-time feed; refresh cadence depends on provider plan.","good");
