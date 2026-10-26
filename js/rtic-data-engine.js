@@ -192,7 +192,6 @@
        window.dispatchEvent(new CustomEvent("rolyfe:rtic-scan",{detail:{symbol,interval,scan}}));
        window.dispatchEvent(new CustomEvent("rolyfe:oscillators",{detail:{symbol,interval,...calculateOscillatorSeries(bars,activeOscillatorSettings)}}));
        status(names[provider]+" responded for "+(data.symbol||symbol)+". "+bars.length+" usable OHLCV bars • "+time+". Quote and RTIC scan rendered below. Verify session, freshness, and plan entitlement before use.","good");
-       const results=byId("rticScanOutput");if(results)results.scrollIntoView({behavior:"smooth",block:"nearest"});
      }else{
        byId("rticScanOutput").innerHTML='<div class="rtic-data-status warn">Quote received. Select “Tickerbot — Historical Bars + RTIC Scan” to run the 10-category technical scan.</div>';
        status(names[provider]+" responded for "+(data.symbol||symbol)+". This response does not confirm an exchange-real-time feed; refresh cadence depends on provider plan.","good");
