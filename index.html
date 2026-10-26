@@ -704,7 +704,7 @@ function loadTradingViewChart(){
  const container=document.getElementById("tradingview_chart");
  if(!container)return;
  clearTimeout(tvLoadTimer);
- container.innerHTML='<div class="chart-fallback">Loading TradingView chart…<br><span class="small-muted">The embedded chart includes symbol search plus EMA 20/50/200, VWAP, RSI, MACD and Stochastic RSI. Some exchange symbols may be unavailable in the embedded widget; use Open Current Symbol in TradingView when that happens.</span></div>';
+ container.innerHTML='<div class="chart-fallback">Loading TradingView chart…<br><span class="small-muted">The embedded chart requests EMA 20/50/200, VWAP, RSI, MACD, Stochastic and Stochastic RSI. Embedded-widget study support can vary by symbol and TradingView configuration. Some exchange symbols may be unavailable in the embedded widget; use Open Current Symbol in TradingView when that happens.</span></div>';
  const raw=currentChartSymbol||formatTradingViewSymbol(getSymbol());
  document.getElementById("chartSymbolLabel").textContent=raw;
  const link=document.getElementById("tvOpenLink");
@@ -718,7 +718,7 @@ function loadTradingViewChart(){
   locale:"en",backgroundColor:"rgba(7,16,12,1)",enable_publishing:false,allow_symbol_change:true,
   save_image:true,hide_top_toolbar:false,hide_side_toolbar:false,hide_legend:false,withdateranges:true,
   details:true,hotlist:true,calendar:false,show_popup_button:true,popup_width:"1000",popup_height:"650",
-  studies:["MAExp@tv-basicstudies","MAExp@tv-basicstudies","MAExp@tv-basicstudies","VWAP@tv-basicstudies","RSI@tv-basicstudies","MACD@tv-basicstudies","StochasticRSI@tv-basicstudies"],
+  studies:["MAExp@tv-basicstudies","MAExp@tv-basicstudies","MAExp@tv-basicstudies","VWAP@tv-basicstudies","RSI@tv-basicstudies","MACD@tv-basicstudies","Stochastic@tv-basicstudies","StochasticRSI@tv-basicstudies"],
   support_host:"https://www.tradingview.com"
  });
  container.innerHTML='<div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div></div>';
