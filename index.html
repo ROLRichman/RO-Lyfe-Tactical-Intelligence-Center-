@@ -234,6 +234,12 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 @media(min-width:950px){.rtic-sidebar{width:320px}.container{padding:18px}.rtic-topbar{padding-left:18px;padding-right:18px}}
 @media(max-width:480px){.rtic-view-label{font-size:10px;padding:7px}.rtic-top-title{font-size:12px}.rtic-step-row{grid-template-columns:1fr}.rtic-quick-actions{grid-template-columns:1fr 1fr}.logo-title{font-size:clamp(23px,7vw,35px)}.logo-subtitle{font-size:12px}}
 
+
+/* Indicator pop-up and responsive chart containment */
+.indicator-card{cursor:pointer;min-width:0;transition:border-color .15s,transform .15s}.indicator-card:hover,.indicator-card:focus{border-color:var(--green);outline:2px solid rgba(0,230,118,.25)}
+.indicator-modal{display:none;position:fixed;inset:0;z-index:12000;align-items:center;justify-content:center;padding:14px}.indicator-modal.open{display:flex}.indicator-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.8)}.indicator-modal-card{position:relative;z-index:1;width:min(520px,100%);max-height:88dvh;overflow:auto;padding:18px;background:#08120d;border:1px solid var(--green);border-radius:18px;box-shadow:0 20px 70px #000}.indicator-modal-card h3{margin:4px 45px 14px 0;font-size:21px}.indicator-modal-card p{line-height:1.55}.indicator-modal-close{position:absolute;right:12px;top:12px;width:40px;min-height:40px;margin:0;padding:6px;background:#14231a;color:#fff}.indicator-modal-visual{min-height:120px;padding:8px;background:#050b08;border:1px solid var(--border);border-radius:12px;overflow:hidden}.indicator-modal-visual svg{display:block;width:100%;height:auto}.indicator-modal-note{color:var(--muted);font-size:11px}.eyebrow{color:var(--green);font-size:10px;font-weight:900;letter-spacing:.12em}
+html,body{max-width:100%;overflow-x:hidden}.tradingview-shell{width:100%;max-width:100%;height:clamp(420px,70vh,700px);min-width:0;position:relative;overflow:hidden;contain:layout paint}.tradingview-widget-container,.tradingview-widget-container__widget{width:100%!important;max-width:100%!important;min-width:0!important;height:100%!important;overflow:hidden!important}.tradingview-widget-container iframe{width:100%!important;max-width:100%!important;border:0!important}.drop-body,.section-drop{min-width:0;max-width:100%}
+@media(max-width:600px){.tradingview-shell{height:clamp(390px,64svh,540px);border-radius:8px}.indicator-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.indicator-card{padding:10px 6px}.indicator-modal{padding:9px}.indicator-modal-card{padding:15px}}
 </style>
 </head>
 
@@ -461,7 +467,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
  <div class="drop-body">
   <p class="chart-description">Core confirmation stack: EMA 20 → EMA 50 → EMA 200 → VWAP → RSI → MACD → Stochastic RSI.</p>
   <div class="indicator-grid">
-   <div class="indicator-card"><span class="indicator-name">📈 EMA 20</span><span id="ema20Value" class="indicator-value">ON CHART</span><span id="ema20Status" class="indicator-status neutral">FAST TREND</span></div>
+   <div class="indicator-card" role="button" tabindex="0"><span class="indicator-name">📈 EMA 20</span><span id="ema20Value" class="indicator-value">ON CHART</span><span id="ema20Status" class="indicator-status neutral">FAST TREND</span></div>
    <div class="indicator-card"><span class="indicator-name">📊 EMA 50</span><span id="ema50Value" class="indicator-value">ON CHART</span><span id="ema50Status" class="indicator-status neutral">TREND</span></div>
    <div class="indicator-card"><span class="indicator-name">🧱 EMA 200</span><span id="ema200Value" class="indicator-value">ON CHART</span><span id="ema200Status" class="indicator-status neutral">MAJOR TREND</span></div>
    <div class="indicator-card"><span class="indicator-name">⚡ VWAP</span><span id="vwapValue" class="indicator-value">ON CHART</span><span id="vwapStatus" class="indicator-status neutral">VALUE</span></div>
@@ -479,6 +485,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
  </div>
 </details>
 
+<div id="indicatorVisualModal" class="indicator-modal" aria-hidden="true" role="dialog" aria-modal="true"><div class="indicator-modal-backdrop" onclick="closeIndicatorVisual()"></div><section class="indicator-modal-card"><button class="indicator-modal-close" onclick="closeIndicatorVisual()" aria-label="Close">✕</button><p class="eyebrow">RO’LYFE INDICATOR LAB</p><h3 id="indicatorModalTitle">Indicator Visual Guide</h3><div id="indicatorModalVisual" class="indicator-modal-visual"></div><p id="indicatorModalText"></p><p class="indicator-modal-note">Illustrative visual—not a live plotted reading. Use the chart for exact values.</p></section></div>
 <!-- LIVE CHART -->
 <details class="section-drop" open>
  <summary>📈 LIVE MARKET CHART</summary>
@@ -699,6 +706,35 @@ function changeTimeframe(tf,button){
  if(button)button.classList.add("active");
  loadTradingViewChart();
 }
+
+
+function indicatorMiniSvg(kind){
+ const grid='<path d="M10 20H490 M10 60H490 M10 100H490 M10 140H490" stroke="#25362c" stroke-dasharray="3 5"/>';
+ if(kind==="MACD")return '<svg viewBox="0 0 500 165" role="img" aria-label="Illustrative MACD line and signal line">'+grid+'<path d="M15 95 C45 85 60 45 95 55 S145 120 180 95 S235 40 270 60 S330 130 365 105 S425 60 485 78" fill="none" stroke="#36c7e8" stroke-width="3"/><path d="M15 100 C55 90 80 70 110 72 S165 98 200 88 S250 60 285 75 S350 105 390 95 S450 75 485 82" fill="none" stroke="#ffb74d" stroke-width="3"/>'+Array.from({length:22},(_,i)=>'<rect x="'+(35+i*20)+'" y="'+(i%5<2?70-(i%4)*5:85)+'" width="9" height="'+(i%5<2?18+(i%4)*4:12+(i%3)*6)+'" fill="'+(i%5<2?'#22c55e':'#ef4444')+'" opacity=".8"/>').join('')+'</svg>';
+ if(kind==="Stochastic 14"||kind==="Stochastic RSI")return '<svg viewBox="0 0 500 165" role="img" aria-label="Illustrative stochastic oscillator with 20 and 80 zones">'+grid+'<rect x="10" y="35" width="480" height="90" fill="#8b5cf6" opacity=".10"/><path d="M10 35H490 M10 125H490" stroke="#a78bfa" stroke-dasharray="7 5"/><path d="M15 112 C45 100 65 70 90 82 S130 125 160 100 S200 55 230 65 S270 110 300 92 S340 40 370 62 S420 118 485 78" fill="none" stroke="#36c7e8" stroke-width="3"/><path d="M15 118 C55 106 75 90 100 90 S145 105 175 92 S215 70 245 78 S285 95 315 80 S355 63 385 78 S440 95 485 88" fill="none" stroke="#d946ef" stroke-width="3"/><text x="15" y="28" fill="#c4b5fd" font-size="13">80 • upper zone</text><text x="15" y="145" fill="#c4b5fd" font-size="13">20 • lower zone</text></svg>';
+ return '<svg viewBox="0 0 500 165" role="img" aria-label="Illustrative indicator trend">'+grid+'<path d="M15 35 C65 48 80 35 120 62 S175 58 215 75 S270 68 310 100 S370 88 405 120 S455 116 485 138" fill="none" stroke="#ef4444" stroke-width="4"/><text x="18" y="18" fill="#a7f3d0" font-size="13">Illustrative direction only</text></svg>';
+}
+function showIndicatorVisual(kind){
+ const modal=document.getElementById("indicatorVisualModal");if(!modal)return;
+ const copy={
+ "EMA 20":"Short-term trend guide. Price above a rising EMA can support bullish momentum; below a falling EMA can support bearish momentum.",
+ "EMA 50":"Intermediate trend filter. Compare price and EMA 20/50 alignment to see whether short-term direction agrees with the broader trend.",
+ "EMA 200":"Major trend reference. Close above EMA 200 is generally a bullish clue; close below is generally bearish. Neither guarantees continuation.",
+ "VWAP":"Intraday volume-weighted average price. Price above VWAP can indicate buyers are in control; below can indicate sellers are in control.",
+ "RSI":"Momentum oscillator from 0 to 100. Above 70 is commonly called overbought and below 30 oversold; strong trends can remain extreme.",
+ "MACD":"Compare the MACD line with its signal line and histogram. MACD below its signal line suggests bearish momentum; crosses can lag.",
+ "Stochastic RSI":"Timing oscillator calculated from RSI. Read %K and %D with the 20/80 zones; extreme readings alone are not entry signals.",
+ "STOCH RSI":"Timing oscillator calculated from RSI. Read %K and %D with the 20/80 zones; extreme readings alone are not entry signals."
+ };
+ document.getElementById("indicatorModalTitle").textContent=kind+" • Visual Guide";
+ document.getElementById("indicatorModalVisual").innerHTML=indicatorMiniSvg(kind);
+ document.getElementById("indicatorModalText").textContent=copy[kind]||"Use this visual as a learning aid, then confirm the actual indicator on the chart.";
+ modal.classList.add("open");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";
+}
+function closeIndicatorVisual(){const m=document.getElementById("indicatorVisualModal");if(m){m.classList.remove("open");m.setAttribute("aria-hidden","true");document.body.style.overflow="";}}
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeIndicatorVisual()});
+document.addEventListener("click",function(e){const card=e.target.closest(".indicator-card");if(!card)return;const n=card.querySelector(".indicator-name");if(!n)return;const label=n.textContent.replace(/^[^A-Z0-9]+/,"").trim();const kind=label==="STOCH RSI"?"Stochastic RSI":label;showIndicatorVisual(kind)});
+document.addEventListener("keydown",function(e){if((e.key==="Enter"||e.key===" ")&&e.target.classList.contains("indicator-card")){e.preventDefault();const n=e.target.querySelector(".indicator-name");if(n){const label=n.textContent.replace(/^[^A-Z0-9]+/,"").trim();showIndicatorVisual(label==="STOCH RSI"?"Stochastic RSI":label)}}});
 
 function loadTradingViewChart(){
  const container=document.getElementById("tradingview_chart");
