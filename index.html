@@ -241,6 +241,44 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 html,body{max-width:100%;overflow-x:hidden}.tradingview-shell{width:100%;max-width:100%;height:clamp(420px,70vh,700px);min-width:0;position:relative;overflow:hidden;contain:layout paint}.tradingview-widget-container,.tradingview-widget-container__widget{width:100%!important;max-width:100%!important;min-width:0!important;height:100%!important;overflow:hidden!important}.tradingview-widget-container iframe{width:100%!important;max-width:100%!important;border:0!important}.drop-body,.section-drop{min-width:0;max-width:100%}
 @media(max-width:600px){.tradingview-shell{height:clamp(390px,64svh,540px);border-radius:8px}.indicator-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.indicator-card{padding:10px 6px}.indicator-modal{padding:9px}.indicator-modal-card{padding:15px}}
 </style>
+<style>
+/* Mobile-safe, expandable chart and independently calculated oscillator panes */
+#rticChartSection{min-width:0;width:100%;max-width:100%}
+#rticChartSection>.drop-body{padding-left:6px;padding-right:6px}
+#tradingview_chart.tradingview-shell{display:block;width:100%;max-width:100%;min-width:0;height:clamp(500px,78svh,760px);overflow:hidden;contain:layout paint;box-sizing:border-box}
+#tradingview_chart .tradingview-widget-container,#tradingview_chart .tradingview-widget-container__widget{width:100%!important;max-width:100%!important;min-width:0!important;height:100%!important;overflow:hidden!important}
+#tradingview_chart iframe{display:block;width:100%!important;max-width:100%!important;border:0!important}
+.rtic-chart-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin:8px 0}
+.rtic-chart-tools .help{flex:1 1 180px}
+.rtic-chart-expand,.rtic-chart-focus-close{width:auto;min-height:40px;margin:0;padding:9px 12px;background:#143321;border:1px solid var(--border2);color:var(--green);font-size:12px}
+#tradingview_chart.chart-focus-mode{position:fixed!important;inset:0!important;z-index:14000!important;width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;min-height:0!important;margin:0!important;border:0!important;border-radius:0!important;background:#07100c!important;overflow:hidden!important;contain:strict}
+#tradingview_chart.chart-focus-mode .tradingview-widget-container,#tradingview_chart.chart-focus-mode .tradingview-widget-container__widget{height:100%!important;width:100%!important}
+.rtic-chart-focus-close{display:none;position:fixed;z-index:14002;right:8px;top:8px;box-shadow:0 2px 16px rgba(0,0,0,.7)}
+body.rtic-chart-focused{overflow:hidden!important}
+.indicator-guide-btn{width:100%;min-height:32px;margin:8px 0 0;padding:6px 7px;background:#102119;border:1px solid var(--border2);border-radius:8px;color:var(--green);font-size:11px}
+.indicator-card .indicator-guide-btn:hover{background:#173323}
+.rtic-osc-panel{min-width:0;margin:12px 0;padding:12px;border:1px solid var(--border);border-radius:12px;background:#06100b}
+.rtic-osc-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
+.rtic-osc-head h3{margin:0;color:var(--green);font-size:16px}.rtic-osc-head h3 span{font-size:12px;color:var(--muted);font-weight:600}
+.rtic-osc-toggle{width:auto;min-height:34px;margin:0;padding:6px 9px;background:#122319;color:#fff;border:1px solid var(--border);font-size:11px}
+.rtic-osc-settings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.rtic-osc-settings-two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.rtic-osc-settings label{min-width:0}.rtic-osc-settings input{min-height:39px;padding:7px}
+.rtic-osc-legend{display:flex;flex-wrap:wrap;gap:12px;margin:7px 0;color:var(--muted);font-size:11px}
+.rtic-osc-legend span{display:flex;align-items:center;gap:5px}.rtic-osc-legend i{display:inline-block;width:13px;height:3px;border-radius:2px}
+.legend-macd{background:#38bdf8}.legend-signal{background:#f59e0b}.legend-hist{background:#22c55e}.legend-stoch{background:#d946ef}
+.rtic-osc-plot{width:100%;min-width:0;overflow:hidden;border-radius:8px;background:#030805}
+.rtic-osc-plot svg{display:block;width:100%;height:auto;max-height:230px}.rtic-osc-plot p{padding:18px;margin:0;color:var(--muted);font-size:13px}
+.rtic-osc-readout{margin:8px 0 0;color:var(--text);font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+@media(max-width:600px){
+ #tradingview_chart.tradingview-shell{height:clamp(520px,78svh,700px);border-radius:8px}
+ #rticChartSection>.drop-body{padding-left:4px;padding-right:4px}
+ .rtic-osc-panel{padding:9px}.rtic-osc-head h3{font-size:14px}
+ .rtic-osc-settings{gap:6px}.rtic-osc-settings input{font-size:14px}
+ .rtic-chart-tools{align-items:stretch}.rtic-chart-expand{flex:0 0 auto}
+}
+@media(max-width:350px){.rtic-osc-settings{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
 </head>
 
 <body>
@@ -467,13 +505,13 @@ html,body{max-width:100%;overflow-x:hidden}.tradingview-shell{width:100%;max-wid
  <div class="drop-body">
   <p class="chart-description">Core confirmation stack: EMA 20 → EMA 50 → EMA 200 → VWAP → RSI → MACD → Stochastic RSI.</p>
   <div class="indicator-grid">
-   <div class="indicator-card" role="button" tabindex="0"><span class="indicator-name">📈 EMA 20</span><span id="ema20Value" class="indicator-value">ON CHART</span><span id="ema20Status" class="indicator-status neutral">FAST TREND</span></div>
-   <div class="indicator-card" role="button" tabindex="0"><span class="indicator-name">📊 EMA 50</span><span id="ema50Value" class="indicator-value">ON CHART</span><span id="ema50Status" class="indicator-status neutral">TREND</span></div>
-   <div class="indicator-card" role="button" tabindex="0"><span class="indicator-name">🧱 EMA 200</span><span id="ema200Value" class="indicator-value">ON CHART</span><span id="ema200Status" class="indicator-status neutral">MAJOR TREND</span></div>
-   <div class="indicator-card" role="button" tabindex="0"><span class="indicator-name">⚡ VWAP</span><span id="vwapValue" class="indicator-value">ON CHART</span><span id="vwapStatus" class="indicator-status neutral">VALUE</span></div>
-   <div class="indicator-card" role="button" tabindex="0"><span class="indicator-name">📉 RSI</span><span id="rsiValue" class="indicator-value">ON CHART</span><span id="rsiStatus" class="indicator-status neutral">MOMENTUM</span></div>
-   <div class="indicator-card" role="button" tabindex="0"><span class="indicator-name">🚀 MACD</span><span id="macdValue" class="indicator-value">ON CHART</span><span id="macdStatus" class="indicator-status neutral">MOMENTUM TREND</span></div>
-   <div class="indicator-card" role="button" tabindex="0"><span class="indicator-name">🎯 STOCH RSI</span><span id="stochValue" class="indicator-value">ON CHART</span><span id="stochStatus" class="indicator-status neutral">TIMING</span></div>
+   <div class="indicator-card" role="button" tabindex="0"><span class="indicator-name">📈 EMA 20</span><span id="ema20Value" class="indicator-value">ON CHART</span><span id="ema20Status" class="indicator-status neutral">FAST TREND</span><button type="button" class="indicator-guide-btn" onclick="showIndicatorVisual('EMA 20')">Open visual guide ↗</button></div>
+   <div class="indicator-card" role="button" tabindex="0"><span class="indicator-name">📊 EMA 50</span><span id="ema50Value" class="indicator-value">ON CHART</span><span id="ema50Status" class="indicator-status neutral">TREND</span><button type="button" class="indicator-guide-btn" onclick="showIndicatorVisual('EMA 50')">Open visual guide ↗</button></div>
+   <div class="indicator-card" role="button" tabindex="0"><span class="indicator-name">🧱 EMA 200</span><span id="ema200Value" class="indicator-value">ON CHART</span><span id="ema200Status" class="indicator-status neutral">MAJOR TREND</span><button type="button" class="indicator-guide-btn" onclick="showIndicatorVisual('EMA 200')">Open visual guide ↗</button></div>
+   <div class="indicator-card" role="button" tabindex="0"><span class="indicator-name">⚡ VWAP</span><span id="vwapValue" class="indicator-value">ON CHART</span><span id="vwapStatus" class="indicator-status neutral">VALUE</span><button type="button" class="indicator-guide-btn" onclick="showIndicatorVisual('VWAP')">Open visual guide ↗</button></div>
+   <div class="indicator-card" role="button" tabindex="0"><span class="indicator-name">📉 RSI</span><span id="rsiValue" class="indicator-value">ON CHART</span><span id="rsiStatus" class="indicator-status neutral">MOMENTUM</span><button type="button" class="indicator-guide-btn" onclick="showIndicatorVisual('RSI')">Open visual guide ↗</button></div>
+   <div class="indicator-card" role="button" tabindex="0"><span class="indicator-name">🚀 MACD</span><span id="macdValue" class="indicator-value">ON CHART</span><span id="macdStatus" class="indicator-status neutral">MOMENTUM TREND</span><button type="button" class="indicator-guide-btn" onclick="showIndicatorVisual('MACD')">Open visual guide ↗</button></div>
+   <div class="indicator-card" role="button" tabindex="0"><span class="indicator-name">🎯 STOCH RSI</span><span id="stochValue" class="indicator-value">ON CHART</span><span id="stochStatus" class="indicator-status neutral">TIMING</span><button type="button" class="indicator-guide-btn" onclick="showIndicatorVisual('Stochastic RSI')">Open visual guide ↗</button></div>
   </div>
   <div class="form-grid" style="margin-bottom:10px">
    <div><label>EMA / VWAP Bias</label><select id="trendBias" onchange="updateSignalDashboard()"><option value="bullish">Bullish</option><option value="neutral" selected>Neutral</option><option value="bearish">Bearish</option></select></div>
@@ -487,7 +525,7 @@ html,body{max-width:100%;overflow-x:hidden}.tradingview-shell{width:100%;max-wid
 
 <div id="indicatorVisualModal" class="indicator-modal" aria-hidden="true" role="dialog" aria-modal="true"><div class="indicator-modal-backdrop" onclick="closeIndicatorVisual()"></div><section class="indicator-modal-card"><button class="indicator-modal-close" onclick="closeIndicatorVisual()" aria-label="Close">✕</button><p class="eyebrow">RO’LYFE INDICATOR LAB</p><h3 id="indicatorModalTitle">Indicator Visual Guide</h3><div id="indicatorModalVisual" class="indicator-modal-visual"></div><p id="indicatorModalText"></p><p class="indicator-modal-note">Illustrative visual—not a live plotted reading. Use the chart for exact values.</p></section></div>
 <!-- LIVE CHART -->
-<details class="section-drop" open>
+<details id="rticChartSection" class="section-drop" open>
  <summary>📈 LIVE MARKET CHART</summary>
  <div class="drop-body">
   <p class="chart-description">Live market view for <strong id="chartSymbolLabel">NASDAQ:NVDA</strong> <span class="badge badge-green">LIVE WIDGET</span></p>
@@ -499,12 +537,44 @@ html,body{max-width:100%;overflow-x:hidden}.tradingview-shell{width:100%;max-wid
    <button class="tf-btn" onclick="changeTimeframe('D',this)">1D</button>
    <button class="tf-btn" onclick="changeTimeframe('W',this)">1W</button>
   </div>
-  <div id="tradingview_chart" class="tradingview-shell"></div>
+  <div class="rtic-chart-tools"><span class="help">Phone tip: expand the chart for more room; use the panels below to tune MACD and Stochastic.</span><button id="rticChartExpandBtn" type="button" class="rtic-chart-expand" onclick="toggleChartFocus(true)">⛶ Expand chart</button></div>
+  <div id="tradingview_chart" class="tradingview-shell"></div><button id="rticChartFocusClose" type="button" class="rtic-chart-focus-close" onclick="toggleChartFocus(false)">✕ Exit expanded chart</button>
   <div class="chart-actions">
    <a id="tvOpenLink" href="https://www.tradingview.com/chart/" target="_blank" rel="noopener">↗ Open Current Symbol in TradingView</a>
    <a href="https://www.tradingview.com/chart/" target="_blank" rel="noopener">🔎 Full TradingView Symbol Search</a>
   </div>
   <p class="help">Important: some symbols are not licensed for embedded widgets. TradingView documents that “only available on TradingView” means the symbol cannot be shown in the website widget. The full TradingView link above is the fallback.</p>
+ </div>
+</details>
+
+
+<!-- RO'LYFE locally calculated momentum panels: same candle series as the RTIC scanner -->
+<details id="rticVisualIndicatorPanels" class="section-drop" open>
+ <summary>📉 MOMENTUM PANELS • MACD + STOCHASTIC</summary>
+ <div class="drop-body">
+  <p class="chart-description">Calculated from the same Tickerbot historical candles pulled into RTIC. These panels stay below the price chart on mobile. Adjust the settings here; they save on this device and remain selected when you change tickers.</p>
+  <div class="rtic-osc-panel" id="rticMacdPanel">
+   <div class="rtic-osc-head"><h3>MACD <span id="rticMacdParamsLabel">12 / 26 / 9</span></h3><button type="button" class="rtic-osc-toggle" onclick="toggleOscillatorPlot('macd')" id="rticMacdToggle">Hide MACD plot</button></div>
+   <div class="rtic-osc-settings">
+    <label>Fast EMA<input id="rticMacdFast" type="number" min="2" max="50" step="1" value="12" onchange="ROLYFEData.setOscillatorSettings()"></label>
+    <label>Slow EMA<input id="rticMacdSlow" type="number" min="3" max="100" step="1" value="26" onchange="ROLYFEData.setOscillatorSettings()"></label>
+    <label>Signal<input id="rticMacdSignal" type="number" min="2" max="50" step="1" value="9" onchange="ROLYFEData.setOscillatorSettings()"></label>
+   </div>
+   <div class="rtic-osc-legend"><span><i class="legend-macd"></i>MACD line</span><span><i class="legend-signal"></i>Signal line</span><span><i class="legend-hist"></i>Histogram</span></div>
+   <div id="rticMacdPlot" class="rtic-osc-plot"><p>Run Pull Secure Market Data to calculate MACD.</p></div>
+   <p id="rticMacdReadout" class="rtic-osc-readout">Waiting for a Tickerbot candle scan.</p>
+  </div>
+  <div class="rtic-osc-panel" id="rticStochPanel">
+   <div class="rtic-osc-head"><h3>Stochastic <span id="rticStochParamsLabel">14 / 3</span></h3><button type="button" class="rtic-osc-toggle" onclick="toggleOscillatorPlot('stoch')" id="rticStochToggle">Hide Stochastic plot</button></div>
+   <div class="rtic-osc-settings rtic-osc-settings-two">
+    <label>Lookback %K<input id="rticStochPeriod" type="number" min="2" max="50" step="1" value="14" onchange="ROLYFEData.setOscillatorSettings()"></label>
+    <label>Smoothing %D<input id="rticStochSmooth" type="number" min="1" max="20" step="1" value="3" onchange="ROLYFEData.setOscillatorSettings()"></label>
+   </div>
+   <div class="rtic-osc-legend"><span><i class="legend-macd"></i>%K</span><span><i class="legend-stoch"></i>%D</span><span>Reference zones: 80 / 20</span></div>
+   <div id="rticStochPlot" class="rtic-osc-plot"><p>Run Pull Secure Market Data to calculate Stochastic.</p></div>
+   <p id="rticStochReadout" class="rtic-osc-readout">Waiting for a Tickerbot candle scan.</p>
+  </div>
+  <p id="rticOscSource" class="help">No historical-bar scan loaded yet. Pull Secure Market Data to populate these panels.</p>
  </div>
 </details>
 
@@ -732,9 +802,82 @@ function showIndicatorVisual(kind){
  modal.classList.add("open");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";
 }
 function closeIndicatorVisual(){const m=document.getElementById("indicatorVisualModal");if(m){m.classList.remove("open");m.setAttribute("aria-hidden","true");document.body.style.overflow="";}}
-document.addEventListener("keydown",function(e){if(e.key==="Escape")closeIndicatorVisual()});
-document.addEventListener("click",function(e){const card=e.target.closest(".indicator-card");if(!card)return;const n=card.querySelector(".indicator-name");if(!n)return;const label=n.textContent.replace(/^[^A-Z0-9]+/,"").trim();const kind=label==="STOCH RSI"?"Stochastic RSI":label;showIndicatorVisual(kind)});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"){closeIndicatorVisual();toggleChartFocus(false);}});
+document.addEventListener("click",function(e){if(e.target.closest(".indicator-guide-btn"))return;const card=e.target.closest(".indicator-card");if(!card)return;const n=card.querySelector(".indicator-name");if(!n)return;const label=n.textContent.replace(/^[^A-Z0-9]+/,"").trim();const kind=label==="STOCH RSI"?"Stochastic RSI":label;showIndicatorVisual(kind)});
 document.addEventListener("keydown",function(e){if((e.key==="Enter"||e.key===" ")&&e.target.classList.contains("indicator-card")){e.preventDefault();const n=e.target.querySelector(".indicator-name");if(n){const label=n.textContent.replace(/^[^A-Z0-9]+/,"").trim();showIndicatorVisual(label==="STOCH RSI"?"Stochastic RSI":label)}}});
+
+
+function toggleChartFocus(force){
+ const chart=document.getElementById("tradingview_chart");if(!chart)return;
+ const open=typeof force==="boolean"?force:!chart.classList.contains("chart-focus-mode");
+ chart.classList.toggle("chart-focus-mode",open);document.body.classList.toggle("rtic-chart-focused",open);
+ const close=document.getElementById("rticChartFocusClose"),expand=document.getElementById("rticChartExpandBtn");
+ if(close)close.style.display=open?"block":"none";
+ if(expand)expand.textContent=open?"↙ Return to page":"⛶ Expand chart";
+}
+function toggleOscillatorPlot(kind){
+ const plot=document.getElementById(kind==="macd"?"rticMacdPlot":"rticStochPlot");
+ const button=document.getElementById(kind==="macd"?"rticMacdToggle":"rticStochToggle");
+ if(!plot||!button)return;
+ const hidden=plot.style.display==="none";
+ plot.style.display=hidden?"block":"none";
+ button.textContent=hidden?(kind==="macd"?"Hide MACD plot":"Hide Stochastic plot"):(kind==="macd"?"Show MACD plot":"Show Stochastic plot");
+}
+function svgOscPath(points,key,xFor,yFor){
+ let d="",drawing=false;
+ points.forEach((p,i)=>{const v=p[key];if(v===null||v===undefined||!Number.isFinite(Number(v))){drawing=false;return;}
+  d+=(drawing?"L":"M")+xFor(i).toFixed(2)+" "+yFor(Number(v)).toFixed(2)+" ";drawing=true;
+ });
+ return d.trim();
+}
+function renderRticOscillators(detail){
+ const points=Array.isArray(detail.points)?detail.points:[];
+ const settings=detail.settings||{macdFast:12,macdSlow:26,macdSignal:9,stochPeriod:14,stochSmooth:3};
+ const macdPlot=document.getElementById("rticMacdPlot"),stochPlot=document.getElementById("rticStochPlot");
+ if(!macdPlot||!stochPlot)return;
+ const controls=[["rticMacdFast",settings.macdFast],["rticMacdSlow",settings.macdSlow],["rticMacdSignal",settings.macdSignal],["rticStochPeriod",settings.stochPeriod],["rticStochSmooth",settings.stochSmooth]];
+ controls.forEach(([id,value])=>{const el=document.getElementById(id);if(el&&value!==undefined)el.value=value;});
+ const ml=document.getElementById("rticMacdParamsLabel"),sl=document.getElementById("rticStochParamsLabel");
+ if(ml)ml.textContent=settings.macdFast+" / "+settings.macdSlow+" / "+settings.macdSignal;
+ if(sl)sl.textContent=settings.stochPeriod+" / "+settings.stochSmooth;
+ const source=document.getElementById("rticOscSource");
+ if(source)source.textContent=points.length?"Source: "+(detail.symbol||"selected symbol")+" • "+(detail.interval||"")+" candles • locally calculated from RTIC historical bars. Settings save on this browser; scanner score keeps standard default parameters.":"No historical-bar scan loaded yet. Use Pull Secure Market Data to populate these panels.";
+ const finite=(p,k)=>p&&p[k]!==null&&p[k]!==undefined&&Number.isFinite(Number(p[k]));
+ const latestMacd=[...points].reverse().find(p=>finite(p,"macd")&&finite(p,"signal")&&finite(p,"histogram"));
+ const macdReadout=document.getElementById("rticMacdReadout"),macdBadge=document.getElementById("rticMacdBias");
+ if(!points.length||!latestMacd){
+  macdPlot.innerHTML='<p>MACD needs enough candles to seed the slow EMA and signal EMA. Pull at least about '+(Number(settings.macdSlow)+Number(settings.macdSignal)-1)+' candles; 200–300 is preferable.</p>';
+  if(macdReadout)macdReadout.textContent="MACD line — • Signal — • Histogram —";
+  if(macdBadge){macdBadge.textContent="Waiting for bars";macdBadge.className="indicator-status neutral";}
+ }else{
+  const vals=[];points.forEach(p=>["macd","signal","histogram"].forEach(k=>{if(finite(p,k))vals.push(Math.abs(Number(p[k])))}));
+  const maxAbs=Math.max(0.000001,...vals)*1.12,W=600,H=190,left=12,right=12,top=18,bottom=18,zeroY=95,plotW=W-left-right;
+  const xFor=i=>left+(points.length<=1?0:i/(points.length-1)*plotW),yFor=v=>zeroY-(v/maxAbs)*69;
+  const grid='<path d="M12 26H588 M12 95H588 M12 164H588" stroke="#26372d" stroke-dasharray="3 5"/>';
+  const bars=points.map((p,i)=>{if(!finite(p,"histogram"))return "";const v=Number(p.histogram),x=xFor(i),y=yFor(v),barW=Math.max(1,plotW/points.length*.72);return '<rect x="'+(x-barW/2).toFixed(2)+'" y="'+Math.min(y,zeroY).toFixed(2)+'" width="'+barW.toFixed(2)+'" height="'+Math.max(1,Math.abs(zeroY-y)).toFixed(2)+'" fill="'+(v>=0?"#22c55e":"#ef4444")+'" opacity=".8"/>';}).join("");
+  const macdPath=svgOscPath(points,"macd",xFor,yFor),signalPath=svgOscPath(points,"signal",xFor,yFor);
+  macdPlot.innerHTML='<svg viewBox="0 0 600 190" role="img" aria-label="Calculated MACD line, signal line, histogram">'+grid+bars+'<path d="'+macdPath+'" fill="none" stroke="#38bdf8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><path d="'+signalPath+'" fill="none" stroke="#f59e0b" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+  if(macdReadout)macdReadout.textContent="MACD "+Number(latestMacd.macd).toFixed(4)+" • Signal "+Number(latestMacd.signal).toFixed(4)+" • Histogram "+Number(latestMacd.histogram).toFixed(4)+" — "+(latestMacd.histogram>0?"MACD above signal (bullish momentum tilt)":latestMacd.histogram<0?"MACD below signal (bearish momentum tilt)":"MACD and signal aligned");
+  if(macdBadge){macdBadge.textContent=latestMacd.histogram>0?"⬆️ Above signal":latestMacd.histogram<0?"⬇️ Below signal":"➡️ At signal";macdBadge.className="indicator-status "+(latestMacd.histogram>0?"bullish":latestMacd.histogram<0?"bearish":"neutral");}
+ }
+ const latestStoch=[...points].reverse().find(p=>finite(p,"stochK")&&finite(p,"stochD"));
+ const stochReadout=document.getElementById("rticStochReadout"),stochBadge=document.getElementById("rticStochBias");
+ if(!points.length||!latestStoch){
+  stochPlot.innerHTML='<p>Stochastic needs '+settings.stochPeriod+' candles plus '+settings.stochSmooth+' %K readings to seed %D. Pull historical candles and try again.</p>';
+  if(stochReadout)stochReadout.textContent="%K — • %D —";
+  if(stochBadge){stochBadge.textContent="Waiting for bars";stochBadge.className="indicator-status neutral";}
+ }else{
+  const W=600,H=190,left=12,right=32,top=14,bottom=14,plotW=W-left-right,plotH=H-top-bottom;
+  const xFor=i=>left+(points.length<=1?0:i/(points.length-1)*plotW),yFor=v=>top+(100-v)/100*plotH;
+  const grid='<rect x="12" y="'+yFor(100).toFixed(2)+'" width="'+plotW+'" height="'+(yFor(80)-yFor(100)).toFixed(2)+'" fill="#ef4444" opacity=".07"/><rect x="12" y="'+yFor(20).toFixed(2)+'" width="'+plotW+'" height="'+(yFor(0)-yFor(20)).toFixed(2)+'" fill="#22c55e" opacity=".07"/><path d="M12 '+yFor(80).toFixed(2)+'H568 M12 '+yFor(50).toFixed(2)+'H568 M12 '+yFor(20).toFixed(2)+'H568" stroke="#37483d" stroke-dasharray="4 4"/><text x="575" y="'+(yFor(80)+4).toFixed(2)+'" fill="#a5b4fc" font-size="12">80</text><text x="575" y="'+(yFor(20)+4).toFixed(2)+'" fill="#a5b4fc" font-size="12">20</text>';
+  const kPath=svgOscPath(points,"stochK",xFor,yFor),dPath=svgOscPath(points,"stochD",xFor,yFor);
+  stochPlot.innerHTML='<svg viewBox="0 0 600 190" role="img" aria-label="Calculated Stochastic percent K and percent D with 80 and 20 zones">'+grid+'<path d="'+kPath+'" fill="none" stroke="#38bdf8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="'+dPath+'" fill="none" stroke="#d946ef" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const k=Number(latestStoch.stochK),d=Number(latestStoch.stochD),state=k<=20?"%K in lower zone":k>=80?"%K in upper zone":k>d?"%K above %D":"%K below %D";
+  if(stochReadout)stochReadout.textContent="%K "+k.toFixed(2)+" • %D "+d.toFixed(2)+" — "+state+". The 20/80 zones are context, not automatic buy/sell triggers.";
+  if(stochBadge){stochBadge.textContent=k<=20?"↓ Lower zone":k>=80?"↑ Upper zone":k>d?"⬆️ K above D":k<d?"⬇️ K below D":"➡️ Aligned";stochBadge.className="indicator-status "+(k>d&&k<80?"bullish":k<d&&k>20?"bearish":"neutral");}
+ }
+}
+window.addEventListener("rolyfe:oscillators",function(e){renderRticOscillators(e.detail||{});});
 
 function loadTradingViewChart(){
  const container=document.getElementById("tradingview_chart");
@@ -1233,6 +1376,7 @@ document.addEventListener("DOMContentLoaded",()=>{
  let current="home",nodes=[];
  function category(el){
   const t=(el.innerText||el.textContent||"").toLowerCase();
+  if(el.id==="rticVisualIndicatorPanels")return "chart";
   if(el.id==="rticSecureData")return "scanner";
   if(t.includes("market control center"))return "market";
   if(t.includes("master trade plan"))return "plan";
