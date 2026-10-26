@@ -273,6 +273,7 @@ html,body{max-width:100%;overflow-x:hidden}.tradingview-shell{width:100%;max-wid
 .rtic-dock-empty strong{color:var(--green)}
 .rtic-dock-run{width:auto;min-height:34px;margin:6px 0 0;padding:6px 10px;font-size:11px}
 .rtic-focus-dock-content .rtic-scan-list{display:grid}
+.rtic-atr-guide-btn{width:100%;min-height:36px;margin:8px 0;padding:7px 10px;background:#102119;border:1px solid var(--border2);border-radius:8px;color:var(--green);font-size:12px;font-weight:800}
 </style>
 <style>
 /* Mobile-safe, expandable chart and independently calculated oscillator panes */
@@ -1534,7 +1535,7 @@ function closeRticAtrGuide(){const m=document.getElementById("rticAtrGuideModal"
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeRticAtrGuide();});
 document.addEventListener("click",e=>{const m=document.getElementById("rticAtrGuideModal");if(m&&e.target===m)closeRticAtrGuide();});
 </script>
-<script src="./js/rtic-data-engine.js?v=20261026-rtic15"></script>
+<script src="./js/rtic-data-engine.js?v=20261026-rtic16"></script>
 
 <script>
 /* RO'Lyfe workspace navigation: focused views, no lost calculators */
