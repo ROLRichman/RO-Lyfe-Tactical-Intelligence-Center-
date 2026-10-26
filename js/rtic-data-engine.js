@@ -122,7 +122,7 @@
  async function refresh(){
    const id=++requestId,button=byId("rticFetchButton"),provider=byId("rticDataProvider")?.value||"tickerbot",symbol=(byId("rticDataSymbol")?.value||"").trim().toUpperCase(),interval=byId("rticDataInterval")?.value||"1d",limit=Number(byId("rticDataLimit")?.value||300);
    if(!/^(X:)?[A-Z0-9.^_-]{1,20}$/.test(symbol)){status("Enter a valid ticker symbol, for example NVDA or SPY.","warn");return;}
-   if(provider==="coingecko"&&["BTC","ETH","SOL","XRP","LINK","HYPE"].indexOf(symbol)<0){status("CoinGecko supports BTC, ETH, SOL, XRP, LINK, and HYPE in this connector.","warn");return;}
+   if(provider==="coingecko"&&["BTC","ETH","SOL","XRP","LINK","HYPE","AVAX","DOGE"].indexOf(symbol)<0){status("CoinGecko supports BTC, ETH, SOL, XRP, LINK, HYPE, AVAX, and DOGE in this connector.","warn");return;}
    if(button){button.disabled=true;button.textContent="⏳ REQUESTING PROVIDER DATA…";}
    status("Requesting "+names[provider]+" data for "+symbol+"…");
    try{
@@ -161,5 +161,5 @@
  }
  function usePlannerSymbol(){const a=byId("symbol");if(a)setSymbol(a.value);}
  window.ROLYFEData={refresh:refresh,usePlannerSymbol:usePlannerSymbol,setSymbol:setSymbol,checkConfig:checkConfig};
- document.addEventListener("DOMContentLoaded",function(){usePlannerSymbol();checkConfig();});
+ if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){usePlannerSymbol();checkConfig();});}else{usePlannerSymbol();checkConfig();}
 })();
