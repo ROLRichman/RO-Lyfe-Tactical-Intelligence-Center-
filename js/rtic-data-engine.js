@@ -11,7 +11,7 @@
  const money=v=>Number.isFinite(v)?"$"+fmt(v,2):"—";
  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const names={tickerbot:"Tickerbot",finnhub:"Finnhub",alphavantage:"Alpha Vantage",coingecko:"CoinGecko"};
- let requestId=0,lastScannedBars=[],lastScanSymbol="",lastScanInterval="1d";
+ let requestId=0,lastScannedBars=[],lastScanSymbol="",lastScanInterval="1d",lastScanAsOf="";
  const defaultOscillatorSettings={macdFast:12,macdSlow:26,macdSignal:9,stochPeriod:14,stochSmooth:3};
  let activeOscillatorSettings={...defaultOscillatorSettings};
  try{const saved=JSON.parse(localStorage.getItem("rolyfeOscillatorSettings")||"null");if(saved&&typeof saved==="object")activeOscillatorSettings={...activeOscillatorSettings,...saved};}catch(e){}
@@ -187,10 +187,10 @@
      if(provider==="tickerbot"){
        const bars=toBars(data.bars);
        if(bars.length<25)throw new Error("Only "+bars.length+" usable historical bars returned; at least 25 are needed for a scan.");
-       lastScannedBars=bars;lastScanSymbol=symbol;lastScanInterval=interval;
+       lastScannedBars=bars;lastScanSymbol=symbol;lastScanInterval=interval;lastScanAsOf=time;
        const scan=scanBars(bars);renderScan(scan,bars,interval);
        window.dispatchEvent(new CustomEvent("rolyfe:rtic-scan",{detail:{symbol,interval,scan}}));
-       window.dispatchEvent(new CustomEvent("rolyfe:oscillators",{detail:{symbol,interval,...calculateOscillatorSeries(bars,activeOscillatorSettings)}}));
+       window.dispatchEvent(new CustomEvent("rolyfe:oscillators",{detail:{symbol,interval,asOf:time,...calculateOscillatorSeries(bars,activeOscillatorSettings)}}));
        status(names[provider]+" responded for "+(data.symbol||symbol)+". "+bars.length+" usable OHLCV bars • "+time+". Quote, RTIC scan, and MACD/Stochastic panels updated below the chart; page position kept. Verify session, freshness, and plan entitlement before use.","good");
      }else{
        byId("rticScanOutput").innerHTML='<div class="rtic-data-status warn">Quote received. Select “Tickerbot — Historical Bars + RTIC Scan” to run the 10-category technical scan.</div>';
@@ -204,7 +204,7 @@
    const next=String(value||"").trim().toUpperCase();if(!next)return;
    if(b.value.trim().toUpperCase()!==next){
      b.value=next;byId("rticQuoteOutput")&&(byId("rticQuoteOutput").innerHTML="");byId("rticScanOutput")&&(byId("rticScanOutput").innerHTML="");
-     lastScannedBars=[];lastScanSymbol=next;
+     lastScannedBars=[];lastScanSymbol=next;lastScanAsOf="";
      window.dispatchEvent(new CustomEvent("rolyfe:oscillators",{detail:{symbol:next,interval:lastScanInterval,points:[],settings:activeOscillatorSettings,cleared:true}}));
      status("Symbol changed to "+next+". Pull Secure Market Data to fetch a fresh quote or scan.","warn");
    }
@@ -226,7 +226,7 @@
    Object.entries(activeOscillatorSettings).forEach(([key,value])=>{const el=byId(map[key]);if(el)el.value=value;});
    if(!lastScannedBars.length){status("Oscillator settings saved on this device. Pull Secure Market Data to calculate the panels.","warn");return;}
    const result=calculateOscillatorSeries(lastScannedBars,activeOscillatorSettings);
-   window.dispatchEvent(new CustomEvent("rolyfe:oscillators",{detail:{symbol:lastScanSymbol,interval:lastScanInterval,...result,customSettings:true}}));
+   window.dispatchEvent(new CustomEvent("rolyfe:oscillators",{detail:{symbol:lastScanSymbol,interval:lastScanInterval,asOf:lastScanAsOf,...result,customSettings:true}}));
  }
  Object.entries(activeOscillatorSettings).forEach(([key,value])=>{const map={macdFast:"rticMacdFast",macdSlow:"rticMacdSlow",macdSignal:"rticMacdSignal",stochPeriod:"rticStochPeriod",stochSmooth:"rticStochSmooth"};const el=byId(map[key]);if(el)el.value=value;});
  window.ROLYFEData={refresh:refresh,usePlannerSymbol:usePlannerSymbol,setSymbol:setSymbol,checkConfig:checkConfig,setOscillatorSettings:setOscillatorSettings};
