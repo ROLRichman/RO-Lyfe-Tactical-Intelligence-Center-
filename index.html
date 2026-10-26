@@ -271,20 +271,25 @@ html,body{max-width:100%;overflow-x:hidden}.tradingview-shell{width:100%;max-wid
 #tradingview_chart.chart-focus-mode{position:fixed!important;inset:0!important;z-index:14000!important;width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;min-height:0!important;margin:0!important;border:0!important;border-radius:0!important;background:#07100c!important;overflow:hidden!important;contain:strict}
 #tradingview_chart.chart-focus-mode .tradingview-widget-container,#tradingview_chart.chart-focus-mode .tradingview-widget-container__widget{height:100%!important;width:100%!important}
 .rtic-chart-focus-close{display:none;position:fixed;z-index:14002;right:8px;top:8px;box-shadow:0 2px 16px rgba(0,0,0,.7)}
-.rtic-focus-indicator-dock{display:none;position:fixed;z-index:14001;left:0;right:0;bottom:0;max-height:36dvh;overflow:hidden;background:rgba(5,12,8,.98);border-top:1px solid var(--border2);box-shadow:0 -10px 35px rgba(0,0,0,.45);padding:8px 10px calc(8px + env(safe-area-inset-bottom));}
+.rtic-focus-indicator-dock{display:none;position:fixed;z-index:14001;left:0;right:0;bottom:0;height:var(--rtic-dock-height,40dvh);max-height:76dvh;min-height:48px;overflow:hidden;background:rgba(5,12,8,.985);border-top:1px solid var(--border2);border-radius:14px 14px 0 0;box-shadow:0 -10px 35px rgba(0,0,0,.5);padding:5px 10px calc(8px + env(safe-area-inset-bottom));transition:height .14s ease;backdrop-filter:blur(12px)}
 body.rtic-chart-focused .rtic-focus-indicator-dock{display:block}
-.rtic-focus-dock-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 0 7px;border-bottom:1px solid var(--border);color:var(--green);font-size:11px;font-weight:900}
-.rtic-focus-dock-head strong{min-width:0}.rtic-focus-dock-head span{margin-left:6px;color:var(--muted);font-size:10px;font-weight:700}
+.rtic-focus-dock-grab{height:22px;display:flex;align-items:center;justify-content:center;gap:8px;margin:-2px auto 3px;color:var(--muted);font-size:9px;letter-spacing:.12em;font-weight:900;touch-action:none;cursor:ns-resize;user-select:none;-webkit-user-select:none}
+.rtic-focus-dock-grab:before{content:"";display:block;width:44px;height:4px;border-radius:99px;background:#6f8879;box-shadow:0 0 0 5px rgba(111,136,121,.08)}
+.rtic-focus-dock-grab:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.rtic-focus-dock-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 0 7px;border-bottom:1px solid var(--border);color:var(--green);font-size:11px;font-weight:900}
+.rtic-focus-dock-head strong{min-width:0;display:flex;align-items:center;flex-wrap:wrap;gap:3px}.rtic-focus-dock-head span{margin-left:4px;color:var(--muted);font-size:10px;font-weight:700}.rtic-focus-dock-head #rticFocusLastPrice{color:#fff;font-size:12px}
 .rtic-focus-dock-head button{flex:0 0 auto;width:auto;min-height:34px;margin:0;padding:5px 10px;background:#132319;border:1px solid var(--border2);color:var(--green);font-size:11px}
-.rtic-focus-dock-content{max-height:calc(36dvh - 58px);overflow:auto;padding-top:7px;overscroll-behavior:contain}
-.rtic-focus-indicator-dock.collapsed{max-height:52px}
+.rtic-focus-dock-content{height:calc(100% - 61px);max-height:none;overflow:auto;padding-top:7px;overscroll-behavior:contain;scrollbar-width:thin}
+.rtic-focus-indicator-dock.collapsed{height:52px!important;min-height:52px}
 .rtic-focus-indicator-dock.collapsed .rtic-focus-dock-content{display:none}
+.rtic-focus-indicator-dock.collapsed .rtic-focus-dock-grab{height:13px;margin-bottom:0}
 .rtic-focus-dock-content .rtic-scan-list{grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:6px;margin-top:0}
 .rtic-focus-dock-content .rtic-scan-dropdown{min-width:0;background:#08120c;border:1px solid var(--border);border-radius:8px;overflow:hidden}
 .rtic-focus-dock-content .rtic-scan-row{padding:9px;margin:0;font-size:11px}
 .rtic-focus-dock-content .rtic-scan-explain{font-size:12px;padding:10px}
 .rtic-focus-dock-content .rtic-mini-visual svg{height:72px}
-@media(max-width:600px){.rtic-focus-indicator-dock{max-height:40dvh;padding:7px 7px calc(7px + env(safe-area-inset-bottom))}.rtic-focus-dock-content{max-height:calc(40dvh - 58px)}.rtic-focus-dock-content .rtic-scan-list{grid-template-columns:1fr}.rtic-focus-dock-content .rtic-mini-visual svg{height:64px}}
+@media(max-width:600px){.rtic-focus-indicator-dock{padding:4px 7px calc(7px + env(safe-area-inset-bottom))}.rtic-focus-dock-content .rtic-scan-list{grid-template-columns:1fr}.rtic-focus-dock-content .rtic-mini-visual svg{height:64px}.rtic-focus-dock-head strong{max-width:72%;line-height:1.35}.rtic-focus-dock-head button{min-height:32px;padding:4px 8px}}
+
 
 body.rtic-chart-focused{overflow:hidden!important}
 .indicator-guide-btn{width:100%;min-height:32px;margin:8px 0 0;padding:6px 7px;background:#102119;border:1px solid var(--border2);border-radius:8px;color:var(--green);font-size:11px}
@@ -572,6 +577,7 @@ body.rtic-chart-focused{overflow:hidden!important}
   <div class="rtic-chart-tools"><span class="help">Phone tip: expand the chart for more room. Sync the separate MACD/Stochastic panels to the selected chart timeframe when needed.</span><button id="rticChartSyncBtn" type="button" class="rtic-chart-sync" onclick="syncIndicatorPanelsToChart()">↻ Sync panels to chart</button><button id="rticChartExpandBtn" type="button" class="rtic-chart-expand" onclick="toggleChartFocus(true)">⛶ Expand chart</button></div>
   <div id="tradingview_chart" class="tradingview-shell"></div><button id="rticChartFocusClose" type="button" class="rtic-chart-focus-close" onclick="toggleChartFocus(false)">✕ Exit expanded chart</button>
   <aside id="rticFocusIndicatorDock" class="rtic-focus-indicator-dock" aria-label="RTIC indicator selector">
+   <div id="rticFocusDockGrab" class="rtic-focus-dock-grab" role="separator" aria-orientation="horizontal" aria-label="Drag up to show more indicators, down to show less" tabindex="0">DRAG TO RESIZE</div>
    <div class="rtic-focus-dock-head"><strong>📊 RTIC INDICATORS <span id="rticFocusIndicatorCount">11 dropdowns</span><span>LAST: <b id="rticFocusLastPrice">—</b></span></strong><button type="button" id="rticFocusDockToggle" onclick="toggleFocusIndicatorDock()" aria-expanded="true">⌄ Collapse</button></div>
    <div id="rticFocusIndicatorContent" class="rtic-focus-dock-content"><p class="small-muted">Run Pull Secure Market Data to load the 11 indicator dropdowns here.</p></div>
   </aside>
@@ -864,9 +870,23 @@ function syncFocusIndicatorDock(){
 }
 function toggleFocusIndicatorDock(){
  const dock=document.getElementById("rticFocusIndicatorDock"),button=document.getElementById("rticFocusDockToggle");if(!dock||!button)return;
- const collapsed=dock.classList.toggle("collapsed");button.textContent=collapsed?"⌃ Show indicators":"⌄ Collapse";button.setAttribute("aria-expanded",String(!collapsed));
+ const collapsed=dock.classList.toggle("collapsed");
+ if(!collapsed){dock.style.setProperty("--rtic-dock-height",Math.min(window.innerHeight*.42,window.innerHeight*.76)+"px");}
+ button.textContent=collapsed?"⌃ Show indicators":"⌄ Collapse";button.setAttribute("aria-expanded",String(!collapsed));
+}
+function initFocusDockDrag(){
+ const dock=document.getElementById("rticFocusIndicatorDock"),handle=document.getElementById("rticFocusDockGrab");if(!dock||!handle||handle.dataset.dragReady)return;handle.dataset.dragReady="1";
+ let startY=0,startHeight=0,dragging=false;
+ const heightNow=()=>Math.min(window.innerHeight*.76,Math.max(52,dock.getBoundingClientRect().height||window.innerHeight*.4));
+ handle.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;startY=e.clientY;startHeight=heightNow();dragging=true;handle.setPointerCapture?.(e.pointerId);dock.classList.add("dragging");e.preventDefault();});
+ handle.addEventListener("pointermove",e=>{if(!dragging)return;const next=startHeight+(startY-e.clientY);if(next<86){dock.classList.add("collapsed");const b=document.getElementById("rticFocusDockToggle");if(b){b.textContent="⌃ Show indicators";b.setAttribute("aria-expanded","false");}dock.style.setProperty("--rtic-dock-height","52px");return;}dock.classList.remove("collapsed");dock.style.setProperty("--rtic-dock-height",Math.min(window.innerHeight*.76,Math.max(150,next))+"px");const b=document.getElementById("rticFocusDockToggle");if(b){b.textContent="⌄ Collapse";b.setAttribute("aria-expanded","true");}});
+ const stop=()=>{if(!dragging)return;dragging=false;dock.classList.remove("dragging");};
+ handle.addEventListener("pointerup",stop);handle.addEventListener("pointercancel",stop);handle.addEventListener("lostpointercapture",stop);
+ handle.addEventListener("keydown",e=>{if(e.key==="ArrowUp"||e.key==="ArrowDown"){e.preventDefault();const next=Math.min(window.innerHeight*.76,Math.max(52,heightNow()+(e.key==="ArrowUp"?50:-50)));if(next<86){dock.classList.add("collapsed");dock.style.setProperty("--rtic-dock-height","52px");}else{dock.classList.remove("collapsed");dock.style.setProperty("--rtic-dock-height",next+"px");}}else if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleFocusIndicatorDock();}});
 }
 window.addEventListener("rolyfe:rtic-scan",syncFocusIndicatorDock);
+document.addEventListener("DOMContentLoaded",initFocusDockDrag);
+initFocusDockDrag();
 function toggleChartFocus(force){
  const chart=document.getElementById("tradingview_chart");if(!chart)return;
  const open=typeof force==="boolean"?force:!chart.classList.contains("chart-focus-mode");
@@ -1428,7 +1448,7 @@ document.addEventListener("DOMContentLoaded",()=>{
  setTimeout(()=>renderVisualChart("trade"),500);
 });
 </script>
-<script src="./js/rtic-data-engine.js?v=20261026-rtic10"></script>
+<script src="./js/rtic-data-engine.js?v=20261026-rtic11"></script>
 
 <script>
 /* RO'Lyfe workspace navigation: focused views, no lost calculators */
