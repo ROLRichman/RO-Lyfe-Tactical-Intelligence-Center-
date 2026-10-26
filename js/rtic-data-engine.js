@@ -205,12 +205,13 @@
    const next=String(value||"").trim().toUpperCase();if(!next)return;
    if(b.value.trim().toUpperCase()!==next){
      b.value=next;byId("rticQuoteOutput")&&(byId("rticQuoteOutput").innerHTML="");byId("rticScanOutput")&&(byId("rticScanOutput").innerHTML="");
+     lastScannedBars=[];lastScanSymbol=next;
+     window.dispatchEvent(new CustomEvent("rolyfe:oscillators",{detail:{symbol:next,interval:lastScanInterval,points:[],settings:activeOscillatorSettings,cleared:true}}));
      status("Symbol changed to "+next+". Pull Secure Market Data to fetch a fresh quote or scan.","warn");
    }
  }
  function usePlannerSymbol(){const a=byId("symbol");if(a)setSymbol(a.value);}
  function setOscillatorSettings(){
-   if(!lastScannedBars.length){status("Run a Tickerbot historical-bar scan first to populate MACD and Stochastic panels.","warn");return;}
    const settings={
      macdFast:byId("rticMacdFast")?.value,
      macdSlow:byId("rticMacdSlow")?.value,
@@ -218,10 +219,14 @@
      stochPeriod:byId("rticStochPeriod")?.value,
      stochSmooth:byId("rticStochSmooth")?.value
    };
-   const result=calculateOscillatorSeries(lastScannedBars,settings);
-   activeOscillatorSettings=result.settings;
+   const fast=intSetting(settings.macdFast,12,2,50);
+   let slow=intSetting(settings.macdSlow,26,3,100);if(slow<=fast)slow=Math.min(100,fast+1);
+   activeOscillatorSettings={macdFast:fast,macdSlow:slow,macdSignal:intSetting(settings.macdSignal,9,2,50),stochPeriod:intSetting(settings.stochPeriod,14,2,50),stochSmooth:intSetting(settings.stochSmooth,3,1,20)};
    try{localStorage.setItem("rolyfeOscillatorSettings",JSON.stringify(activeOscillatorSettings));}catch(e){}
-   Object.entries(activeOscillatorSettings).forEach(([key,value])=>{const map={macdFast:"rticMacdFast",macdSlow:"rticMacdSlow",macdSignal:"rticMacdSignal",stochPeriod:"rticStochPeriod",stochSmooth:"rticStochSmooth"};const el=byId(map[key]);if(el)el.value=value;});
+   const map={macdFast:"rticMacdFast",macdSlow:"rticMacdSlow",macdSignal:"rticMacdSignal",stochPeriod:"rticStochPeriod",stochSmooth:"rticStochSmooth"};
+   Object.entries(activeOscillatorSettings).forEach(([key,value])=>{const el=byId(map[key]);if(el)el.value=value;});
+   if(!lastScannedBars.length){status("Oscillator settings saved on this device. Pull Secure Market Data to calculate the panels.","warn");return;}
+   const result=calculateOscillatorSeries(lastScannedBars,activeOscillatorSettings);
    window.dispatchEvent(new CustomEvent("rolyfe:oscillators",{detail:{symbol:lastScanSymbol,interval:lastScanInterval,...result,customSettings:true}}));
  }
  Object.entries(activeOscillatorSettings).forEach(([key,value])=>{const map={macdFast:"rticMacdFast",macdSlow:"rticMacdSlow",macdSignal:"rticMacdSignal",stochPeriod:"rticStochPeriod",stochSmooth:"rticStochSmooth"};const el=byId(map[key]);if(el)el.value=value;});
