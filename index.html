@@ -1606,7 +1606,7 @@ document.addEventListener("click",e=>{const m=document.getElementById("rticAtrGu
   review:{label:"JOURNAL & PERFORMANCE",show:["performance","journal"]},
   resources:{label:"MARKET RESOURCES",show:["resources","disclosure"]}
  };
- let current="home",nodes=[];
+ let current="home",previousView="home",nodes=[];
  function category(el){
   const t=(el.innerText||el.textContent||"").toLowerCase();
   if(el.id==="rticVisualIndicatorPanels")return "chart";
@@ -1626,15 +1626,22 @@ document.addEventListener("click",e=>{const m=document.getElementById("rticAtrGu
   return "other";
  }
  function collect(){nodes=Array.from(document.querySelector("main.container").children).filter(el=>!el.classList.contains("rtic-workspace-intro")&&!el.classList.contains("rtic-quick-actions")).map(el=>({el,cat:category(el)}));}
- function closeWhatIf(){
+ function hideWhatIf(){
   const section=document.getElementById("rticWhatIfSection");
   if(section){section.classList.remove("rtic-whatif-modal");section.open=false;}
   document.body.classList.remove("rtic-whatif-open");
   document.body.style.overflow="";
  }
+ function closeWhatIf(){
+  const target=views[previousView]?previousView:"home";
+  hideWhatIf();
+  if(current==="whatif")setView(target,true);
+ }
  function setView(view,writeHash){
-  if(!views[view])view="home";current=view;const cfg=views[view];if(!nodes.length)collect();
-  if(view!=="whatif")closeWhatIf();
+  if(!views[view])view="home";
+  if(view==="whatif"&&current!=="whatif")previousView=current;
+  if(view!=="whatif")hideWhatIf();
+  current=view;const cfg=views[view];if(!nodes.length)collect();
   nodes.forEach(({el,cat})=>{
    const show=cfg.show.includes(cat)||(view==="home"&&cat==="other");
    el.classList.toggle("rtic-section-hidden",!show);
