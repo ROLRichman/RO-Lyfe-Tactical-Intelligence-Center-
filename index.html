@@ -241,6 +241,13 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 html,body{max-width:100%;overflow-x:hidden}.tradingview-shell{width:100%;max-width:100%;height:clamp(420px,70vh,700px);min-width:0;position:relative;overflow:hidden;contain:layout paint}.tradingview-widget-container,.tradingview-widget-container__widget{width:100%!important;max-width:100%!important;min-width:0!important;height:100%!important;overflow:hidden!important}.tradingview-widget-container iframe{width:100%!important;max-width:100%!important;border:0!important}.drop-body,.section-drop{min-width:0;max-width:100%}
 @media(max-width:600px){.tradingview-shell{height:clamp(390px,64svh,540px);border-radius:8px}.indicator-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.indicator-card{padding:10px 6px}.indicator-modal{padding:9px}.indicator-modal-card{padding:15px}}
 .rtic-scan-dropdown{border-bottom:1px solid var(--border);margin:0}.rtic-scan-dropdown>summary{list-style:none;cursor:pointer;gap:10px}.rtic-scan-dropdown>summary::-webkit-details-marker{display:none}.rtic-scan-dropdown>summary:after{content:"＋";color:var(--green);font-weight:800;align-self:center}.rtic-scan-dropdown[open]>summary:after{content:"−"}.rtic-scan-dropdown .rtic-scan-row{border-bottom:0}.rtic-expand-hint{display:block;color:var(--muted);font-size:11px;margin-top:5px}.rtic-scan-explain{padding:12px 14px 14px;background:rgba(80,110,130,.09);border-top:1px solid var(--border);font-size:13px;line-height:1.55}.rtic-scan-explain p{margin:6px 0}.rtic-scan-current{padding:9px 10px;margin:0 0 10px;border-left:3px solid var(--green);background:rgba(60,190,120,.08);border-radius:0 8px 8px 0}.rtic-scan-current strong{color:var(--green)}.rtic-scan-explain .small-muted{font-size:11px}
+
+/* Compact, accessible per-category indicator mini charts */
+.rtic-mini-visual{margin:12px 0 10px;padding:10px;background:#06100a;border:1px solid var(--border);border-radius:10px;min-width:0;overflow:hidden}
+.rtic-mini-visual svg{display:block;width:100%;height:100px;max-width:100%;overflow:visible}
+.rtic-mini-caption{margin-top:5px;color:var(--muted);font-size:11px;line-height:1.45}
+.rtic-scan-dropdown>summary:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+@media(max-width:420px){.rtic-mini-visual{padding:7px}.rtic-mini-visual svg{height:86px}.rtic-mini-caption{font-size:10px}}
 </style>
 <style>
 /* Mobile-safe, expandable chart and independently calculated oscillator panes */
@@ -1379,7 +1386,7 @@ document.addEventListener("DOMContentLoaded",()=>{
  setTimeout(()=>renderVisualChart("trade"),500);
 });
 </script>
-<script src="./js/rtic-data-engine.js?v=20261026-rtic8"></script>
+<script src="./js/rtic-data-engine.js?v=20261026-rtic9"></script>
 
 <script>
 /* RO'Lyfe workspace navigation: focused views, no lost calculators */
