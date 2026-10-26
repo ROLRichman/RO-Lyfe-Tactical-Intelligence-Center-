@@ -175,10 +175,11 @@
  function miniVisual(test,bars){
    const W=320,H=92,L=8,R=8,T=8,B=17,innerW=W-L-R,innerH=H-T-B;
    const closes=bars.map(b=>b.close),last=bars[bars.length-1];
-   const line=(values,color,dash="")=>{
+   const line=(values,color,dash="",sharedScale=null)=>{
      const valid=values.map((v,i)=>({v,i})).filter(p=>Number.isFinite(p.v));
      if(valid.length<2)return "";
-     const min=Math.min(...valid.map(p=>p.v)),max=Math.max(...valid.map(p=>p.v)),range=max-min||1;
+     const scale=(Array.isArray(sharedScale)?sharedScale:valid.map(p=>p.v)).filter(Number.isFinite);
+     const min=Math.min(...scale),max=Math.max(...scale),range=max-min||1;
      const pts=valid.map(p=>(L+p.i/(values.length-1)*innerW).toFixed(1)+","+(T+innerH-(p.v-min)/range*innerH).toFixed(1)).join(" ");
      return '<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '+(dash?'stroke-dasharray="'+dash+'"':'')+'/>';
    };
@@ -191,19 +192,30 @@
      const max=Math.max(0.000001,...trs);
      drawing=trs.map((v,i)=>'<rect x="'+(L+i/(trs.length-1)*innerW).toFixed(1)+'" y="'+(T+innerH*(1-v/max)).toFixed(1)+'" width="4" height="'+(innerH*v/max).toFixed(1)+'" fill="'+(i===trs.length-1?"#ffd54f":"#4b8062")+'" rx="1"/>').join("");
      caption="True range bars • ATR(14) is the average of the latest 14 true ranges";
+   }else if(name.indexOf("EMA 5/10/20 Alignment")>=0){
+     const base=bars.slice(-48),c=base.map(b=>b.close);
+     const e5=emaSeries(closes,5).slice(-48),e10=emaSeries(closes,10).slice(-48),e20=emaSeries(closes,20).slice(-48);
+     const shared=c.concat(e5,e10,e20);
+     drawing=line(c,"#eaf4ee","",shared)+line(e5,"#00e676","",shared)+line(e10,"#4da3ff","",shared)+line(e20,"#ffd54f","",shared);
+     caption="Close (white) • EMA 5 (green) • EMA 10 (blue) • EMA 20 (yellow)";
    }else if(name.indexOf("EMA 200")>=0||name.indexOf("EMA 50")>=0||name.indexOf("SMA 20")>=0){
      const k=name.indexOf("EMA 200")>=0?200:name.indexOf("EMA 50")>=0?50:20;
      const base=bars.slice(-48),c=base.map(b=>b.close);
-     drawing=line(c,"#eaf4ee");
-     if(k===200||k===50)drawing+=line(emaSeries(closes,k).slice(-48),"#00e676","5 3");
-     if(k===20)drawing+=line(closes.map((v,i)=>i>=19?closes.slice(i-19,i+1).reduce((a,b)=>a+b,0)/20:NaN).slice(-48),"#ffd54f","2 3");
+     let avg;
+     if(k===200||k===50)avg=emaSeries(closes,k).slice(-48);
+     else avg=closes.map((v,i)=>i>=19?closes.slice(i-19,i+1).reduce((a,b)=>a+b,0)/20:NaN).slice(-48);
+     const shared=c.concat(avg);
+     drawing=line(c,"#eaf4ee","",shared);
+     if(k===200||k===50)drawing+=line(avg,"#00e676","5 3",shared);
+     if(k===20)drawing+=line(avg,"#ffd54f","2 3",shared);
      caption=k===200?"Close (white) vs EMA 200 (green)":k===50?"Close (white) vs EMA 50 (green)":"Close (white) vs SMA 20 (yellow)";
    }else if(name.indexOf("MACD")>=0){
      const o=calculateOscillatorSeries(bars),pts=o.points.slice(-48),m=pts.map(p=>p.macd),sig=pts.map(p=>p.signal),hist=pts.map(p=>p.histogram);
      drawing='<line x1="8" y1="45" x2="312" y2="45" stroke="#718078" stroke-dasharray="3 4"/>';
      const valid=hist.filter(Number.isFinite),max=Math.max(0.000001,...valid.map(v=>Math.abs(v)));
      drawing+=hist.map((v,i)=>Number.isFinite(v)?'<line x1="'+(L+i/(hist.length-1)*innerW).toFixed(1)+'" y1="45" x2="'+(L+i/(hist.length-1)*innerW).toFixed(1)+'" y2="'+(45-v/max*28).toFixed(1)+'" stroke="'+(v>=0?"#00e676":"#ff5c5c")+'" stroke-width="2"/>':"").join("");
-     drawing+=line(m,"#4da3ff")+line(sig,"#ffd54f","4 3");caption="MACD line (blue), signal (yellow), histogram (green/red)";
+     const shared=m.concat(sig);
+     drawing+=line(m,"#4da3ff","",shared)+line(sig,"#ffd54f","4 3",shared);caption="MACD line (blue), signal (yellow), histogram (green/red)";
    }else if(name.indexOf("RSI")>=0){
      const vals=[];for(let i=0;i<closes.length;i++)vals.push(i<14?NaN:rsi(closes.slice(0,i+1)));
      const v=vals.slice(-48);drawing='<rect x="8" y="'+(T+innerH*(1-.7))+'" width="304" height="'+(innerH*.4)+'" fill="rgba(255,213,79,.08)"/><line x1="8" y1="'+(T+innerH*.3)+'" x2="312" y2="'+(T+innerH*.3)+'" stroke="#ffd54f" stroke-dasharray="3 3"/><line x1="8" y1="'+(T+innerH*.7)+'" x2="312" y2="'+(T+innerH*.7)+'" stroke="#ffd54f" stroke-dasharray="3 3"/>';
