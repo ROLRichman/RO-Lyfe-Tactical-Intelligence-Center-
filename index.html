@@ -262,6 +262,21 @@ html,body{max-width:100%;overflow-x:hidden}.tradingview-shell{width:100%;max-wid
 #tradingview_chart.chart-focus-mode{position:fixed!important;inset:0!important;z-index:14000!important;width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;min-height:0!important;margin:0!important;border:0!important;border-radius:0!important;background:#07100c!important;overflow:hidden!important;contain:strict}
 #tradingview_chart.chart-focus-mode .tradingview-widget-container,#tradingview_chart.chart-focus-mode .tradingview-widget-container__widget{height:100%!important;width:100%!important}
 .rtic-chart-focus-close{display:none;position:fixed;z-index:14002;right:8px;top:8px;box-shadow:0 2px 16px rgba(0,0,0,.7)}
+.rtic-focus-indicator-dock{display:none;position:fixed;z-index:14001;left:0;right:0;bottom:0;max-height:36dvh;overflow:hidden;background:rgba(5,12,8,.98);border-top:1px solid var(--border2);box-shadow:0 -10px 35px rgba(0,0,0,.45);padding:8px 10px calc(8px + env(safe-area-inset-bottom));}
+body.rtic-chart-focused .rtic-focus-indicator-dock{display:block}
+.rtic-focus-dock-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 0 7px;border-bottom:1px solid var(--border);color:var(--green);font-size:11px;font-weight:900}
+.rtic-focus-dock-head strong{min-width:0}.rtic-focus-dock-head span{margin-left:6px;color:var(--muted);font-size:10px;font-weight:700}
+.rtic-focus-dock-head button{flex:0 0 auto;width:auto;min-height:34px;margin:0;padding:5px 10px;background:#132319;border:1px solid var(--border2);color:var(--green);font-size:11px}
+.rtic-focus-dock-content{max-height:calc(36dvh - 58px);overflow:auto;padding-top:7px;overscroll-behavior:contain}
+.rtic-focus-indicator-dock.collapsed{max-height:52px}
+.rtic-focus-indicator-dock.collapsed .rtic-focus-dock-content{display:none}
+.rtic-focus-dock-content .rtic-scan-list{grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:6px;margin-top:0}
+.rtic-focus-dock-content .rtic-scan-dropdown{min-width:0;background:#08120c;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.rtic-focus-dock-content .rtic-scan-row{padding:9px;margin:0;font-size:11px}
+.rtic-focus-dock-content .rtic-scan-explain{font-size:12px;padding:10px}
+.rtic-focus-dock-content .rtic-mini-visual svg{height:72px}
+@media(max-width:600px){.rtic-focus-indicator-dock{max-height:40dvh;padding:7px 7px calc(7px + env(safe-area-inset-bottom))}.rtic-focus-dock-content{max-height:calc(40dvh - 58px)}.rtic-focus-dock-content .rtic-scan-list{grid-template-columns:1fr}.rtic-focus-dock-content .rtic-mini-visual svg{height:64px}}
+
 body.rtic-chart-focused{overflow:hidden!important}
 .indicator-guide-btn{width:100%;min-height:32px;margin:8px 0 0;padding:6px 7px;background:#102119;border:1px solid var(--border2);border-radius:8px;color:var(--green);font-size:11px}
 .indicator-card .indicator-guide-btn:hover{background:#173323}
@@ -547,6 +562,10 @@ body.rtic-chart-focused{overflow:hidden!important}
   </div>
   <div class="rtic-chart-tools"><span class="help">Phone tip: expand the chart for more room. Sync the separate MACD/Stochastic panels to the selected chart timeframe when needed.</span><button id="rticChartSyncBtn" type="button" class="rtic-chart-sync" onclick="syncIndicatorPanelsToChart()">↻ Sync panels to chart</button><button id="rticChartExpandBtn" type="button" class="rtic-chart-expand" onclick="toggleChartFocus(true)">⛶ Expand chart</button></div>
   <div id="tradingview_chart" class="tradingview-shell"></div><button id="rticChartFocusClose" type="button" class="rtic-chart-focus-close" onclick="toggleChartFocus(false)">✕ Exit expanded chart</button>
+  <aside id="rticFocusIndicatorDock" class="rtic-focus-indicator-dock" aria-label="RTIC indicator selector">
+   <div class="rtic-focus-dock-head"><strong>📊 RTIC INDICATORS <span id="rticFocusIndicatorCount">10 dropdowns</span></strong><button type="button" id="rticFocusDockToggle" onclick="toggleFocusIndicatorDock()" aria-expanded="true">⌄ Collapse</button></div>
+   <div id="rticFocusIndicatorContent" class="rtic-focus-dock-content"><p class="small-muted">Run Pull Secure Market Data to load the 10 indicator dropdowns here.</p></div>
+  </aside>
   <div class="chart-actions">
    <a id="tvOpenLink" href="https://www.tradingview.com/chart/" target="_blank" rel="noopener">↗ Open Current Symbol in TradingView</a>
    <a href="https://www.tradingview.com/chart/" target="_blank" rel="noopener">🔎 Full TradingView Symbol Search</a>
@@ -826,6 +845,18 @@ function syncIndicatorPanelsToChart(){
  if(source)source.textContent="Syncing RTIC oscillator panels to "+labels[currentTimeframe]+" chart context using Tickerbot historical candles…";
  if(window.ROLYFEData)window.ROLYFEData.refresh();
 }
+function syncFocusIndicatorDock(){
+ const dock=document.getElementById("rticFocusIndicatorContent"),source=document.querySelector("#rticScanOutput .rtic-scan-list"),count=document.getElementById("rticFocusIndicatorCount");
+ if(!dock)return;
+ if(!source){dock.innerHTML='<p class="small-muted">Run Pull Secure Market Data to load the 10 indicator dropdowns here.</p>';if(count)count.textContent="10 dropdowns";return;}
+ const clone=source.cloneNode(true);dock.replaceChildren(clone);
+ const total=clone.querySelectorAll(".rtic-scan-dropdown").length;if(count)count.textContent=total+" dropdowns";
+}
+function toggleFocusIndicatorDock(){
+ const dock=document.getElementById("rticFocusIndicatorDock"),button=document.getElementById("rticFocusDockToggle");if(!dock||!button)return;
+ const collapsed=dock.classList.toggle("collapsed");button.textContent=collapsed?"⌃ Show indicators":"⌄ Collapse";button.setAttribute("aria-expanded",String(!collapsed));
+}
+window.addEventListener("rolyfe:rtic-scan",syncFocusIndicatorDock);
 function toggleChartFocus(force){
  const chart=document.getElementById("tradingview_chart");if(!chart)return;
  const open=typeof force==="boolean"?force:!chart.classList.contains("chart-focus-mode");
@@ -833,6 +864,7 @@ function toggleChartFocus(force){
  const close=document.getElementById("rticChartFocusClose"),expand=document.getElementById("rticChartExpandBtn");
  if(close)close.style.display=open?"block":"none";
  if(expand)expand.textContent=open?"↙ Return to page":"⛶ Expand chart";
+ if(open){syncFocusIndicatorDock();const dock=document.getElementById("rticFocusIndicatorDock");if(dock)dock.classList.remove("collapsed");const btn=document.getElementById("rticFocusDockToggle");if(btn){btn.textContent="⌄ Collapse";btn.setAttribute("aria-expanded","true");}}
 }
 function toggleOscillatorPlot(kind){
  const plot=document.getElementById(kind==="macd"?"rticMacdPlot":"rticStochPlot");
