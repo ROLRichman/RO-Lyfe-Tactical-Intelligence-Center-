@@ -257,6 +257,22 @@ html,body{max-width:100%;overflow-x:hidden}.tradingview-shell{width:100%;max-wid
 .rtic-atr-grid small{margin-top:3px;font-weight:500}
 .rtic-atr-card .small-muted{margin:10px 0 0;line-height:1.55}
 @media(max-width:420px){.rtic-mini-visual{padding:7px}.rtic-mini-visual svg{height:86px}.rtic-mini-caption{font-size:10px}.rtic-atr-grid strong{font-size:12px}.rtic-atr-grid span{font-size:8px}}
+/* RO’Lyfe coach resource library + accessible ATR explainer */
+.rtic-resource-heading{margin:18px 0 9px;color:var(--green);font-size:13px;letter-spacing:.03em}
+.rtic-coach-library{margin-top:14px}
+.rtic-guide-overlay[hidden]{display:none!important}
+.rtic-guide-overlay{position:fixed;inset:0;z-index:16000;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(0,0,0,.78)}
+.rtic-guide-card{width:min(560px,100%);max-height:88dvh;overflow:auto;padding:17px;background:#07100c;border:1px solid var(--border2);border-radius:16px;box-shadow:0 22px 70px rgba(0,0,0,.65);color:#e6f0e9;line-height:1.55}
+.rtic-guide-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.rtic-guide-head h2{margin:0;color:var(--green);font-size:18px}
+.rtic-guide-head button{width:auto;min-height:36px;margin:0;padding:5px 10px;background:#132319}
+.rtic-guide-level{display:grid;gap:4px;padding:11px;margin:9px 0;background:#0c1a11;border:1px solid var(--border);border-radius:9px}
+.rtic-guide-level strong{color:var(--green)}
+.rtic-guide-done{width:100%;margin-top:8px}
+.rtic-dock-empty{padding:14px;background:#08120c;border:1px solid var(--border2);border-radius:10px;color:#dce7df;font-size:12px;line-height:1.5}
+.rtic-dock-empty strong{color:var(--green)}
+.rtic-dock-run{width:auto;min-height:34px;margin:6px 0 0;padding:6px 10px;font-size:11px}
+.rtic-focus-dock-content .rtic-scan-list{display:grid}
 </style>
 <style>
 /* Mobile-safe, expandable chart and independently calculated oscillator panes */
@@ -681,6 +697,43 @@ body.rtic-chart-focused{overflow:hidden!important}
    <a class="market-link" href="https://finance.yahoo.com/" target="_blank" rel="noopener">📈 Yahoo Finance<span>Futures • News • Market overview</span></a>
    <a class="market-link" href="https://www.schwab.com/trading/thinkorswim" target="_blank" rel="noopener">🧠 thinkorswim<span>Schwab's thinkorswim desktop, web and mobile platforms</span></a>
   </div>
+  <details class="section-drop rtic-coach-library" open>
+   <summary>🎓 RO’LYFE TRADING CLASSROOM &amp; COACH LIBRARY</summary>
+   <div class="drop-body">
+    <p class="chart-description">A curated collection of Market Watch Group learning materials, trading logs, planning documents, and market research links. Use these resources for study and coach review; they do not provide automatic trade signals.</p>
+    <h3 class="rtic-resource-heading">RO’Lyfe Classroom</h3>
+    <div class="link-grid">
+     <a class="market-link" href="https://rolrichman.github.io/RO-Lyfe-Trading-Intelligence-Classroom/" target="_blank" rel="noopener">🏫 RO’Lyfe Trading Intelligence Classroom<span>Stock-first study, chart lab, strategy comparison, and trading education</span></a>
+     <a class="market-link" href="https://www.tradingview.com/pricing/?share_your_love=Richman29&amp;mobileapp=true" target="_blank" rel="noopener">📈 TradingView<span>Explore plans and charting tools</span></a>
+    </div>
+    <h3 class="rtic-resource-heading">Community &amp; lessons</h3>
+    <div class="link-grid">
+     <a class="market-link" href="https://marketwatchgroup.circle.so/join?invitation_token=b2df14a8b788444ba1048e625bddf225d13ec6be-78234a93-c284-46f5-9f43-a9913c065fb8" target="_blank" rel="noopener">👥 Market Watch Group on Circle<span>Community has moved from Discord to Circle; check current membership access</span></a>
+     <a class="market-link" href="https://youtu.be/HfZTCZTDfWk?si=W7awh8Tj219N3jLK" target="_blank" rel="noopener">🕓 The 4-Hour Trading Lesson<span>Coach-shared lesson video</span></a>
+     <a class="market-link" href="https://www.youtube.com/@TheMarketWatchGroup/videos" target="_blank" rel="noopener">📺 Market Watch Group YouTube<span>Trading lessons and community videos</span></a>
+     <a class="market-link" href="https://docs.google.com/document/d/14i6xHsf6x6qPeP69HGoOU8_O2oovNkzcLDa4ESh3EoI" target="_blank" rel="noopener">📚 Market Watch Content Library<span>Trading plans, market posture, stock and options foundations</span></a>
+    </div>
+    <h3 class="rtic-resource-heading">Trading logs &amp; planning documents</h3>
+    <div class="link-grid">
+     <a class="market-link" href="https://mcusercontent.com/c137ea973e64f42b7a794fc66/files/e1a013cc-1575-b194-1691-365642a71e12/Market_Watch_Option_Log.xlsx" target="_blank" rel="noopener">🧾 Option Trading Log<span>Download the coach-shared spreadsheet</span></a>
+     <a class="market-link" href="https://mcusercontent.com/c137ea973e64f42b7a794fc66/files/fbad17b0-75ae-0b73-78c8-1c0cb192b93e/Market_Watch_Stock_Log.xlsx" target="_blank" rel="noopener">📓 Stock Trading Log<span>Download the coach-shared spreadsheet</span></a>
+     <a class="market-link" href="https://mcusercontent.com/c137ea973e64f42b7a794fc66/files/b4eee03e-26f1-a424-8d09-47bb8dfb5cda/MWG_Market_Posture_Log.xlsx" target="_blank" rel="noopener">🧭 Market Posture Log<span>Blank worksheet for market context</span></a>
+     <a class="market-link" href="https://mcusercontent.com/c137ea973e64f42b7a794fc66/files/03e447c8-02ef-93e2-69ca-d67bd8265af5/MWAG_Trading_Plan_Outline.docx" target="_blank" rel="noopener">📝 Trading Plan Outline<span>Core plan document for preparation and review</span></a>
+     <a class="market-link" href="https://docs.google.com/document/d/1jRqtSbGeprcuGxdC3mu7H2NfLMdKtf0lbon2Z1wDarw/edit?usp=sharing" target="_blank" rel="noopener">📋 Sample Trading Plan<span>Example structure for planning a trade</span></a>
+     <a class="market-link" href="https://docs.google.com/spreadsheets/d/1ulSmS_AKrCKXtFNlcoVfj1LNE8WRb-btMNXFIJFVPFE/edit?usp=sharing" target="_blank" rel="noopener">🗂️ Historical Market Posture<span>Reference spreadsheet for prior market context</span></a>
+     <a class="market-link" href="https://mcusercontent.com/c137ea973e64f42b7a794fc66/files/bce197a1-aa6a-7a05-1edb-b70f0cb9b59f/MWAG_Top_Ten_Trading_Mistakes.docx" target="_blank" rel="noopener">⚠️ Top Ten Trading Mistakes<span>Review common process and execution errors</span></a>
+    </div>
+    <h3 class="rtic-resource-heading">First Stock Trade • six-part learning series</h3>
+    <div class="link-grid">
+     <a class="market-link" href="https://youtu.be/_BxNhfL8TVo" target="_blank" rel="noopener">1️⃣ The Basics<span>Start here</span></a>
+     <a class="market-link" href="https://youtu.be/iX269TC6Ebs" target="_blank" rel="noopener">2️⃣ Choosing a Stock<span>Build a watchlist candidate</span></a>
+     <a class="market-link" href="https://youtu.be/y45MIAKcdZQ" target="_blank" rel="noopener">3️⃣ Preparing the Trade<span>Plan entry, stop, and target</span></a>
+     <a class="market-link" href="https://youtu.be/3KdTgwGlWE8" target="_blank" rel="noopener">4️⃣ Executing the Trade<span>Understand order execution</span></a>
+     <a class="market-link" href="https://youtu.be/bf2lVJoU3b0" target="_blank" rel="noopener">5️⃣ Managing the Trade<span>Manage risk and exits</span></a>
+     <a class="market-link" href="https://youtu.be/6jagYoeQwYU" target="_blank" rel="noopener">6️⃣ After the Trade<span>Review and learn from the outcome</span></a>
+    </div>
+   </div>
+  </details>
  </div>
 </details>
 
@@ -873,12 +926,12 @@ function syncIndicatorPanelsToChart(){
  if(window.ROLYFEData)window.ROLYFEData.refresh();
 }
 function syncFocusIndicatorDock(){
- const dock=document.getElementById("rticFocusIndicatorContent"),source=document.querySelector("#rticScanOutput .rtic-scan-list"),count=document.getElementById("rticFocusIndicatorCount"),lastPrice=document.getElementById("rticFocusLastPrice");
+ const dock=document.getElementById("rticFocusIndicatorContent"),out=document.getElementById("rticScanOutput"),source=out&&out.querySelector(".rtic-scan-list"),count=document.getElementById("rticFocusIndicatorCount"),lastPrice=document.getElementById("rticFocusLastPrice");
  if(!dock)return;
- if(!source){dock.innerHTML='<p class="small-muted">Run Pull Secure Market Data to load the 11 indicator dropdowns here.</p>';if(count)count.textContent="11 dropdowns";if(lastPrice)lastPrice.textContent="—";return;}
- const clone=source.cloneNode(true);dock.replaceChildren(clone);
+ if(!source||!source.querySelector(".rtic-scan-dropdown")){dock.innerHTML='<div class="rtic-dock-empty"><strong>Indicators are waiting for scan data</strong><p>Choose Tickerbot — Historical Bars + RTIC Scan, then tap Pull Secure Market Data. After a successful scan, your indicator cards and mini visuals appear here.</p><button type="button" class="rtic-dock-run" onclick="ROLYFEData.refresh()">↻ Run indicator scan</button></div>';if(count)count.textContent="11 dropdowns";if(lastPrice)lastPrice.textContent="—";return;}
+ const clone=source.cloneNode(true);clone.querySelectorAll("details").forEach(d=>d.open=false);dock.replaceChildren(clone);
  const total=clone.querySelectorAll(".rtic-scan-dropdown").length;if(count)count.textContent=total+" dropdowns";
- const price=source.querySelector(".rtic-atr-last-close");if(lastPrice)lastPrice.textContent=price?price.textContent:"—";
+ const price=out.querySelector(".rtic-atr-last-close");if(lastPrice)lastPrice.textContent=price?price.textContent:(out.querySelector(".rtic-data-metric.rtic-scan-score")?"Loaded":"—");
 }
 function toggleFocusIndicatorDock(){
  const dock=document.getElementById("rticFocusIndicatorDock"),button=document.getElementById("rticFocusDockToggle");if(!dock||!button)return;
@@ -897,6 +950,7 @@ function initFocusDockDrag(){
  handle.addEventListener("keydown",e=>{if(e.key==="ArrowUp"||e.key==="ArrowDown"){e.preventDefault();const next=Math.min(window.innerHeight*.76,Math.max(52,heightNow()+(e.key==="ArrowUp"?50:-50)));if(next<86){dock.classList.add("collapsed");dock.style.setProperty("--rtic-dock-height","62px");}else{dock.classList.remove("collapsed");dock.style.setProperty("--rtic-dock-height",next+"px");}}else if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleFocusIndicatorDock();}});
 }
 window.addEventListener("rolyfe:rtic-scan",syncFocusIndicatorDock);
+const rticScanOutputNode=document.getElementById("rticScanOutput");if(rticScanOutputNode&&"MutationObserver" in window){new MutationObserver(()=>{if(document.body.classList.contains("rtic-chart-focused"))syncFocusIndicatorDock();}).observe(rticScanOutputNode,{childList:true,subtree:true});}
 document.addEventListener("DOMContentLoaded",initFocusDockDrag);
 initFocusDockDrag();
 function toggleChartFocus(force){
@@ -1460,7 +1514,27 @@ document.addEventListener("DOMContentLoaded",()=>{
  setTimeout(()=>renderVisualChart("trade"),500);
 });
 </script>
-<script src="./js/rtic-data-engine.js?v=20261026-rtic14"></script>
+<!-- RO'LYFE ATR strategy explainer -->
+<div id="rticAtrGuideModal" class="rtic-guide-overlay" role="dialog" aria-modal="true" aria-labelledby="rticAtrGuideTitle" hidden>
+ <div class="rtic-guide-card">
+  <div class="rtic-guide-head"><h2 id="rticAtrGuideTitle">🛡️ RO’Lyfe ATR Stop Strategy Guide</h2><button type="button" onclick="closeRticAtrGuide()" aria-label="Close ATR strategy guide">✕</button></div>
+  <p>ATR(14) estimates typical price movement over the selected candle timeframe. It is a volatility distance in dollars per share—not the stock price and not a guaranteed stop fill.</p>
+  <div class="rtic-guide-level"><strong>LOW • 1.0× ATR</strong><span>Tighter stop. Normal movement may hit it; use only when chart structure supports the level.</span></div>
+  <div class="rtic-guide-level"><strong>MEDIUM • 1.5× ATR</strong><span>A middle-ground planning reference, provided it fits the setup's structure and risk limit.</span></div>
+  <div class="rtic-guide-level"><strong>HIGH • 2.0× ATR</strong><span>Wider stop. Gives price more room but increases risk per share if position size stays unchanged.</span></div>
+  <p><strong>Formula:</strong> Long stop = latest returned close − (ATR × multiplier). Short stop = latest returned close + (ATR × multiplier).</p>
+  <p><strong>Position sizing:</strong> shares = maximum planned dollar risk ÷ distance from entry to stop. Reduce share count as the stop gets wider.</p>
+  <p class="small-muted">Use completed candles when possible; use 1D bars for a daily swing. Stock ATR stops do not directly determine an options-contract stop because premium also responds to volatility and time decay.</p>
+  <button type="button" class="rtic-guide-done" onclick="closeRticAtrGuide()">Got it</button>
+ </div>
+</div>
+<script>
+function showRticAtrGuide(){const m=document.getElementById("rticAtrGuideModal");if(m){m.hidden=false;document.body.classList.add("rtic-guide-open");const b=m.querySelector("button");if(b)b.focus();}}
+function closeRticAtrGuide(){const m=document.getElementById("rticAtrGuideModal");if(m){m.hidden=true;document.body.classList.remove("rtic-guide-open");}}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeRticAtrGuide();});
+document.addEventListener("click",e=>{const m=document.getElementById("rticAtrGuideModal");if(m&&e.target===m)closeRticAtrGuide();});
+</script>
+<script src="./js/rtic-data-engine.js?v=20261026-rtic15"></script>
 
 <script>
 /* RO'Lyfe workspace navigation: focused views, no lost calculators */
