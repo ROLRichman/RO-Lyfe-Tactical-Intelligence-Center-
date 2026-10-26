@@ -235,6 +235,20 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 @media(max-width:480px){.rtic-view-label{font-size:10px;padding:7px}.rtic-top-title{font-size:12px}.rtic-step-row{grid-template-columns:1fr}.rtic-quick-actions{grid-template-columns:1fr 1fr}.logo-title{font-size:clamp(23px,7vw,35px)}.logo-subtitle{font-size:12px}}
 
 
+/* Full-screen What-If Scenario Lab */
+body.rtic-whatif-open{overflow:hidden!important}
+details.rtic-whatif-modal{position:fixed!important;inset:0!important;z-index:15000!important;display:block!important;width:100vw!important;height:100dvh!important;max-width:none!important;overflow-y:auto!important;overscroll-behavior:contain;margin:0!important;padding:10px 12px calc(24px + env(safe-area-inset-bottom))!important;border:0!important;border-radius:0!important;background:radial-gradient(circle at top,#143525 0%,#07100c 48%,#030604 100%)!important;box-shadow:none!important}
+details.rtic-whatif-modal>summary{position:sticky;top:0;z-index:4;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 10px;background:rgba(5,10,7,.97);border-bottom:1px solid var(--border2);font-size:14px}
+details.rtic-whatif-modal .drop-body{width:100%;max-width:1100px;margin:0 auto;padding:12px 0 24px}
+.rtic-whatif-modal-head{position:sticky;top:44px;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px;padding:10px;background:rgba(7,16,12,.97);border:1px solid var(--border);border-radius:12px}
+.rtic-whatif-modal-head strong{display:block;color:var(--green);font-size:12px}
+.rtic-whatif-modal-head span{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.rtic-whatif-modal-head button{flex:0 0 auto;width:auto;min-height:40px;margin:0;padding:8px 12px}
+.rtic-whatif-modal .whatif-controls{grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr))}
+.rtic-whatif-modal .scenario-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.rtic-whatif-modal .scenario{min-width:0}
+@media(max-width:480px){details.rtic-whatif-modal{padding-left:9px!important;padding-right:9px!important}.rtic-whatif-modal-head{top:42px}.rtic-whatif-modal-head span{max-width:180px;line-height:1.4}}
+
 /* Indicator pop-up and responsive chart containment */
 .indicator-card{cursor:pointer;min-width:0;transition:border-color .15s,transform .15s}.indicator-card:hover,.indicator-card:focus{border-color:var(--green);outline:2px solid rgba(0,230,118,.25)}
 .indicator-modal{display:none;position:fixed;inset:0;z-index:12000;align-items:center;justify-content:center;padding:14px}.indicator-modal.open{display:flex}.indicator-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.8)}.indicator-modal-card{position:relative;z-index:1;width:min(520px,100%);max-height:88dvh;overflow:auto;padding:18px;background:#08120d;border:1px solid var(--green);border-radius:18px;box-shadow:0 20px 70px #000}.indicator-modal-card h3{margin:4px 45px 14px 0;font-size:21px}.indicator-modal-card p{line-height:1.55}.indicator-modal-close{position:absolute;right:12px;top:12px;width:40px;min-height:40px;margin:0;padding:6px;background:#14231a;color:#fff}.indicator-modal-visual{min-height:120px;padding:8px;background:#050b08;border:1px solid var(--border);border-radius:12px;overflow:hidden}.indicator-modal-visual svg{display:block;width:100%;height:auto}.indicator-modal-note{color:var(--muted);font-size:11px}.eyebrow{color:var(--green);font-size:10px;font-weight:900;letter-spacing:.12em}
@@ -566,10 +580,11 @@ body.rtic-chart-focused{overflow:hidden!important}
  </div>
 </details>
 
-<!-- WHAT IF -->
-<details class="section-drop">
- <summary>🧠 RO'LYFE WHAT-IF PSYCHOLOGY ENGINE</summary>
+<!-- WHAT IF: opens as a full-screen scenario workspace from the side menu -->
+<details class="section-drop" id="rticWhatIfSection">
+ <summary>🧠 RO'LYFE WHAT-IF SCENARIO LAB</summary>
  <div class="drop-body">
+  <div class="rtic-whatif-modal-head"><div><strong>FULL-SCREEN SCENARIO LAB</strong><span>Change one variable before the trade. Review the consequence before risking capital.</span></div><button type="button" class="secondary-btn" onclick="ROLYFEWorkspace.closeWhatIf()" aria-label="Close full-screen What-If Scenario Lab">✕ CLOSE</button></div>
   <p class="psychology-intro">Change one variable before the trade. The engine exposes the consequence before capital is exposed.</p>
   <div class="whatif-controls">
    <div><label>Psychology Account</label><input id="whatIfAccount" type="number" step="0.01" value="100"></div>
@@ -727,6 +742,15 @@ body.rtic-chart-focused{overflow:hidden!important}
    <a class="market-link" href="https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html" target="_blank" rel="noopener">🏦 CME FedWatch<span>Interest-rate expectations</span></a>
    <a class="market-link" href="https://finance.yahoo.com/" target="_blank" rel="noopener">📈 Yahoo Finance<span>Futures • News • Market overview</span></a>
    <a class="market-link" href="https://www.schwab.com/trading/thinkorswim" target="_blank" rel="noopener">🧠 thinkorswim<span>Schwab's thinkorswim desktop, web and mobile platforms</span></a>
+  </div>
+  <h3 class="rtic-resource-heading">🔌 Market Data Providers &amp; API Setup</h3>
+  <p class="chart-description">FinancialData.Net replied to your API inquiry. You have not yet confirmed an account or API key, so this is a provider link only—not a live connection. Start with historical daily data; verify subscription access before relying on intraday, real-time, or options data.</p>
+  <div class="link-grid">
+   <a class="market-link" href="https://financialdata.net/sign-up" target="_blank" rel="noopener">🆕 FinancialData.Net — Create Account<span>Register for an account and check the free plan before paying</span></a>
+   <a class="market-link" href="https://financialdata.net/dashboard" target="_blank" rel="noopener">🔑 FinancialData.Net — API Dashboard<span>After signing in, locate your API key; never paste it into public GitHub files</span></a>
+   <a class="market-link" href="https://financialdata.net/documentation" target="_blank" rel="noopener">📘 FinancialData.Net — API Documentation<span>Check endpoint-by-endpoint plan requirements, including current quotes and options</span></a>
+   <a class="market-link" href="https://github.com/financialdatanet/fdnpy" target="_blank" rel="noopener">🐍 fdnpy Python SDK on GitHub<span>Official integration examples; RO’Lyfe can call the API server-side without exposing a key in this page</span></a>
+   <a class="market-link" href="https://financialdata.net/pricing" target="_blank" rel="noopener">💳 FinancialData.Net — Pricing<span>Review the plan and cancellation terms before upgrading</span></a>
   </div>
   <details class="section-drop rtic-coach-library" open>
    <summary>🎓 RO’LYFE TRADING CLASSROOM &amp; COACH LIBRARY</summary>
@@ -1601,13 +1625,24 @@ document.addEventListener("click",e=>{const m=document.getElementById("rticAtrGu
   return "other";
  }
  function collect(){nodes=Array.from(document.querySelector("main.container").children).filter(el=>!el.classList.contains("rtic-workspace-intro")&&!el.classList.contains("rtic-quick-actions")).map(el=>({el,cat:category(el)}));}
+ function closeWhatIf(){
+  const section=document.getElementById("rticWhatIfSection");
+  if(section){section.classList.remove("rtic-whatif-modal");section.open=false;}
+  document.body.classList.remove("rtic-whatif-open");
+  document.body.style.overflow="";
+ }
  function setView(view,writeHash){
   if(!views[view])view="home";current=view;const cfg=views[view];if(!nodes.length)collect();
+  if(view!=="whatif")closeWhatIf();
   nodes.forEach(({el,cat})=>{
    const show=cfg.show.includes(cat)||(view==="home"&&cat==="other");
    el.classList.toggle("rtic-section-hidden",!show);
    if(show&&el.tagName==="DETAILS"&&["scanner","plan","whatif","chart","indicators","visual","watchlist","journal","performance","resources"].includes(cat))el.open=true;
   });
+  if(view==="whatif"){
+   const section=document.getElementById("rticWhatIfSection");
+   if(section){section.open=true;section.classList.add("rtic-whatif-modal");document.body.classList.add("rtic-whatif-open");document.body.style.overflow="hidden";}
+  }
   const intro=document.getElementById("rticOverviewIntro"),actions=document.getElementById("rticHomeActions");
   if(intro)intro.classList.toggle("rtic-section-hidden",!cfg.intro);if(actions)actions.classList.toggle("rtic-section-hidden",!cfg.intro);
   const label=document.getElementById("rticCurrentView");if(label)label.textContent=cfg.label;
@@ -1620,8 +1655,8 @@ document.addEventListener("click",e=>{const m=document.getElementById("rticAtrGu
   side.classList.toggle("open",open);scrim.classList.toggle("open",open);document.body.style.overflow=open?"hidden":"";
  }
  function go(view){setView(view,true)}
- window.ROLYFEWorkspace={go,toggleMenu};
- document.addEventListener("keydown",e=>{if(e.key==="Escape")toggleMenu(false)});
+ window.ROLYFEWorkspace={go,toggleMenu,closeWhatIf};
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"){toggleMenu(false);closeWhatIf()}});
  document.addEventListener("DOMContentLoaded",()=>{collect();const requested=location.hash.replace("#","");setView(views[requested]?requested:"home",false)});
 })();
 </script>
