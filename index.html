@@ -1386,6 +1386,26 @@ CLARITY PASS: indicator explanations, chart connection, and simpler sizing -->
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
 })();
+
+// Keep the Green Ignition bias controls synchronized with the latest RTIC scan.
+window.addEventListener("rolyfe:rtic-scan",function(event){
+ const d=event.detail||{},scan=d.scan;if(!scan||!Array.isArray(scan.tests))return;
+ const tests=scan.tests;
+ const find=name=>tests.find(t=>t.name.indexOf(name)>=0);
+ const biasFor=t=>!t||t.vote===null?"neutral":t.vote>0?"bullish":t.vote<0?"bearish":"neutral";
+ const ema200=find("EMA 200"),ema50=find("EMA 50"),alignment=find("EMA 5/10/20"),rsi=find("RSI 14"),macd=find("MACD 12/26/9"),stoch=find("Stochastic 14");
+ let trend="neutral";
+ if(ema200&&ema50&&alignment){
+  const votes=[ema200.vote,ema50.vote,alignment.vote].filter(v=>v!==null);
+  const sum=votes.reduce((a,v)=>a+v,0);
+  trend=sum>=2?"bullish":sum<=-2?"bearish":"neutral";
+ }
+ const mapping=[["trendBias",trend],["rsiBias",biasFor(rsi)],["macdBias",biasFor(macd)],["stochBias",biasFor(stoch)]];
+ mapping.forEach(([id,value])=>{const el=document.getElementById(id);if(el)el.value=value;});
+ if(typeof updateSignalDashboard==="function")updateSignalDashboard();
+ const message=document.getElementById("signalMessage");
+ if(message){message.title="Derived from the latest RTIC historical-bar scan; not a trade recommendation."}
+});
 </script>
 
 </body>
