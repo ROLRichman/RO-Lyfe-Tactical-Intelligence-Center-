@@ -803,7 +803,7 @@ function showIndicatorVisual(kind){
 }
 function closeIndicatorVisual(){const m=document.getElementById("indicatorVisualModal");if(m){m.classList.remove("open");m.setAttribute("aria-hidden","true");document.body.style.overflow="";}}
 document.addEventListener("keydown",function(e){if(e.key==="Escape"){closeIndicatorVisual();toggleChartFocus(false);}});
-document.addEventListener("click",function(e){if(e.target.closest(".indicator-guide-btn"))return;const card=e.target.closest(".indicator-card");if(!card)return;const n=card.querySelector(".indicator-name");if(!n)return;const label=n.textContent.replace(/^[^A-Z0-9]+/,"").trim();const kind=label==="STOCH RSI"?"Stochastic RSI":label;showIndicatorVisual(kind)});
+document.addEventListener("click",function(e){if(e.target.closest(".indicator-guide-btn,.rtic-mini-details"))return;const card=e.target.closest(".indicator-card");if(!card)return;const n=card.querySelector(".indicator-name");if(!n)return;const label=n.textContent.replace(/^[^A-Z0-9]+/,"").trim();const kind=label==="STOCH RSI"?"Stochastic RSI":label;showIndicatorVisual(kind)});
 document.addEventListener("keydown",function(e){if((e.key==="Enter"||e.key===" ")&&e.target.classList.contains("indicator-card")){e.preventDefault();const n=e.target.querySelector(".indicator-name");if(n){const label=n.textContent.replace(/^[^A-Z0-9]+/,"").trim();showIndicatorVisual(label==="STOCH RSI"?"Stochastic RSI":label)}}});
 
 
