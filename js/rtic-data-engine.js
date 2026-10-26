@@ -12,6 +12,9 @@
  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const names={tickerbot:"Tickerbot",finnhub:"Finnhub",alphavantage:"Alpha Vantage",coingecko:"CoinGecko"};
  let requestId=0,lastScannedBars=[],lastScanSymbol="",lastScanInterval="1d";
+ const defaultOscillatorSettings={macdFast:12,macdSlow:26,macdSignal:9,stochPeriod:14,stochSmooth:3};
+ let activeOscillatorSettings={...defaultOscillatorSettings};
+ try{const saved=JSON.parse(localStorage.getItem("rolyfeOscillatorSettings")||"null");if(saved&&typeof saved==="object")activeOscillatorSettings={...activeOscillatorSettings,...saved};}catch(e){}
  async function callData(path,params={}) {
    const url=new URL(FUNCTION_ROOT+path);
    Object.keys(params).forEach(k=>url.searchParams.set(k,String(params[k])));
@@ -187,7 +190,7 @@
        lastScannedBars=bars;lastScanSymbol=symbol;lastScanInterval=interval;
        const scan=scanBars(bars);renderScan(scan,bars,interval);
        window.dispatchEvent(new CustomEvent("rolyfe:rtic-scan",{detail:{symbol,interval,scan}}));
-       window.dispatchEvent(new CustomEvent("rolyfe:oscillators",{detail:{symbol,interval,...calculateOscillatorSeries(bars)}}));
+       window.dispatchEvent(new CustomEvent("rolyfe:oscillators",{detail:{symbol,interval,...calculateOscillatorSeries(bars,activeOscillatorSettings)}}));
        status(names[provider]+" responded for "+(data.symbol||symbol)+". "+bars.length+" usable OHLCV bars • "+time+". Quote and RTIC scan rendered below. Verify session, freshness, and plan entitlement before use.","good");
        const results=byId("rticScanOutput");if(results)results.scrollIntoView({behavior:"smooth",block:"nearest"});
      }else{
@@ -216,8 +219,12 @@
      stochSmooth:byId("rticStochSmooth")?.value
    };
    const result=calculateOscillatorSeries(lastScannedBars,settings);
+   activeOscillatorSettings=result.settings;
+   try{localStorage.setItem("rolyfeOscillatorSettings",JSON.stringify(activeOscillatorSettings));}catch(e){}
+   Object.entries(activeOscillatorSettings).forEach(([key,value])=>{const map={macdFast:"rticMacdFast",macdSlow:"rticMacdSlow",macdSignal:"rticMacdSignal",stochPeriod:"rticStochPeriod",stochSmooth:"rticStochSmooth"};const el=byId(map[key]);if(el)el.value=value;});
    window.dispatchEvent(new CustomEvent("rolyfe:oscillators",{detail:{symbol:lastScanSymbol,interval:lastScanInterval,...result,customSettings:true}}));
  }
+ Object.entries(activeOscillatorSettings).forEach(([key,value])=>{const map={macdFast:"rticMacdFast",macdSlow:"rticMacdSlow",macdSignal:"rticMacdSignal",stochPeriod:"rticStochPeriod",stochSmooth:"rticStochSmooth"};const el=byId(map[key]);if(el)el.value=value;});
  window.ROLYFEData={refresh:refresh,usePlannerSymbol:usePlannerSymbol,setSymbol:setSymbol,checkConfig:checkConfig,setOscillatorSettings:setOscillatorSettings};
  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){usePlannerSymbol();checkConfig();});}else{usePlannerSymbol();checkConfig();}
 })();
