@@ -118,7 +118,7 @@
     '<div class="rtic-data-metric"><span>BAR COVERAGE</span><strong>'+bars.length+'</strong><span class="small-muted">'+esc(interval)+' bars returned</span></div>'+
     '<div class="rtic-data-metric"><span>EMA 5 / 10 / 20</span><strong>'+[scan.e5,scan.e10,scan.e20].map(v=>money(v)).join(" / ")+'</strong></div>'+
     '<div class="rtic-data-metric"><span>EMA 50 / 200</span><strong>'+[scan.e50,scan.e200].map(v=>money(v)).join(" / ")+'</strong></div></div>'+
-    '<div class="rtic-scan-list">'+scan.tests.map(t=>{const c=t.vote===1?"bullish":t.vote===-1?"bearish":"neutral";const label=t.vote===1?"BULLISH":t.vote===-1?"BEARISH":t.vote===null?"UNAVAILABLE":"NEUTRAL";return '<div class="rtic-scan-row"><div><strong>'+esc(t.name)+'</strong><div class="small-muted">'+esc(t.value)+'</div></div><span class="rtic-vote '+c+'">'+label+'</span></div>';}).join("")+'</div>'+
+    '<div class="rtic-scan-list">'+scan.tests.map(t=>{const c=t.vote===1?"bullish":t.vote===-1?"bearish":"neutral";const label=t.vote===1?"⬆️ BULLISH":t.vote===-1?"⬇️ BEARISH":t.vote===null?"⏸️ UNAVAILABLE":"➡️ NEUTRAL";return '<div class="rtic-scan-row"><div><strong>'+esc(t.name)+'</strong><div class="small-muted">'+esc(t.value)+'</div></div><span class="rtic-vote '+c+'">'+label+'</span></div>';}).join("")+'</div>'+
     '<div class="callout" style="margin-top:10px"><strong>RTIC methodology:</strong> the score is a transparent equal-weight directional summary of available historical-bar indicators, not a probability of success or an instruction to trade. The squeeze metric is a lightweight volatility proxy, not a platform-identical TTM Squeeze.</div>';
  }
  async function refresh(){
@@ -145,6 +145,7 @@
        const bars=toBars(data.bars);
        if(bars.length<25)throw new Error("Only "+bars.length+" usable historical bars returned; at least 25 are needed for a scan.");
        const scan=scanBars(bars);renderScan(scan,bars,interval);
+       window.dispatchEvent(new CustomEvent("rolyfe:rtic-scan",{detail:{symbol,interval,scan}}));
        status(names[provider]+" responded for "+(data.symbol||symbol)+". "+bars.length+" usable OHLCV bars • "+time+". Quote and RTIC scan rendered below. Verify session, freshness, and plan entitlement before use.","good");
        const results=byId("rticScanOutput");if(results)results.scrollIntoView({behavior:"smooth",block:"nearest"});
      }else{
