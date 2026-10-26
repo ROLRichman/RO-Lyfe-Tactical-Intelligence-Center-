@@ -240,8 +240,7 @@
    }
    return '<div class="rtic-mini-visual"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(name)+' indicator visual" preserveAspectRatio="none">'+drawing+'</svg><div class="rtic-mini-caption">'+esc(caption)+'</div></div>';
  }
- .rtic-atr-guide-btn{width:100%;min-height:36px;margin:8px 0;padding:7px 10px;background:#102119;border:1px solid var(--border2);border-radius:8px;color:var(--green);font-size:12px;font-weight:800}
-function renderScan(scan,bars,interval){
+ function renderScan(scan,bars,interval){
    const out=byId("rticScanOutput");if(!out)return;
    out.style.display="block";out.style.visibility="visible";out.style.minHeight="80px";
    const color=scan.score>=65?"bullish":scan.score<=35?"bearish":"neutral";
