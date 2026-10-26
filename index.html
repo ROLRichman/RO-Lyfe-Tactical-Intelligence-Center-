@@ -280,7 +280,7 @@ body.rtic-chart-focused .rtic-focus-indicator-dock{display:block}
 .rtic-focus-dock-head strong{min-width:0;display:flex;align-items:center;flex-wrap:wrap;gap:3px}.rtic-focus-dock-head span{margin-left:4px;color:var(--muted);font-size:10px;font-weight:700}.rtic-focus-dock-head #rticFocusLastPrice{color:#fff;font-size:12px}
 .rtic-focus-dock-head button{flex:0 0 auto;width:auto;min-height:34px;margin:0;padding:5px 10px;background:#132319;border:1px solid var(--border2);color:var(--green);font-size:11px}
 .rtic-focus-dock-content{height:calc(100% - 61px);max-height:none;overflow:auto;padding-top:7px;overscroll-behavior:contain;scrollbar-width:thin}
-.rtic-focus-indicator-dock.collapsed{height:52px!important;min-height:52px}
+.rtic-focus-indicator-dock.collapsed{height:62px!important;min-height:62px}
 .rtic-focus-indicator-dock.collapsed .rtic-focus-dock-content{display:none}
 .rtic-focus-indicator-dock.collapsed .rtic-focus-dock-grab{height:13px;margin-bottom:0}
 .rtic-focus-dock-content .rtic-scan-list{grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:6px;margin-top:0}
@@ -879,10 +879,10 @@ function initFocusDockDrag(){
  let startY=0,startHeight=0,dragging=false;
  const heightNow=()=>Math.min(window.innerHeight*.76,Math.max(52,dock.getBoundingClientRect().height||window.innerHeight*.4));
  handle.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;startY=e.clientY;startHeight=heightNow();dragging=true;handle.setPointerCapture?.(e.pointerId);dock.classList.add("dragging");e.preventDefault();});
- handle.addEventListener("pointermove",e=>{if(!dragging)return;const next=startHeight+(startY-e.clientY);if(next<86){dock.classList.add("collapsed");const b=document.getElementById("rticFocusDockToggle");if(b){b.textContent="⌃ Show indicators";b.setAttribute("aria-expanded","false");}dock.style.setProperty("--rtic-dock-height","52px");return;}dock.classList.remove("collapsed");dock.style.setProperty("--rtic-dock-height",Math.min(window.innerHeight*.76,Math.max(150,next))+"px");const b=document.getElementById("rticFocusDockToggle");if(b){b.textContent="⌄ Collapse";b.setAttribute("aria-expanded","true");}});
+ handle.addEventListener("pointermove",e=>{if(!dragging)return;const next=startHeight+(startY-e.clientY);if(next<86){dock.classList.add("collapsed");const b=document.getElementById("rticFocusDockToggle");if(b){b.textContent="⌃ Show indicators";b.setAttribute("aria-expanded","false");}dock.style.setProperty("--rtic-dock-height","62px");return;}dock.classList.remove("collapsed");dock.style.setProperty("--rtic-dock-height",Math.min(window.innerHeight*.76,Math.max(150,next))+"px");const b=document.getElementById("rticFocusDockToggle");if(b){b.textContent="⌄ Collapse";b.setAttribute("aria-expanded","true");}});
  const stop=()=>{if(!dragging)return;dragging=false;dock.classList.remove("dragging");};
  handle.addEventListener("pointerup",stop);handle.addEventListener("pointercancel",stop);handle.addEventListener("lostpointercapture",stop);
- handle.addEventListener("keydown",e=>{if(e.key==="ArrowUp"||e.key==="ArrowDown"){e.preventDefault();const next=Math.min(window.innerHeight*.76,Math.max(52,heightNow()+(e.key==="ArrowUp"?50:-50)));if(next<86){dock.classList.add("collapsed");dock.style.setProperty("--rtic-dock-height","52px");}else{dock.classList.remove("collapsed");dock.style.setProperty("--rtic-dock-height",next+"px");}}else if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleFocusIndicatorDock();}});
+ handle.addEventListener("keydown",e=>{if(e.key==="ArrowUp"||e.key==="ArrowDown"){e.preventDefault();const next=Math.min(window.innerHeight*.76,Math.max(52,heightNow()+(e.key==="ArrowUp"?50:-50)));if(next<86){dock.classList.add("collapsed");dock.style.setProperty("--rtic-dock-height","62px");}else{dock.classList.remove("collapsed");dock.style.setProperty("--rtic-dock-height",next+"px");}}else if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleFocusIndicatorDock();}});
 }
 window.addEventListener("rolyfe:rtic-scan",syncFocusIndicatorDock);
 document.addEventListener("DOMContentLoaded",initFocusDockDrag);
@@ -894,7 +894,7 @@ function toggleChartFocus(force){
  const close=document.getElementById("rticChartFocusClose"),expand=document.getElementById("rticChartExpandBtn");
  if(close)close.style.display=open?"block":"none";
  if(expand)expand.textContent=open?"↙ Return to page":"⛶ Expand chart";
- if(open){syncFocusIndicatorDock();const dock=document.getElementById("rticFocusIndicatorDock");if(dock)dock.classList.remove("collapsed");const btn=document.getElementById("rticFocusDockToggle");if(btn){btn.textContent="⌄ Collapse";btn.setAttribute("aria-expanded","true");}}
+ if(open){syncFocusIndicatorDock();const dock=document.getElementById("rticFocusIndicatorDock");if(dock){dock.classList.remove("collapsed");dock.style.setProperty("--rtic-dock-height",Math.min(window.innerHeight*.42,window.innerHeight*.76)+"px");}const btn=document.getElementById("rticFocusDockToggle");if(btn){btn.textContent="⌄ Collapse";btn.setAttribute("aria-expanded","true");}}
 }
 function toggleOscillatorPlot(kind){
  const plot=document.getElementById(kind==="macd"?"rticMacdPlot":"rticStochPlot");
@@ -1448,7 +1448,7 @@ document.addEventListener("DOMContentLoaded",()=>{
  setTimeout(()=>renderVisualChart("trade"),500);
 });
 </script>
-<script src="./js/rtic-data-engine.js?v=20261026-rtic12"></script>
+<script src="./js/rtic-data-engine.js?v=20261026-rtic13"></script>
 
 <script>
 /* RO'Lyfe workspace navigation: focused views, no lost calculators */
