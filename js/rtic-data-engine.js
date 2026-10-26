@@ -149,6 +149,69 @@
    out.style.display="grid";out.style.visibility="visible";out.style.minHeight="48px";
    out.innerHTML=items.map(x=>'<div class="rtic-data-metric"><span>'+esc(x[0])+'</span><strong>'+esc(x[1])+'</strong></div>').join("");
  }
+ function miniVisual(test,bars){
+   const W=320,H=92,L=8,R=8,T=8,B=17,innerW=W-L-R,innerH=H-T-B;
+   const closes=bars.map(b=>b.close),last=bars[bars.length-1];
+   const line=(values,color,dash="")=>{
+     const valid=values.map((v,i)=>({v,i})).filter(p=>Number.isFinite(p.v));
+     if(valid.length<2)return "";
+     const min=Math.min(...valid.map(p=>p.v)),max=Math.max(...valid.map(p=>p.v)),range=max-min||1;
+     const pts=valid.map(p=>(L+p.i/(values.length-1)*innerW).toFixed(1)+","+(T+innerH-(p.v-min)/range*innerH).toFixed(1)).join(" ");
+     return '<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '+(dash?'stroke-dasharray="'+dash+'"':'')+'/>';
+   };
+   const safe=arr=>arr.map(v=>Number.isFinite(v)?v:null);
+   const recentBars=bars.slice(-48),recentCloses=closes.slice(-48);
+   let drawing="",caption="Recent historical bars • illustrative scale";
+   const name=test.name;
+   if(name.indexOf("EMA 200")>=0||name.indexOf("EMA 50")>=0||name.indexOf("Alignment")>=0){
+     const k=name.indexOf("EMA 200")>=0?200:name.indexOf("EMA 50")>=0?50:0;
+     const base=bars.slice(-48),c=base.map(b=>b.close);
+     drawing=line(c,"#eaf4ee");
+     if(k)drawing+=line(emaSeries(closes,k).slice(-48),"#00e676","5 3");
+     else if(name.indexOf("Alignment")>=0)drawing+=line(emaSeries(closes,5).slice(-48),"#00e676")+line(emaSeries(closes,10).slice(-48),"#4da3ff","4 2")+line(emaSeries(closes,20).slice(-48),"#ffd54f","2 3");
+     caption=k?"Close vs EMA "+k+" • last 48 bars":"Close (white), EMA 5 (green), EMA 10 (blue), EMA 20 (yellow)";
+   }else if(name.indexOf("MACD")>=0){
+     const o=calculateOscillatorSeries(bars),pts=o.points.slice(-48),m=pts.map(p=>p.macd),sig=pts.map(p=>p.signal),hist=pts.map(p=>p.histogram);
+     drawing='<line x1="8" y1="45" x2="312" y2="45" stroke="#718078" stroke-dasharray="3 4"/>';
+     const valid=hist.filter(Number.isFinite),max=Math.max(0.000001,...valid.map(v=>Math.abs(v)));
+     drawing+=hist.map((v,i)=>Number.isFinite(v)?'<line x1="'+(L+i/(hist.length-1)*innerW).toFixed(1)+'" y1="45" x2="'+(L+i/(hist.length-1)*innerW).toFixed(1)+'" y2="'+(45-v/max*28).toFixed(1)+'" stroke="'+(v>=0?"#00e676":"#ff5c5c")+'" stroke-width="2"/>':"").join("");
+     drawing+=line(m,"#4da3ff")+line(sig,"#ffd54f","4 3");caption="MACD line (blue), signal (yellow), histogram (green/red)";
+   }else if(name.indexOf("RSI")>=0){
+     const vals=[];for(let i=0;i<closes.length;i++)vals.push(i<14?NaN:rsi(closes.slice(0,i+1)));
+     const v=vals.slice(-48);drawing='<rect x="8" y="'+(T+innerH*(1-.7))+'" width="304" height="'+(innerH*.4)+'" fill="rgba(255,213,79,.08)"/><line x1="8" y1="'+(T+innerH*.3)+'" x2="312" y2="'+(T+innerH*.3)+'" stroke="#ffd54f" stroke-dasharray="3 3"/><line x1="8" y1="'+(T+innerH*.7)+'" x2="312" y2="'+(T+innerH*.7)+'" stroke="#ffd54f" stroke-dasharray="3 3"/>';
+     const points=v.map((x,i)=>Number.isFinite(x)?(L+i/(v.length-1)*innerW).toFixed(1)+","+(T+innerH*(1-x/100)).toFixed(1):null).filter(Boolean).join(" ");
+     drawing+='<polyline points="'+points+'" fill="none" stroke="#4da3ff" stroke-width="2"/>';caption="RSI 14 • 70 overbought reference, 30 oversold reference";
+   }else if(name.indexOf("Stochastic")>=0){
+     const st=stochasticSeries(bars,14,3),k=st.k.slice(-48),d=st.d.slice(-48);
+     drawing='<line x1="8" y1="'+(T+innerH*.2)+'" x2="312" y2="'+(T+innerH*.2)+'" stroke="#ffd54f" stroke-dasharray="3 3"/><line x1="8" y1="'+(T+innerH*.8)+'" x2="312" y2="'+(T+innerH*.8)+'" stroke="#ffd54f" stroke-dasharray="3 3"/>';
+     const pts=(arr,col)=>{const p=arr.map((v,i)=>Number.isFinite(v)?(L+i/(arr.length-1)*innerW).toFixed(1)+","+(T+innerH*(1-v/100)).toFixed(1):null).filter(Boolean).join(" ");return p?'<polyline points="'+p+'" fill="none" stroke="'+col+'" stroke-width="2"/>':""};
+     drawing+=pts(k,"#4da3ff")+pts(d,"#00e676");caption="Stochastic %K (blue), %D (green), 80/20 reference zones";
+   }else if(name.indexOf("CCI")>=0){
+     const vals=[];for(let i=0;i<bars.length;i++)vals.push(i<19?NaN:cci(bars.slice(0,i+1)));
+     const v=vals.slice(-48),min=-200,max=200;
+     drawing='<line x1="8" y1="'+(T+innerH*(1-100/400))+'" x2="312" y2="'+(T+innerH*(1-100/400))+'" stroke="#ffd54f" stroke-dasharray="3 3"/><line x1="8" y1="'+(T+innerH*(1-(-100+200)/400))+'" x2="312" y2="'+(T+innerH*(1-(-100+200)/400))+'" stroke="#ffd54f" stroke-dasharray="3 3"/>';
+     const p=v.map((x,i)=>Number.isFinite(x)?(L+i/(v.length-1)*innerW).toFixed(1)+","+(T+innerH*(1-(Math.max(min,Math.min(max,x))-min)/(max-min))).toFixed(1):null).filter(Boolean).join(" ");
+     drawing+='<polyline points="'+p+'" fill="none" stroke="#4da3ff" stroke-width="2"/>';caption="CCI 20 • +100 / −100 reference levels; display clipped at ±200";
+   }else if(name.indexOf("Squeeze")>=0){
+     const mean=closes.slice(-20).reduce((a,b)=>a+b,0)/Math.min(20,closes.length),momentum=last.close-mean;
+     const bars20=bars.slice(-32);drawing='<line x1="8" y1="46" x2="312" y2="46" stroke="#718078" stroke-dasharray="3 4"/>';
+     const momentumValues=bars20.map((b,i)=>{const upto=closes.slice(0,closes.length-bars20.length+i+1);return b.close-(upto.slice(-20).reduce((a,x)=>a+x,0)/Math.min(20,upto.length));});
+     const max=Math.max(1e-8,...momentumValues.map(v=>Math.abs(v)));
+     drawing+=momentumValues.map((v,i)=>'<line x1="'+(L+i/(momentumValues.length-1)*innerW).toFixed(1)+'" y1="46" x2="'+(L+i/(momentumValues.length-1)*innerW).toFixed(1)+'" y2="'+(46-v/max*30).toFixed(1)+'" stroke="'+(v>=0?"#00e676":"#ff5c5c")+'" stroke-width="4"/>').join("");
+     caption="Close minus 20-bar mean • lightweight momentum proxy, not TTM Squeeze";
+   }else if(name.indexOf("Volume")>=0){
+     const v=recentBars.map(b=>Math.max(0,b.volume||0)),max=Math.max(1,...v);
+     drawing=v.map((x,i)=>'<rect x="'+(L+i/(v.length-1)*innerW).toFixed(1)+'" y="'+(T+innerH*(1-x/max)).toFixed(1)+'" width="3" height="'+(innerH*x/max).toFixed(1)+'" fill="'+(i===v.length-1?"#00e676":"#4b8062")+'" rx="1"/>').join("");
+     caption="Volume per bar • latest bar highlighted; not options-chain liquidity";
+   }else{
+     const seg=bars.slice(-20),lo=Math.min(...seg.map(b=>b.low)),hi=Math.max(...seg.map(b=>b.high)),span=hi-lo||1;
+     const y=v=>T+innerH*(1-(v-lo)/span);
+     drawing='<rect x="8" y="'+y(hi)+'" width="304" height="'+(y(lo)-y(hi))+'" fill="rgba(77,163,255,.08)"/><line x1="8" y1="'+y(hi)+'" x2="312" y2="'+y(hi)+'" stroke="#ff5c5c" stroke-dasharray="4 3"/><line x1="8" y1="'+y(lo)+'" x2="312" y2="'+y(lo)+'" stroke="#00e676" stroke-dasharray="4 3"/>';
+     const cs=seg.map(b=>b.close),p=cs.map((v,i)=>(L+i/(cs.length-1)*innerW).toFixed(1)+","+y(v).toFixed(1)).join(" ");
+     drawing+='<polyline points="'+p+'" fill="none" stroke="#eaf4ee" stroke-width="2"/>';caption="20-bar range • resistance (red), support (green), closes (white)";
+   }
+   return '<div class="rtic-mini-visual"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(name)+' indicator visual" preserveAspectRatio="none">'+drawing+'</svg><div class="rtic-mini-caption">'+esc(caption)+'</div></div>';
+ }
  function renderScan(scan,bars,interval){
    const out=byId("rticScanOutput");if(!out)return;
    out.style.display="block";out.style.visibility="visible";out.style.minHeight="80px";
@@ -161,7 +224,7 @@
     '<div class="rtic-data-metric"><span>BAR COVERAGE</span><strong>'+bars.length+'</strong><span class="small-muted">'+esc(interval)+' bars returned</span></div>'+
     '<div class="rtic-data-metric"><span>EMA 5 / 10 / 20</span><strong>'+[scan.e5,scan.e10,scan.e20].map(v=>money(v)).join(" / ")+'</strong></div>'+
     '<div class="rtic-data-metric"><span>EMA 50 / 200</span><strong>'+[scan.e50,scan.e200].map(v=>money(v)).join(" / ")+'</strong></div></div>'+
-    '<div class="rtic-scan-list">'+scan.tests.map(t=>{const c=t.vote===1?"bullish":t.vote===-1?"bearish":"neutral";const label=t.vote===1?"⬆️ BULLISH":t.vote===-1?"⬇️ BEARISH":t.vote===null?"⏸️ UNAVAILABLE":"➡️ NEUTRAL";const n=t.name.toLowerCase();let explain="This category summarizes the current historical-bar evidence. Neutral or unavailable means the evidence is mixed or insufficient; check the chart and other context.";if(n.indexOf("ema 200")>=0)explain="Major trend filter: compares the latest close with the 200-period exponential moving average. Above it is a bullish directional clue; below it is bearish. The line’s slope and timeframe also matter.";else if(n.indexOf("ema 50")>=0)explain="Trend filter: compares the latest close with EMA 50. It helps show intermediate trend context and can disagree with EMA 200 during transitions.";else if(n.indexOf("alignment")>=0)explain="Checks the order of EMA 5, EMA 10, and EMA 20. A bear stack means the shorter averages sit below the longer ones; a bull stack is the reverse.";else if(n.indexOf("macd")>=0)explain="MACD 12/26/9 compares the fast and slow exponential averages and a signal line. MACD below its signal is bearish momentum context; above is bullish context. It can lag price.";else if(n.indexOf("rsi")>=0)explain="RSI 14 measures recent momentum on a 0–100 scale. Readings near or below 30 are commonly called oversold and above 70 overbought, but neither is a standalone buy/sell signal.";else if(n.indexOf("stochastic")>=0)explain="Stochastic compares the latest close with its recent high–low range. %K and %D near 20 or 80 indicate lower or upper zones; a zone alone does not determine direction.";else if(n.indexOf("cci")>=0)explain="CCI 20 measures how far price is from its recent statistical average. Positive readings can indicate upside momentum; strongly negative readings can indicate downside momentum, but it can stay extreme in a trend.";else if(n.indexOf("squeeze")>=0)explain="A lightweight volatility/momentum proxy, not an exact TradingView TTM Squeeze replication. OFF means this proxy did not detect its squeeze condition; negative momentum points downward.";else if(n.indexOf("volume")>=0||n.indexOf("rvol")>=0)explain="Relative volume compares current bar volume with a recent baseline. Higher activity can confirm a move; low activity can mean weaker participation. It is not options-chain liquidity.";else if(n.indexOf("support")>=0||n.indexOf("resistance")>=0)explain="Uses the recent 20-bar low and high as a support/resistance range. The bearish/bullish label reflects the latest close’s position versus that range, not a guaranteed bounce or breakout.";const signalMeaning=t.vote===null?"Not enough valid data for a directional reading.":t.vote===1?"This reading currently supports an upward directional bias.":t.vote===-1?"This reading currently supports a downward directional bias.":"This reading is neutral or mixed under the RTIC rules; it is not a standalone directional confirmation.";return '<details class="rtic-scan-dropdown"><summary class="rtic-scan-row"><div><strong>'+esc(t.name)+'</strong><div class="small-muted">'+esc(t.value)+'</div><span class="rtic-expand-hint">＋ Tap to understand this reading</span></div><span class="rtic-vote '+c+'">'+label+'</span></summary><div class="rtic-scan-explain"><div class="rtic-scan-current"><strong>Current interpretation: '+label+'</strong><p>'+esc(signalMeaning)+'</p></div><strong>How to read it</strong><p>'+esc(explain)+'</p><p class="small-muted">Calculated from the loaded '+esc(interval)+' historical bars. Use as context, not as a trade instruction.</p></div></details>';}).join("")+'</div>'+
+    '<div class="rtic-scan-list">'+scan.tests.map(t=>{const c=t.vote===1?"bullish":t.vote===-1?"bearish":"neutral";const label=t.vote===1?"⬆️ BULLISH":t.vote===-1?"⬇️ BEARISH":t.vote===null?"⏸️ UNAVAILABLE":"➡️ NEUTRAL";const n=t.name.toLowerCase();let explain="This category summarizes the current historical-bar evidence. Neutral or unavailable means the evidence is mixed or insufficient; check the chart and other context.";if(n.indexOf("ema 200")>=0)explain="Major trend filter: compares the latest close with the 200-period exponential moving average. Above it is a bullish directional clue; below it is bearish. The line’s slope and timeframe also matter.";else if(n.indexOf("ema 50")>=0)explain="Trend filter: compares the latest close with EMA 50. It helps show intermediate trend context and can disagree with EMA 200 during transitions.";else if(n.indexOf("alignment")>=0)explain="Checks the order of EMA 5, EMA 10, and EMA 20. A bear stack means the shorter averages sit below the longer ones; a bull stack is the reverse.";else if(n.indexOf("macd")>=0)explain="MACD 12/26/9 compares the fast and slow exponential averages and a signal line. MACD below its signal is bearish momentum context; above is bullish context. It can lag price.";else if(n.indexOf("rsi")>=0)explain="RSI 14 measures recent momentum on a 0–100 scale. Readings near or below 30 are commonly called oversold and above 70 overbought, but neither is a standalone buy/sell signal.";else if(n.indexOf("stochastic")>=0)explain="Stochastic compares the latest close with its recent high–low range. %K and %D near 20 or 80 indicate lower or upper zones; a zone alone does not determine direction.";else if(n.indexOf("cci")>=0)explain="CCI 20 measures how far price is from its recent statistical average. Positive readings can indicate upside momentum; strongly negative readings can indicate downside momentum, but it can stay extreme in a trend.";else if(n.indexOf("squeeze")>=0)explain="A lightweight volatility/momentum proxy, not an exact TradingView TTM Squeeze replication. OFF means this proxy did not detect its squeeze condition; negative momentum points downward.";else if(n.indexOf("volume")>=0||n.indexOf("rvol")>=0)explain="Relative volume compares current bar volume with a recent baseline. Higher activity can confirm a move; low activity can mean weaker participation. It is not options-chain liquidity.";else if(n.indexOf("support")>=0||n.indexOf("resistance")>=0)explain="Uses the recent 20-bar low and high as a support/resistance range. The bearish/bullish label reflects the latest close’s position versus that range, not a guaranteed bounce or breakout.";const signalMeaning=t.vote===null?"Not enough valid data for a directional reading.":t.vote===1?"This reading currently supports an upward directional bias.":t.vote===-1?"This reading currently supports a downward directional bias.":"This reading is neutral or mixed under the RTIC rules; it is not a standalone directional confirmation.";return '<details class="rtic-scan-dropdown"><summary class="rtic-scan-row"><div><strong>'+esc(t.name)+'</strong><div class="small-muted">'+esc(t.value)+'</div><span class="rtic-expand-hint">＋ Tap to understand this reading</span></div><span class="rtic-vote '+c+'">'+label+'</span></summary><div class="rtic-scan-explain"><div class="rtic-scan-current"><strong>Current interpretation: '+label+'</strong><p>'+esc(signalMeaning)+'</p></div><strong>How to read it</strong><p>'+esc(explain)+'</p>'+miniVisual(t,bars)+'<p class="small-muted">Calculated from the loaded '+esc(interval)+' historical bars. Use as context, not as a trade instruction.</p></div></details>';}).join("")+'</div>'+
     '<div class="callout" style="margin-top:10px"><strong>RTIC methodology:</strong> the score is a transparent equal-weight directional summary of available historical-bar indicators, not a probability of success or an instruction to trade. The squeeze metric is a lightweight volatility proxy, not a platform-identical TTM Squeeze.</div>';
  }
  async function refresh(){
