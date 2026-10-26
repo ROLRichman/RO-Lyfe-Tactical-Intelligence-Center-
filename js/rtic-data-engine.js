@@ -161,7 +161,7 @@
     {name:"Squeeze / Momentum Proxy",value:(squeeze?"Squeeze proxy ON":"Squeeze proxy OFF")+" • momentum "+(momentum>=0?"positive":"negative"),vote:Number.isFinite(momentum)?(momentum>0?1:momentum<0?-1:0):null},
     {name:"Volume / RVOL",value:Number.isFinite(rvol)?"RVOL "+fmt(rvol,2)+"x":"Volume unavailable",vote:Number.isFinite(rvol)&&rvol>=1.2?(last.close>prev.close?1:last.close<prev.close?-1:0):0},
     {name:"20-Bar Support / Resistance",value:money(low20)+" — "+money(high20),vote:pos>=.75?1:pos<=.25?-1:0},
-    {name:"ATR 14 — Stop Planner",value:Number.isFinite(atr)?"ATR "+money(atr)+" • 1.5× stop "+money(atrLongStop):"Need 14 bars for ATR",vote:null,atrSetup}
+    {name:"ATR 14 — Stop Planner",value:Number.isFinite(atr)?"ATR "+money(atr)+" • 1.5× stop "+money(mediumStop.long):"Need 14 bars for ATR",vote:null,atrSetup}
    ];
    const active=tests.filter(t=>t.vote!==null),sum=active.reduce((s,t)=>s+t.vote,0),score=active.length?Math.round(50+50*sum/active.length):50;
    const liquidity=dollarVol>=25000000?10:dollarVol>=5000000?8:dollarVol>=1000000?6:dollarVol>=500000?4:dollarVol>=100000?2:0;
