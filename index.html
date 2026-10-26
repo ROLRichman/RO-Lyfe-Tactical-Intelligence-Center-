@@ -842,6 +842,16 @@ function renderRticOscillators(detail){
  if(sl)sl.textContent=settings.stochPeriod+" / "+settings.stochSmooth;
  const source=document.getElementById("rticOscSource");
  if(source)source.textContent=points.length?"Source: "+(detail.symbol||"selected symbol")+" • "+(detail.interval||"")+" candles • locally calculated from RTIC historical bars. Settings save on this browser; scanner score keeps standard default parameters.":"No historical-bar scan loaded yet. Use Pull Secure Market Data to populate these panels.";
+ if(detail.cleared){
+  const symbol=detail.symbol||"the selected ticker";
+  macdPlot.innerHTML='<p>Waiting for a fresh historical scan for '+symbol+'. The previous symbol’s lines have been cleared.</p>';
+  stochPlot.innerHTML='<p>Waiting for a fresh historical scan for '+symbol+'. The previous symbol’s lines have been cleared.</p>';
+  const mr=document.getElementById("rticMacdReadout"),sr=document.getElementById("rticStochReadout");
+  if(mr)mr.textContent="MACD line — • Signal — • Histogram —";
+  if(sr)sr.textContent="%K — • %D —";
+  [["rticMacdBias","Waiting for scan"],["rticStochBias","Waiting for scan"]].forEach(([id,text])=>{const el=document.getElementById(id);if(el){el.textContent=text;el.className="indicator-status neutral";}});
+  return;
+ }
  const finite=(p,k)=>p&&p[k]!==null&&p[k]!==undefined&&Number.isFinite(Number(p[k]));
  const latestMacd=[...points].reverse().find(p=>finite(p,"macd")&&finite(p,"signal")&&finite(p,"histogram"));
  const macdReadout=document.getElementById("rticMacdReadout"),macdBadge=document.getElementById("rticMacdBias");
@@ -1357,7 +1367,7 @@ document.addEventListener("DOMContentLoaded",()=>{
  setTimeout(()=>renderVisualChart("trade"),500);
 });
 </script>
-<script src="./js/rtic-data-engine.js"></script>
+<script src="./js/rtic-data-engine.js?v=20261026-rtic3"></script>
 
 <script>
 /* RO'Lyfe workspace navigation: focused views, no lost calculators */
