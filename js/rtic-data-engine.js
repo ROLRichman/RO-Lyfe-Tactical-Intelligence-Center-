@@ -113,7 +113,7 @@
  }
  function scanBars(bars){
    const closes=bars.map(b=>b.close),volumes=bars.map(b=>Math.max(0,b.volume||0)),last=bars[bars.length-1],prev=bars[bars.length-2],length=bars.length;
-   const e5=emaSeries(closes,5).at(-1),e10=emaSeries(closes,10).at(-1),e20=emaSeries(closes,20).at(-1),e50=emaSeries(closes,50).at(-1),e200=emaSeries(closes,200).at(-1);
+   const e50=emaSeries(closes,50).at(-1),s20=sma(closes,20),e200=emaSeries(closes,200).at(-1);
    const oscillatorData=calculateOscillatorSeries(bars);
    const macd=oscillatorData.latest.macd,signal=oscillatorData.latest.signal;
    const st={k:oscillatorData.latest.stochK??NaN,d:oscillatorData.latest.stochD??NaN};
@@ -123,26 +123,36 @@
    const rvol=avgVol>0?last.volume/avgVol:NaN;
    const dollarVol=sma(bars.slice(-20).map(b=>b.close*Math.max(0,b.volume||0)),Math.min(20,length));
    const mean=sma(closes,20),std=closes.length>=20?Math.sqrt(closes.slice(-20).reduce((s,x)=>s+Math.pow(x-mean,2),0)/20):NaN;
-   const recent=bars.slice(-20),atr=recent.reduce((s,b,i)=>{const p=bars[Math.max(0,length-20+i-1)]?.close??b.close;return s+Math.max(b.high-b.low,Math.abs(b.high-p),Math.abs(b.low-p));},0)/Math.max(1,recent.length);
+   const trueRanges=bars.map((b,i)=>{const p=i>0?bars[i-1].close:b.close;return Math.max(b.high-b.low,Math.abs(b.high-p),Math.abs(b.low-p));});
+   const atrPeriod=14,atr=trueRanges.length>=atrPeriod?trueRanges.slice(-atrPeriod).reduce((a,b)=>a+b,0)/atrPeriod:NaN;
    const squeeze=Number.isFinite(std)&&Number.isFinite(atr)?std*2<atr*1.5:false,momentum=Number.isFinite(mean)?last.close-mean:NaN;
+   const roundDown=(v,step)=>Number.isFinite(v)&&step>0?Math.floor((v+1e-9)/step)*step:NaN;
+   const roundUp=(v,step)=>Number.isFinite(v)&&step>0?Math.ceil((v-1e-9)/step)*step:NaN;
+   const atrLongStop=Number.isFinite(atr)?last.close-1.5*atr:NaN,atrShortStop=Number.isFinite(atr)?last.close+1.5*atr:NaN;
+   const atrSetup={lastClose:last.close,atr,period:atrPeriod,multiplier:1.5,longStop:atrLongStop,shortStop:atrShortStop,
+    longStop10:roundDown(atrLongStop,.1),shortStop10:roundUp(atrShortStop,.1),
+    longStop1:roundDown(atrLongStop,1),shortStop1:roundUp(atrShortStop,1),
+    longStop01:roundDown(atrLongStop,.01),shortStop01:roundUp(atrShortStop,.01),
+    timestamp:last.time};
    const trendVote=Number.isFinite(e200)?(last.close>e200?1:last.close<e200?-1:0):null;
-   const vote50=Number.isFinite(e50)?(last.close>e50?1:last.close<e50?-1:0):null;
-   const aligned=[e5,e10,e20].every(Number.isFinite),macdReady=Number.isFinite(macd)&&Number.isFinite(signal);
+   const maReady=Number.isFinite(e50)&&Number.isFinite(s20),macdReady=Number.isFinite(macd)&&Number.isFinite(signal);
+   const maVote=maReady?(last.close>e50&&last.close>s20?1:last.close<e50&&last.close<s20?-1:0):null;
+   const maValue=maReady?(last.close>e50&&last.close>s20?"Close above EMA50 + SMA20":last.close<e50&&last.close<s20?"Close below EMA50 + SMA20":"Price between / crossing averages"):"Need 50 bars";
    const tests=[
     {name:"EMA 200 — Major Trend",value:Number.isFinite(e200)?(last.close>=e200?"Close above EMA200":"Close below EMA200"):"Need 200 bars",vote:trendVote},
-    {name:"EMA 50 — Trend Filter",value:Number.isFinite(e50)?(last.close>=e50?"Close above EMA50":"Close below EMA50"):"Need 50 bars",vote:vote50},
-    {name:"EMA 5/10/20 Alignment",value:aligned?(e5>e10&&e10>e20?"Bull stack":e5<e10&&e10<e20?"Bear stack":"Mixed stack"):"Building EMAs",vote:aligned?(e5>e10&&e10>e20?1:e5<e10&&e10<e20?-1:0):null},
+    {name:"EMA 50 + SMA 20 — Trend Setup",value:maValue+" • EMA50 "+money(e50)+" / SMA20 "+money(s20),vote:maVote},
     {name:"MACD 12/26/9",value:macdReady?(macd>signal?"MACD above signal":"MACD below signal"):"Building MACD",vote:macdReady?(macd>signal&&macd>0?1:macd<signal&&macd<0?-1:0):null},
     {name:"RSI 14",value:Number.isFinite(rv)?fmt(rv,1):"Unavailable",vote:Number.isFinite(rv)?(rv>=52&&rv<70?1:rv<=48&&rv>30?-1:0):null},
     {name:"Stochastic 14",value:Number.isFinite(st.k)?"%K "+fmt(st.k,1)+" / %D "+fmt(st.d,1):"Unavailable",vote:Number.isFinite(st.k)&&Number.isFinite(st.d)?(st.k>st.d&&st.k<80?1:st.k<st.d&&st.k>20?-1:0):null},
     {name:"CCI 20",value:Number.isFinite(cv)?fmt(cv,1):"Unavailable",vote:Number.isFinite(cv)?(cv>100?1:cv< -100?-1:0):null},
     {name:"Squeeze / Momentum Proxy",value:(squeeze?"Squeeze proxy ON":"Squeeze proxy OFF")+" • momentum "+(momentum>=0?"positive":"negative"),vote:Number.isFinite(momentum)?(momentum>0?1:momentum<0?-1:0):null},
     {name:"Volume / RVOL",value:Number.isFinite(rvol)?"RVOL "+fmt(rvol,2)+"x":"Volume unavailable",vote:Number.isFinite(rvol)&&rvol>=1.2?(last.close>prev.close?1:last.close<prev.close?-1:0):0},
-    {name:"20-Bar Support / Resistance",value:money(low20)+" — "+money(high20),vote:pos>=.75?1:pos<=.25?-1:0}
+    {name:"20-Bar Support / Resistance",value:money(low20)+" — "+money(high20),vote:pos>=.75?1:pos<=.25?-1:0},
+    {name:"ATR 14 — Stop Planner",value:Number.isFinite(atr)?"ATR "+money(atr)+" • 1.5× stop "+money(atrLongStop):"Need 14 bars for ATR",vote:null,atrSetup}
    ];
    const active=tests.filter(t=>t.vote!==null),sum=active.reduce((s,t)=>s+t.vote,0),score=active.length?Math.round(50+50*sum/active.length):50;
    const liquidity=dollarVol>=25000000?10:dollarVol>=5000000?8:dollarVol>=1000000?6:dollarVol>=500000?4:dollarVol>=100000?2:0;
-   return {last,score,available:active.length,tests,dollarVol,rvol,e5,e10,e20,e50,e200,liquidity,oscillatorPoints:oscillatorData.points,oscillatorLatest:oscillatorData.latest};
+   return {last,score,available:active.length,tests,dollarVol,rvol,e50,s20,e200,atrSetup,liquidity,oscillatorPoints:oscillatorData.points,oscillatorLatest:oscillatorData.latest};
  }
  function renderQuote(items){
    const out=byId("rticQuoteOutput");if(!out)return;
@@ -163,13 +173,18 @@
    const recentBars=bars.slice(-48),recentCloses=closes.slice(-48);
    let drawing="",caption="Recent historical bars • illustrative scale";
    const name=test.name;
-   if(name.indexOf("EMA 200")>=0||name.indexOf("EMA 50")>=0||name.indexOf("Alignment")>=0){
-     const k=name.indexOf("EMA 200")>=0?200:name.indexOf("EMA 50")>=0?50:0;
+   if(name.indexOf("ATR 14")>=0){
+     const trs=bars.map((b,i)=>{const p=i>0?bars[i-1].close:b.close;return Math.max(b.high-b.low,Math.abs(b.high-p),Math.abs(b.low-p));}).slice(-48);
+     const max=Math.max(0.000001,...trs);
+     drawing=trs.map((v,i)=>'<rect x="'+(L+i/(trs.length-1)*innerW).toFixed(1)+'" y="'+(T+innerH*(1-v/max)).toFixed(1)+'" width="4" height="'+(innerH*v/max).toFixed(1)+'" fill="'+(i===trs.length-1?"#ffd54f":"#4b8062")+'" rx="1"/>').join("");
+     caption="True range bars • ATR(14) is the average of the latest 14 true ranges";
+   }else if(name.indexOf("EMA 200")>=0||name.indexOf("EMA 50 + SMA 20")>=0){
+     const k=name.indexOf("EMA 200")>=0?200:50;
      const base=bars.slice(-48),c=base.map(b=>b.close);
      drawing=line(c,"#eaf4ee");
-     if(k)drawing+=line(emaSeries(closes,k).slice(-48),"#00e676","5 3");
-     else if(name.indexOf("Alignment")>=0)drawing+=line(emaSeries(closes,5).slice(-48),"#00e676")+line(emaSeries(closes,10).slice(-48),"#4da3ff","4 2")+line(emaSeries(closes,20).slice(-48),"#ffd54f","2 3");
-     caption=k?"Close vs EMA "+k+" • last 48 bars":"Close (white), EMA 5 (green), EMA 10 (blue), EMA 20 (yellow)";
+     drawing+=line(emaSeries(closes,k).slice(-48),"#00e676","5 3");
+     if(k===50)drawing+=line(closes.map((v,i)=>i>=19?closes.slice(i-19,i+1).reduce((a,b)=>a+b,0)/20:NaN).slice(-48),"#ffd54f","2 3");
+     caption=k===200?"Close (white) vs EMA 200 (green)":"Close (white), EMA 50 (green), SMA 20 (yellow)";
    }else if(name.indexOf("MACD")>=0){
      const o=calculateOscillatorSeries(bars),pts=o.points.slice(-48),m=pts.map(p=>p.macd),sig=pts.map(p=>p.signal),hist=pts.map(p=>p.histogram);
      drawing='<line x1="8" y1="45" x2="312" y2="45" stroke="#718078" stroke-dasharray="3 4"/>';
@@ -218,13 +233,13 @@
    const color=scan.score>=65?"bullish":scan.score<=35?"bearish":"neutral";
    const bias=scan.score>=65?"BULLISH BIAS":scan.score<=35?"BEARISH BIAS":"MIXED / NEUTRAL";
    out.innerHTML='<div class="rtic-data-metrics">'+
-    '<div class="rtic-data-metric rtic-scan-score"><span>RO’LYFE RTIC SCORE</span><strong class="'+color+'">'+scan.score+'/100</strong><span class="small-muted">'+bias+' • '+scan.available+'/10 categories available</span></div>'+
+    '<div class="rtic-data-metric rtic-scan-score"><span>RO’LYFE RTIC SCORE</span><strong class="'+color+'">'+scan.score+'/100</strong><span class="small-muted">'+bias+' • '+scan.available+'/10 directional categories available</span></div>'+
     '<div class="rtic-data-metric"><span>LIQUIDITY PROXY</span><strong>'+scan.liquidity+'/10</strong><span class="small-muted">Avg. dollar volume '+money(scan.dollarVol)+'</span></div>'+
     '<div class="rtic-data-metric"><span>RVOL</span><strong>'+(Number.isFinite(scan.rvol)?fmt(scan.rvol,2)+"x":"—")+'</strong><span class="small-muted">Versus prior bars</span></div>'+
     '<div class="rtic-data-metric"><span>BAR COVERAGE</span><strong>'+bars.length+'</strong><span class="small-muted">'+esc(interval)+' bars returned</span></div>'+
-    '<div class="rtic-data-metric"><span>EMA 5 / 10 / 20</span><strong>'+[scan.e5,scan.e10,scan.e20].map(v=>money(v)).join(" / ")+'</strong></div>'+
-    '<div class="rtic-data-metric"><span>EMA 50 / 200</span><strong>'+[scan.e50,scan.e200].map(v=>money(v)).join(" / ")+'</strong></div></div>'+
-    '<div class="rtic-scan-list">'+scan.tests.map(t=>{const c=t.vote===1?"bullish":t.vote===-1?"bearish":"neutral";const label=t.vote===1?"⬆️ BULLISH":t.vote===-1?"⬇️ BEARISH":t.vote===null?"⏸️ UNAVAILABLE":"➡️ NEUTRAL";const n=t.name.toLowerCase();let explain="This category summarizes the current historical-bar evidence. Neutral or unavailable means the evidence is mixed or insufficient; check the chart and other context.";if(n.indexOf("ema 200")>=0)explain="Major trend filter: compares the latest close with the 200-period exponential moving average. Above it is a bullish directional clue; below it is bearish. The line’s slope and timeframe also matter.";else if(n.indexOf("ema 50")>=0)explain="Trend filter: compares the latest close with EMA 50. It helps show intermediate trend context and can disagree with EMA 200 during transitions.";else if(n.indexOf("alignment")>=0)explain="Checks the order of EMA 5, EMA 10, and EMA 20. A bear stack means the shorter averages sit below the longer ones; a bull stack is the reverse.";else if(n.indexOf("macd")>=0)explain="MACD 12/26/9 compares the fast and slow exponential averages and a signal line. MACD below its signal is bearish momentum context; above is bullish context. It can lag price.";else if(n.indexOf("rsi")>=0)explain="RSI 14 measures recent momentum on a 0–100 scale. Readings near or below 30 are commonly called oversold and above 70 overbought, but neither is a standalone buy/sell signal.";else if(n.indexOf("stochastic")>=0)explain="Stochastic compares the latest close with its recent high–low range. %K and %D near 20 or 80 indicate lower or upper zones; a zone alone does not determine direction.";else if(n.indexOf("cci")>=0)explain="CCI 20 measures how far price is from its recent statistical average. Positive readings can indicate upside momentum; strongly negative readings can indicate downside momentum, but it can stay extreme in a trend.";else if(n.indexOf("squeeze")>=0)explain="A lightweight volatility/momentum proxy, not an exact TradingView TTM Squeeze replication. OFF means this proxy did not detect its squeeze condition; negative momentum points downward.";else if(n.indexOf("volume")>=0||n.indexOf("rvol")>=0)explain="Relative volume compares current bar volume with a recent baseline. Higher activity can confirm a move; low activity can mean weaker participation. It is not options-chain liquidity.";else if(n.indexOf("support")>=0||n.indexOf("resistance")>=0)explain="Uses the recent 20-bar low and high as a support/resistance range. The bearish/bullish label reflects the latest close’s position versus that range, not a guaranteed bounce or breakout.";const signalMeaning=t.vote===null?"Not enough valid data for a directional reading.":t.vote===1?"This reading currently supports an upward directional bias.":t.vote===-1?"This reading currently supports a downward directional bias.":"This reading is neutral or mixed under the RTIC rules; it is not a standalone directional confirmation.";return '<details class="rtic-scan-dropdown"><summary class="rtic-scan-row"><div><strong>'+esc(t.name)+'</strong><div class="small-muted">'+esc(t.value)+'</div><span class="rtic-expand-hint">＋ Tap to understand this reading</span></div><span class="rtic-vote '+c+'">'+label+'</span></summary><div class="rtic-scan-explain"><div class="rtic-scan-current"><strong>Current interpretation: '+label+'</strong><p>'+esc(signalMeaning)+'</p></div><strong>How to read it</strong><p>'+esc(explain)+'</p>'+miniVisual(t,bars)+'<p class="small-muted">Calculated from the loaded '+esc(interval)+' historical bars. Use as context, not as a trade instruction.</p></div></details>';}).join("")+'</div>'+
+    '<div class="rtic-data-metric"><span>EMA 50 / SMA 20</span><strong>'+[scan.e50,scan.s20].map(v=>money(v)).join(" / ")+'</strong></div>'+
+    '<div class="rtic-data-metric"><span>EMA 200 / ATR 14</span><strong>'+[scan.e200,scan.atrSetup?.atr].map(v=>money(v)).join(" / ")+'</strong></div></div>'+
+    '<div class="rtic-scan-list">'+scan.tests.map(t=>{const c=t.vote===1?"bullish":t.vote===-1?"bearish":"neutral";const label=t.vote===1?"⬆️ BULLISH":t.vote===-1?"⬇️ BEARISH":t.vote===null?"⏸️ UNAVAILABLE":"➡️ NEUTRAL";const n=t.name.toLowerCase();let explain="This category summarizes the current historical-bar evidence. Neutral or unavailable means the evidence is mixed or insufficient; check the chart and other context.";if(n.indexOf("ema 200")>=0)explain="Major trend filter: compares the latest close with the 200-period exponential moving average. Above it is a bullish directional clue; below it is bearish. The line’s slope and timeframe also matter.";else if(n.indexOf("ema 50")>=0)explain="Trend filter: compares the latest close with EMA 50. It helps show intermediate trend context and can disagree with EMA 200 during transitions.";else if(n.indexOf("alignment")>=0)explain="Checks the order of EMA 5, EMA 10, and EMA 20. A bear stack means the shorter averages sit below the longer ones; a bull stack is the reverse.";else if(n.indexOf("macd")>=0)explain="MACD 12/26/9 compares the fast and slow exponential averages and a signal line. MACD below its signal is bearish momentum context; above is bullish context. It can lag price.";else if(n.indexOf("rsi")>=0)explain="RSI 14 measures recent momentum on a 0–100 scale. Readings near or below 30 are commonly called oversold and above 70 overbought, but neither is a standalone buy/sell signal.";else if(n.indexOf("stochastic")>=0)explain="Stochastic compares the latest close with its recent high–low range. %K and %D near 20 or 80 indicate lower or upper zones; a zone alone does not determine direction.";else if(n.indexOf("cci")>=0)explain="CCI 20 measures how far price is from its recent statistical average. Positive readings can indicate upside momentum; strongly negative readings can indicate downside momentum, but it can stay extreme in a trend.";else if(n.indexOf("squeeze")>=0)explain="A lightweight volatility/momentum proxy, not an exact TradingView TTM Squeeze replication. OFF means this proxy did not detect its squeeze condition; negative momentum points downward.";else if(n.indexOf("volume")>=0||n.indexOf("rvol")>=0)explain="Relative volume compares current bar volume with a recent baseline. Higher activity can confirm a move; low activity can mean weaker participation. It is not options-chain liquidity.";else if(n.indexOf("support")>=0||n.indexOf("resistance")>=0)explain="Uses the recent 20-bar low and high as a support/resistance range. The bearish/bullish label reflects the latest close’s position versus that range, not a guaranteed bounce or breakout.";const signalMeaning=t.vote===null?"Not enough valid data for a directional reading.":t.vote===1?"This reading currently supports an upward directional bias.":t.vote===-1?"This reading currently supports a downward directional bias.":"This reading is neutral or mixed under the RTIC rules; it is not a standalone directional confirmation.";const risk=t.atrSetup;const riskHtml=risk?'<div class="rtic-atr-card"><div class="rtic-atr-price-row"><span>LAST RETURNED BAR CLOSE</span><strong class="rtic-atr-last-close">'+money(risk.lastClose)+'</strong></div><div class="rtic-atr-grid"><div><span>ATR(14)</span><strong>'+money(risk.atr)+'</strong></div><div><span>Stop distance (1.5× ATR)</span><strong>'+money(risk.atr*risk.multiplier)+'</strong></div><div><span>LONG stop — round down</span><strong>'+money(risk.longStop01)+'</strong><small>Nearest $0.01</small></div><div><span>SHORT stop — round up</span><strong>'+money(risk.shortStop01)+'</strong><small>Nearest $0.01</small></div><div><span>Long stop — $0.10 increment</span><strong>'+money(risk.longStop10)+'</strong></div><div><span>Short stop — $0.10 increment</span><strong>'+money(risk.shortStop10)+'</strong></div><div><span>Long stop — $1 increment</span><strong>'+money(risk.longStop1)+'</strong></div><div><span>Short stop — $1 increment</span><strong>'+money(risk.shortStop1)+'</strong></div></div><p class="small-muted">Formula: long stop = latest returned close − (1.5 × ATR14); short stop = latest returned close + (1.5 × ATR14). Long stops round down and short stops round up to avoid rounding closer to price. Confirm the latest bar is fully closed; use 1D candles for daily swing setups. This is a planning estimate, not a guaranteed fill or personalized instruction.</p></div>':'';return '<details class="rtic-scan-dropdown"><summary class="rtic-scan-row"><div><strong>'+esc(t.name)+'</strong><div class="small-muted">'+esc(t.value)+'</div><span class="rtic-expand-hint">＋ Tap to understand this reading</span></div><span class="rtic-vote '+c+'">'+label+'</span></summary><div class="rtic-scan-explain"><div class="rtic-scan-current"><strong>Current interpretation: '+label+'</strong><p>'+esc(signalMeaning)+'</p></div>'+(risk?riskHtml:'<strong>How to read it</strong><p>'+esc(explain)+'</p>')+miniVisual(t,bars)+'<p class="small-muted">Calculated from the loaded '+esc(interval)+' historical bars. Use as context, not as a trade instruction.</p></div></details>';}).join("")+'</div>'+
     '<div class="callout" style="margin-top:10px"><strong>RTIC methodology:</strong> the score is a transparent equal-weight directional summary of available historical-bar indicators, not a probability of success or an instruction to trade. The squeeze metric is a lightweight volatility proxy, not a platform-identical TTM Squeeze.</div>';
  }
  async function refresh(){
