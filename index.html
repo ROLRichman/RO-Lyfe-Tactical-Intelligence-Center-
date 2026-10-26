@@ -259,7 +259,7 @@ body.rtic-chart-focused{overflow:hidden!important}
 .indicator-card .indicator-guide-btn:hover{background:#173323}
 .rtic-osc-panel{min-width:0;margin:12px 0;padding:12px;border:1px solid var(--border);border-radius:12px;background:#06100b}
 .rtic-osc-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
-.rtic-osc-head h3{margin:0;color:var(--green);font-size:16px}.rtic-osc-head h3 span{font-size:12px;color:var(--muted);font-weight:600}
+.rtic-osc-title{display:flex;flex-wrap:wrap;align-items:center;gap:7px;min-width:0}.rtic-osc-title .indicator-status{margin:0}.rtic-osc-head h3{margin:0;color:var(--green);font-size:16px}.rtic-osc-head h3 span{font-size:12px;color:var(--muted);font-weight:600}
 .rtic-osc-toggle{width:auto;min-height:34px;margin:0;padding:6px 9px;background:#122319;color:#fff;border:1px solid var(--border);font-size:11px}
 .rtic-osc-settings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
 .rtic-osc-settings-two{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -554,7 +554,7 @@ body.rtic-chart-focused{overflow:hidden!important}
  <div class="drop-body">
   <p class="chart-description">Calculated from the same Tickerbot historical candles pulled into RTIC. These panels stay below the price chart on mobile. Adjust the settings here; they save on this device and remain selected when you change tickers.</p>
   <div class="rtic-osc-panel" id="rticMacdPanel">
-   <div class="rtic-osc-head"><h3>MACD <span id="rticMacdParamsLabel">12 / 26 / 9</span></h3><button type="button" class="rtic-osc-toggle" onclick="toggleOscillatorPlot('macd')" id="rticMacdToggle">Hide MACD plot</button></div>
+   <div class="rtic-osc-head"><div class="rtic-osc-title"><h3>MACD <span id="rticMacdParamsLabel">12 / 26 / 9</span></h3><span id="rticMacdBias" class="indicator-status neutral">Waiting for scan</span></div><button type="button" class="rtic-osc-toggle" onclick="toggleOscillatorPlot('macd')" id="rticMacdToggle">Hide MACD plot</button></div>
    <div class="rtic-osc-settings">
     <label>Fast EMA<input id="rticMacdFast" type="number" min="2" max="50" step="1" value="12" onchange="ROLYFEData.setOscillatorSettings()"></label>
     <label>Slow EMA<input id="rticMacdSlow" type="number" min="3" max="100" step="1" value="26" onchange="ROLYFEData.setOscillatorSettings()"></label>
@@ -565,7 +565,7 @@ body.rtic-chart-focused{overflow:hidden!important}
    <p id="rticMacdReadout" class="rtic-osc-readout">Waiting for a Tickerbot candle scan.</p>
   </div>
   <div class="rtic-osc-panel" id="rticStochPanel">
-   <div class="rtic-osc-head"><h3>Stochastic <span id="rticStochParamsLabel">14 / 3</span></h3><button type="button" class="rtic-osc-toggle" onclick="toggleOscillatorPlot('stoch')" id="rticStochToggle">Hide Stochastic plot</button></div>
+   <div class="rtic-osc-head"><div class="rtic-osc-title"><h3>Stochastic <span id="rticStochParamsLabel">14 / 3</span></h3><span id="rticStochBias" class="indicator-status neutral">Waiting for scan</span></div><button type="button" class="rtic-osc-toggle" onclick="toggleOscillatorPlot('stoch')" id="rticStochToggle">Hide Stochastic plot</button></div>
    <div class="rtic-osc-settings rtic-osc-settings-two">
     <label>Lookback %K<input id="rticStochPeriod" type="number" min="2" max="50" step="1" value="14" onchange="ROLYFEData.setOscillatorSettings()"></label>
     <label>Smoothing %D<input id="rticStochSmooth" type="number" min="1" max="20" step="1" value="3" onchange="ROLYFEData.setOscillatorSettings()"></label>
@@ -852,7 +852,7 @@ function renderRticOscillators(detail){
  if(ml)ml.textContent=settings.macdFast+" / "+settings.macdSlow+" / "+settings.macdSignal;
  if(sl)sl.textContent=settings.stochPeriod+" / "+settings.stochSmooth;
  const source=document.getElementById("rticOscSource");
- if(source)source.textContent=points.length?"Source: "+(detail.symbol||"selected symbol")+" • "+(detail.interval||"")+" candles • locally calculated from RTIC historical bars."+(currentTimeframe==="W"&&detail.interval==="1d"?" • chart is 1W; panel candles are daily":"")+". Settings save on this browser; scanner score keeps standard default parameters.":"No historical-bar scan loaded yet. Use Pull Secure Market Data to populate these panels.";
+ if(source)source.textContent=points.length?"Source: "+(detail.symbol||"selected symbol")+" • "+(detail.interval||"")+" candles • data as of "+(detail.asOf||"timestamp unavailable")+" • locally calculated from RTIC historical bars."+(currentTimeframe==="W"&&detail.interval==="1d"?" • chart is 1W; panel candles are daily":"")+". Settings save on this browser; scanner score keeps standard default parameters.":"No historical-bar scan loaded yet. Use Pull Secure Market Data to populate these panels.";
  if(detail.cleared){
   const symbol=detail.symbol||"the selected ticker";
   macdPlot.innerHTML='<p>Waiting for a fresh historical scan for '+symbol+'. The previous symbol’s lines have been cleared.</p>';
@@ -1378,7 +1378,7 @@ document.addEventListener("DOMContentLoaded",()=>{
  setTimeout(()=>renderVisualChart("trade"),500);
 });
 </script>
-<script src="./js/rtic-data-engine.js?v=20261026-rtic4"></script>
+<script src="./js/rtic-data-engine.js?v=20261026-rtic5"></script>
 
 <script>
 /* RO'Lyfe workspace navigation: focused views, no lost calculators */
