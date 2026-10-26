@@ -573,6 +573,7 @@ body.rtic-chart-focused{overflow:hidden!important}
   <div id="positionSizingOutput"></div>
   <div class="action-grid">
    <button type="button" class="primary-btn" onclick="createTradePlan()">🎯 CREATE MASTER TRADE PLAN</button>
+   <button type="button" class="secondary-btn rtic-options-lab-launch" onclick="ROLYFEOptionsLab.open()">🧭 OPEN OPTIONS-ONLY EXECUTION LAB</button>
    <button type="button" class="secondary-btn" onclick="updateChartFromPlanner()">📈 UPDATE LIVE CHART</button>
    <button type="button" class="secondary-btn" onclick="saveCurrentPlan()">💾 SAVE TO JOURNAL</button>
    <button type="button" class="danger-btn" onclick="clearPlan()">🗑️ CLEAR PLAN</button>
@@ -716,6 +717,9 @@ body.rtic-chart-focused{overflow:hidden!important}
    <button class="secondary-btn" onclick="downloadTradeTicketTXT()">📄 DOWNLOAD TRADE TICKET TXT</button>
    <button class="secondary-btn" onclick="downloadJournalTXT()">📓 DOWNLOAD JOURNAL TXT</button>
    <button class="secondary-btn" onclick="printCurrentPlan()">🖨️ PRINT / SAVE PDF</button>
+   <button class="secondary-btn" onclick="ROLYFEExport.emailPlan()">✉ EMAIL CURRENT PLAN</button>
+   <button class="secondary-btn" onclick="ROLYFEExport.downloadWorkspace()">⬇ DOWNLOAD WORKSPACE BACKUP</button>
+   <button class="secondary-btn" onclick="ROLYFEExport.saveWorkspace()">💾 SAVE WORKSPACE ON THIS DEVICE</button>
   </div>
  </div>
 </details>
