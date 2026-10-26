@@ -260,6 +260,12 @@ html,body{max-width:100%;overflow-x:hidden}.tradingview-shell{width:100%;max-wid
 /* RO’Lyfe coach resource library + accessible ATR explainer */
 .rtic-resource-heading{margin:18px 0 9px;color:var(--green);font-size:13px;letter-spacing:.03em}
 .rtic-coach-library{margin-top:14px}
+.rtic-overview-research{margin:12px 0 0!important;background:rgba(8,20,12,.9)!important}
+.rtic-overview-research>summary{font-size:14px!important;padding:12px!important}
+.rtic-classroom-home-btn{display:block;grid-column:1/-1;margin:0;border-color:var(--green2);background:linear-gradient(145deg,rgba(0,230,118,.12),rgba(9,23,14,.98));color:var(--green)}
+.rtic-classroom-home-btn strong{display:block;color:var(--green);font-size:13px}
+.rtic-classroom-home-btn span{display:block;margin-top:4px;color:var(--muted);font-size:10px;font-weight:500;line-height:1.45}
+.rtic-classroom-chart-btn{background:linear-gradient(135deg,rgba(0,230,118,.16),#101d15)!important;border-color:var(--green2)!important;color:var(--green)!important}
 .rtic-guide-overlay[hidden]{display:none!important}
 .rtic-guide-overlay{position:fixed;inset:0;z-index:16000;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(0,0,0,.78)}
 .rtic-guide-card{width:min(560px,100%);max-height:88dvh;overflow:auto;padding:17px;background:#07100c;border:1px solid var(--border2);border-radius:16px;box-shadow:0 22px 70px rgba(0,0,0,.65);color:#e6f0e9;line-height:1.55}
@@ -382,12 +388,35 @@ body.rtic-chart-focused{overflow:hidden!important}
   <div class="rtic-step">2 · PLAN<span>Entry + stop + size</span></div>
   <div class="rtic-step">3 · REVIEW<span>Journal + performance</span></div>
  </div>
+ <details class="section-drop rtic-overview-research">
+  <summary>🧭 RESEARCH SHORTCUTS • FINVIZ, MARKET MAPS &amp; CALENDAR</summary>
+  <div class="drop-body">
+   <p class="chart-description">Quick access to your research tools. Use screeners and market maps to build a watchlist, then verify the chart and risk plan inside RTIC. These links open external sites; they do not send trades.</p>
+   <h3 class="rtic-resource-heading">Screeners &amp; market maps</h3>
+   <div class="link-grid">
+    <a class="market-link" href="https://finviz.com/" target="_blank" rel="noopener">🔎 Finviz.com<span>Screen stocks, inspect charts, and research market leaders</span></a>
+    <a class="market-link" href="https://finviz.com/screener.ashx?v=211&amp;f=sh_avgvol_o2000,sh_opt_optionshort,sh_price_o10,ta_sma200_pa,ta_sma50_pa&amp;o=-perf4w" target="_blank" rel="noopener">🎯 Finviz Bullish Scanner<span>Volume • options • price • SMA filters</span></a>
+    <a class="market-link" href="https://finviz.com/map.ashx?t=sec" target="_blank" rel="noopener">🔥 Finviz S&amp;P 500 Heat Map<span>Compare sector and market performance</span></a>
+    <a class="market-link" href="https://stockcharts.com/freecharts/perf.php?$COMPQ,iwm,$INDU,$SPX" target="_blank" rel="noopener">📊 Market Posture<span>Nasdaq • Russell • Dow • S&amp;P 500</span></a>
+    <a class="market-link" href="https://stockcharts.com/freecharts/perf.php?SPY,XLY,XLC,XLK,XLI,XLB,XLE,XLP,XLV,XLU,XLF" target="_blank" rel="noopener">🔄 Sector Rotation<span>Compare sector performance</span></a>
+   </div>
+   <h3 class="rtic-resource-heading">Calendar, rates &amp; market news</h3>
+   <div class="link-grid">
+    <a class="market-link" href="https://www.marketwatch.com/economy-politics/calendar" target="_blank" rel="noopener">🗓️ Economic Calendar<span>Review scheduled economic events</span></a>
+    <a class="market-link" href="https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html" target="_blank" rel="noopener">🏦 CME FedWatch<span>Review interest-rate expectations</span></a>
+    <a class="market-link" href="https://finance.yahoo.com/" target="_blank" rel="noopener">📈 Yahoo Finance<span>Futures • news • market overview</span></a>
+    <a class="market-link" href="https://www.schwab.com/trading/thinkorswim" target="_blank" rel="noopener">🧠 thinkorswim<span>Schwab trading platforms</span></a>
+    <a class="market-link" href="https://www.tradingview.com/chart/" target="_blank" rel="noopener">↗ TradingView Symbol Search<span>Open a symbol directly on TradingView</span></a>
+   </div>
+  </div>
+ </details>
 </div>
 <div class="rtic-quick-actions" id="rticHomeActions">
  <button type="button" onclick="ROLYFEWorkspace.go('scanner')"><strong>🔎 Scan a symbol</strong><span>Get data and a readable technical summary.</span></button>
  <button type="button" onclick="ROLYFEWorkspace.go('studies')"><strong>📚 Open study folders</strong><span>Chart, indicators and visual maps.</span></button>
  <button type="button" onclick="ROLYFEWorkspace.go('execute')"><strong>🎯 Build a trade plan</strong><span>Calculate risk before considering a trade.</span></button>
  <button type="button" onclick="ROLYFEWorkspace.go('watchlist')"><strong>👁️ Open watchlist</strong><span>Keep track of symbols you follow.</span></button>
+ <a class="market-link rtic-classroom-home-btn" href="https://rolrichman.github.io/RO-Lyfe-Trading-Intelligence-Classroom/" target="_blank" rel="noopener"><strong>🏫 Open Trading Classroom ↗</strong><span>Stock-first learning, chart lab, and strategy studies.</span></a>
 </div>
 
 
@@ -606,6 +635,7 @@ body.rtic-chart-focused{overflow:hidden!important}
   <div class="chart-actions">
    <a id="tvOpenLink" href="https://www.tradingview.com/chart/" target="_blank" rel="noopener">↗ Open Current Symbol in TradingView</a>
    <a href="https://www.tradingview.com/chart/" target="_blank" rel="noopener">🔎 Full TradingView Symbol Search</a>
+   <a class="rtic-classroom-chart-btn" href="https://rolrichman.github.io/RO-Lyfe-Trading-Intelligence-Classroom/" target="_blank" rel="noopener">🏫 Open RO’Lyfe Trading Classroom</a>
   </div>
   <p class="help">Important: some symbols are not licensed for embedded widgets. TradingView documents that “only available on TradingView” means the symbol cannot be shown in the website widget. The full TradingView link above is the fallback.</p>
  </div>
