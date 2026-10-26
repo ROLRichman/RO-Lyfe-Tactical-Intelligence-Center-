@@ -113,7 +113,7 @@
  }
  function scanBars(bars){
    const closes=bars.map(b=>b.close),volumes=bars.map(b=>Math.max(0,b.volume||0)),last=bars[bars.length-1],prev=bars[bars.length-2],length=bars.length;
-   const e50=emaSeries(closes,50).at(-1),s20=sma(closes,20),e200=emaSeries(closes,200).at(-1);
+   const e5=emaSeries(closes,5).at(-1),e10=emaSeries(closes,10).at(-1),e20=emaSeries(closes,20).at(-1),e50=emaSeries(closes,50).at(-1),s20=sma(closes,20),e200=emaSeries(closes,200).at(-1);
    const oscillatorData=calculateOscillatorSeries(bars);
    const macd=oscillatorData.latest.macd,signal=oscillatorData.latest.signal;
    const st={k:oscillatorData.latest.stochK??NaN,d:oscillatorData.latest.stochD??NaN};
@@ -153,7 +153,7 @@
    const tests=[
     {name:"EMA 200 — Major Trend",value:Number.isFinite(e200)?(last.close>=e200?"Close above EMA200":"Close below EMA200"):"Need 200 bars",vote:trendVote},
     {name:"EMA 50 — Trend Filter",value:Number.isFinite(e50)?(last.close>=e50?"Close above EMA50":"Close below EMA50"):"Need 50 bars",vote:ema50Vote},
-    {name:"SMA 20 — Short-Term Average",value:Number.isFinite(s20)?(last.close>=s20?"Close above SMA20":"Close below SMA20"):"Need 20 bars",vote:sma20Vote},
+    {name:"EMA 5/10/20 Alignment",value:[e5,e10,e20].every(Number.isFinite)?(e5>e10&&e10>e20?"Bull stack":e5<e10&&e10<e20?"Bear stack":"Mixed EMA stack"):"Need 20 bars",vote:[e5,e10,e20].every(Number.isFinite)?(e5>e10&&e10>e20?1:e5<e10&&e10<e20?-1:0):null},
     {name:"MACD 12/26/9",value:macdReady?(macd>signal?"MACD above signal":"MACD below signal"):"Building MACD",vote:macdReady?(macd>signal&&macd>0?1:macd<signal&&macd<0?-1:0):null},
     {name:"RSI 14",value:Number.isFinite(rv)?fmt(rv,1):"Unavailable",vote:Number.isFinite(rv)?(rv>=52&&rv<70?1:rv<=48&&rv>30?-1:0):null},
     {name:"Stochastic 14",value:Number.isFinite(st.k)?"%K "+fmt(st.k,1)+" / %D "+fmt(st.d,1):"Unavailable",vote:Number.isFinite(st.k)&&Number.isFinite(st.d)?(st.k>st.d&&st.k<80?1:st.k<st.d&&st.k>20?-1:0):null},
