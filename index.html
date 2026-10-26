@@ -247,7 +247,16 @@ html,body{max-width:100%;overflow-x:hidden}.tradingview-shell{width:100%;max-wid
 .rtic-mini-visual svg{display:block;width:100%;height:100px;max-width:100%;overflow:visible}
 .rtic-mini-caption{margin-top:5px;color:var(--muted);font-size:11px;line-height:1.45}
 .rtic-scan-dropdown>summary:focus-visible{outline:2px solid var(--green);outline-offset:2px}
-@media(max-width:420px){.rtic-mini-visual{padding:7px}.rtic-mini-visual svg{height:86px}.rtic-mini-caption{font-size:10px}}
+.rtic-atr-card{margin:10px 0;padding:12px;border:1px solid var(--border2);border-radius:11px;background:linear-gradient(145deg,rgba(12,30,18,.98),rgba(5,12,8,.98))}
+.rtic-atr-price-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 0 10px;border-bottom:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:900}
+.rtic-atr-price-row strong{color:var(--green);font-size:21px;white-space:nowrap}
+.rtic-atr-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:10px}
+.rtic-atr-grid>div{min-width:0;padding:9px;background:#07100c;border:1px solid var(--border);border-radius:8px}
+.rtic-atr-grid span,.rtic-atr-grid small{display:block;color:var(--muted);font-size:9px;line-height:1.4;font-weight:800}
+.rtic-atr-grid strong{display:block;margin-top:5px;color:#fff;font-size:14px;overflow-wrap:anywhere}
+.rtic-atr-grid small{margin-top:3px;font-weight:500}
+.rtic-atr-card .small-muted{margin:10px 0 0;line-height:1.55}
+@media(max-width:420px){.rtic-mini-visual{padding:7px}.rtic-mini-visual svg{height:86px}.rtic-mini-caption{font-size:10px}.rtic-atr-grid strong{font-size:12px}.rtic-atr-grid span{font-size:8px}}
 </style>
 <style>
 /* Mobile-safe, expandable chart and independently calculated oscillator panes */
@@ -563,8 +572,8 @@ body.rtic-chart-focused{overflow:hidden!important}
   <div class="rtic-chart-tools"><span class="help">Phone tip: expand the chart for more room. Sync the separate MACD/Stochastic panels to the selected chart timeframe when needed.</span><button id="rticChartSyncBtn" type="button" class="rtic-chart-sync" onclick="syncIndicatorPanelsToChart()">↻ Sync panels to chart</button><button id="rticChartExpandBtn" type="button" class="rtic-chart-expand" onclick="toggleChartFocus(true)">⛶ Expand chart</button></div>
   <div id="tradingview_chart" class="tradingview-shell"></div><button id="rticChartFocusClose" type="button" class="rtic-chart-focus-close" onclick="toggleChartFocus(false)">✕ Exit expanded chart</button>
   <aside id="rticFocusIndicatorDock" class="rtic-focus-indicator-dock" aria-label="RTIC indicator selector">
-   <div class="rtic-focus-dock-head"><strong>📊 RTIC INDICATORS <span id="rticFocusIndicatorCount">10 dropdowns</span></strong><button type="button" id="rticFocusDockToggle" onclick="toggleFocusIndicatorDock()" aria-expanded="true">⌄ Collapse</button></div>
-   <div id="rticFocusIndicatorContent" class="rtic-focus-dock-content"><p class="small-muted">Run Pull Secure Market Data to load the 10 indicator dropdowns here.</p></div>
+   <div class="rtic-focus-dock-head"><strong>📊 RTIC INDICATORS <span id="rticFocusIndicatorCount">11 dropdowns</span><span>LAST: <b id="rticFocusLastPrice">—</b></span></strong><button type="button" id="rticFocusDockToggle" onclick="toggleFocusIndicatorDock()" aria-expanded="true">⌄ Collapse</button></div>
+   <div id="rticFocusIndicatorContent" class="rtic-focus-dock-content"><p class="small-muted">Run Pull Secure Market Data to load the 11 indicator dropdowns here.</p></div>
   </aside>
   <div class="chart-actions">
    <a id="tvOpenLink" href="https://www.tradingview.com/chart/" target="_blank" rel="noopener">↗ Open Current Symbol in TradingView</a>
@@ -846,11 +855,12 @@ function syncIndicatorPanelsToChart(){
  if(window.ROLYFEData)window.ROLYFEData.refresh();
 }
 function syncFocusIndicatorDock(){
- const dock=document.getElementById("rticFocusIndicatorContent"),source=document.querySelector("#rticScanOutput .rtic-scan-list"),count=document.getElementById("rticFocusIndicatorCount");
+ const dock=document.getElementById("rticFocusIndicatorContent"),source=document.querySelector("#rticScanOutput .rtic-scan-list"),count=document.getElementById("rticFocusIndicatorCount"),lastPrice=document.getElementById("rticFocusLastPrice");
  if(!dock)return;
- if(!source){dock.innerHTML='<p class="small-muted">Run Pull Secure Market Data to load the 10 indicator dropdowns here.</p>';if(count)count.textContent="10 dropdowns";return;}
+ if(!source){dock.innerHTML='<p class="small-muted">Run Pull Secure Market Data to load the 11 indicator dropdowns here.</p>';if(count)count.textContent="11 dropdowns";if(lastPrice)lastPrice.textContent="—";return;}
  const clone=source.cloneNode(true);dock.replaceChildren(clone);
  const total=clone.querySelectorAll(".rtic-scan-dropdown").length;if(count)count.textContent=total+" dropdowns";
+ const price=source.querySelector(".rtic-atr-last-close");if(lastPrice)lastPrice.textContent=price?price.textContent:"—";
 }
 function toggleFocusIndicatorDock(){
  const dock=document.getElementById("rticFocusIndicatorDock"),button=document.getElementById("rticFocusDockToggle");if(!dock||!button)return;
@@ -1418,7 +1428,7 @@ document.addEventListener("DOMContentLoaded",()=>{
  setTimeout(()=>renderVisualChart("trade"),500);
 });
 </script>
-<script src="./js/rtic-data-engine.js?v=20261026-rtic9"></script>
+<script src="./js/rtic-data-engine.js?v=20261026-rtic10"></script>
 
 <script>
 /* RO'Lyfe workspace navigation: focused views, no lost calculators */
