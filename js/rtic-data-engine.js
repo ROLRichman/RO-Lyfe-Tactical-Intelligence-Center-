@@ -61,20 +61,33 @@
    const m=a.reduce((x,y)=>x+y,0)/k,d=a.reduce((x,y)=>x+Math.abs(y-m),0)/k;
    return d?(a[a.length-1]-m)/(.015*d):0;
  }
- function stochastic(bars,k=14){
-   if(bars.length<k)return {k:NaN,d:NaN};const values=[];
-   const first=Math.max(k-1,bars.length-3);
-   for(let end=first;end<bars.length;end++){
+ function stochasticSeries(bars,k=14,dPeriod=3){
+   const kValues=Array(bars.length).fill(NaN),dValues=Array(bars.length).fill(NaN);
+   for(let end=k-1;end<bars.length;end++){
      const seg=bars.slice(end-k+1,end+1),hi=Math.max(...seg.map(b=>b.high)),lo=Math.min(...seg.map(b=>b.low));
-     values.push(hi===lo?50:100*(bars[end].close-lo)/(hi-lo));
+     kValues[end]=hi===lo?50:100*(bars[end].close-lo)/(hi-lo);
+     if(end>=k-1+dPeriod-1){
+       const recent=kValues.slice(end-dPeriod+1,end+1);
+       if(recent.every(Number.isFinite))dValues[end]=recent.reduce((sum,v)=>sum+v,0)/dPeriod;
+     }
    }
-   return {k:values[values.length-1]??NaN,d:sma(values,Math.min(3,values.length))};
+   return {k:kValues,d:dValues};
+ }
+ function stochastic(bars,k=14){
+   const series=stochasticSeries(bars,k,3);
+   return {k:series.k.at(-1)??NaN,d:series.d.at(-1)??NaN};
  }
  function scanBars(bars){
    const closes=bars.map(b=>b.close),volumes=bars.map(b=>Math.max(0,b.volume||0)),last=bars[bars.length-1],prev=bars[bars.length-2],length=bars.length;
    const e5=emaSeries(closes,5).at(-1),e10=emaSeries(closes,10).at(-1),e20=emaSeries(closes,20).at(-1),e50=emaSeries(closes,50).at(-1),e200=emaSeries(closes,200).at(-1);
-   const a12=emaSeries(closes,12),a26=emaSeries(closes,26),macdSeries=closes.map((x,i)=>a12[i]-a26[i]).filter(Number.isFinite),macd=macdSeries.at(-1),signal=emaSeries(macdSeries,9).at(-1);
-   const rv=rsi(closes),st=stochastic(bars),cv=cci(bars),seg=bars.slice(-20);
+   const a12=emaSeries(closes,12),a26=emaSeries(closes,26);
+   const macdLine=closes.map((x,i)=>Number.isFinite(a12[i])&&Number.isFinite(a26[i])?a12[i]-a26[i]:NaN);
+   const macdCompact=macdLine.filter(Number.isFinite),signalCompact=emaSeries(macdCompact,9),signalLine=Array(length).fill(NaN);
+   let macdIndex=0;
+   for(let i=0;i<length;i++){if(Number.isFinite(macdLine[i])){signalLine[i]=signalCompact[macdIndex]??NaN;macdIndex++;}}
+   const histogram=macdLine.map((v,i)=>Number.isFinite(v)&&Number.isFinite(signalLine[i])?v-signalLine[i]:NaN);
+   const macd=macdLine.at(-1),signal=signalLine.at(-1);
+   const rv=rsi(closes),stSeries=stochasticSeries(bars,14,3),st={k:stSeries.k.at(-1)??NaN,d:stSeries.d.at(-1)??NaN},cv=cci(bars),seg=bars.slice(-20);
    const low20=Math.min(...seg.map(b=>b.low)),high20=Math.max(...seg.map(b=>b.high)),range=high20-low20,pos=range?(last.close-low20)/range:.5;
    const volWindow=volumes.slice(Math.max(0,length-21),length-1),avgVol=volWindow.length?volWindow.reduce((x,y)=>x+y,0)/volWindow.length:NaN;
    const rvol=avgVol>0?last.volume/avgVol:NaN;
@@ -99,7 +112,13 @@
    ];
    const active=tests.filter(t=>t.vote!==null),sum=active.reduce((s,t)=>s+t.vote,0),score=active.length?Math.round(50+50*sum/active.length):50;
    const liquidity=dollarVol>=25000000?10:dollarVol>=5000000?8:dollarVol>=1000000?6:dollarVol>=500000?4:dollarVol>=100000?2:0;
-   return {last,score,available:active.length,tests,dollarVol,rvol,e5,e10,e20,e50,e200,liquidity};
+   const plotStart=Math.max(0,length-120);
+   const oscillatorPoints=bars.slice(plotStart).map((bar,j)=>{
+     const i=plotStart+j;
+     const val=v=>Number.isFinite(v)?Number(v.toFixed(6)):null;
+     return {time:bar.time,close:bar.close,macd:val(macdLine[i]),signal:val(signalLine[i]),histogram:val(histogram[i]),stochK:val(stSeries.k[i]),stochD:val(stSeries.d[i])};
+   });
+   return {last,score,available:active.length,tests,dollarVol,rvol,e5,e10,e20,e50,e200,liquidity,oscillatorPoints};
  }
  function renderQuote(items){
    const out=byId("rticQuoteOutput");if(!out)return;
