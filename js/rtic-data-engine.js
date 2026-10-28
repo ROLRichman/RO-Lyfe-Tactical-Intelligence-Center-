@@ -152,7 +152,7 @@
    const hmaVote=!Number.isFinite(hma)||!Number.isFinite(prevHma)?null:last.close>hma&&hma>prevHma?1:last.close<hma&&hma<prevHma?-1:0;
    const ppsUp=Number.isFinite(hma)&&Number.isFinite(prevHma)&&last.close>hma&&prev.close<=prevHma,ppsDown=Number.isFinite(hma)&&Number.isFinite(prevHma)&&last.close<hma&&prev.close>=prevHma;
    const ppsVote=!Number.isFinite(hma)||!Number.isFinite(prevHma)?null:ppsUp?1:ppsDown?-1:0;
-   const hmaValue=Number.isFinite(hma)?"Close "+(last.close>=hma?"above":"below")+" HMA("+hmaPeriod+") "+money(hma)+" • slope "+(hma>prevHma?"rising":hma<prevHma?"falling":"flat"):"Need more valid bars for HMA("+hmaPeriod+")");
+   const hmaValue=Number.isFinite(hma)?"Close "+(last.close>=hma?"above":"below")+" HMA("+hmaPeriod+") "+money(hma)+" • slope "+(hma>prevHma?"rising":hma<prevHma?"falling":"flat"):"Need more valid bars for HMA("+hmaPeriod+")";
    const ppsValue=ppsVote===null?"Need more valid bars for HMA crossing":ppsUp?"⬆ UP ARROW · local HMA-cross heuristic":ppsDown?"⬇ DOWN ARROW · local HMA-cross heuristic":"No fresh crossover · WAIT";
    const pbValue=bullPullback?"Bullish pullback zone"+(bullVolumeOk?" · volume +"+fmt(volChangePct,1)+"% confirms":" · volume gate not met"):(bearPullback?"Bearish pullback zone"+(bearVolumeOk?" · volume "+fmt(volChangePct,1)+"% confirms":" · volume gate not met"):"No aligned pullback setup · WAIT");
    const pbDisplay=pbShowLabel?pbValue:((pullbackVote===1||pullbackVote===-1)?"PULLBACK WATCH":"WAIT");
