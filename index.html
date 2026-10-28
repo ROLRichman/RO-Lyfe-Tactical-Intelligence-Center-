@@ -1620,18 +1620,6 @@ document.addEventListener("DOMContentLoaded",()=>{
  setTimeout(loadTradingViewChart,350);
  setTimeout(()=>renderVisualChart("trade"),500);
 });
-
-function calculateTacticalOptionLab(){
- const position=byId("tacticalOptPosition")?.value||"buy",side=byId("tacticalOptSide").value,strike=Number(byId("tacticalOptStrike").value),prem=Number(byId("tacticalOptPremium").value),iv=Number(byId("tacticalOptIV").value),rankText=byId("tacticalOptIVRank").value,pctText=byId("tacticalOptIVPercentile").value,rank=rankText===""?null:Number(rankText),pct=pctText===""?null:Number(pctText),expiry=byId("tacticalOptExpiry").value,qty=Math.floor(Number(byId("tacticalOptQty").value)||0),out=byId("tacticalOptResult");
- if(!expiry||!Number.isFinite(strike)||strike<=0||!Number.isFinite(prem)||prem<0||qty<1||!Number.isFinite(iv)||iv<0||rank!==null&&(!Number.isFinite(rank)||rank<0||rank>100)||pct!==null&&(!Number.isFinite(pct)||pct<0||pct>100)){out.textContent="Enter valid chain values for strike, quoted premium, IV, expiration, quantity, and optional IV Rank/Percentile.";return}
- const now=new Date();now.setHours(0,0,0,0);const exp=new Date(expiry+"T00:00:00"),dte=Math.ceil((exp-now)/86400000);if(dte<0){out.textContent="Expiration date is in the past.";return}
- const total=prem*100*qty,breakeven=side==="call"?strike+prem:strike-prem,parts=[];if(rank!==null)parts.push("IV Rank "+rank.toFixed(0)+"% ("+(rank>=70?"high":rank<=20?"low":"middle")+" versus its 52-week range)");if(pct!==null)parts.push("IV Percentile "+pct.toFixed(0)+"% ("+(pct>=70?"higher than most observations":pct<=20?"lower than most observations":"middle historical percentile")+")");
- const ivContext=parts.length?parts.join("; ")+".":"IV "+iv.toFixed(1)+"% entered; IV alone cannot say whether premium is historically expensive or cheap.";
- const premiumLabel=position==="buy"?"Estimated premium debit: $"+total.toFixed(2):"Estimated gross premium credit: $"+total.toFixed(2)+" before fees, collateral requirements and potential losses";
- out.textContent=premiumLabel+" for "+qty+" "+(qty===1?"contract":"contracts")+" (100-share multiplier). "+ivContext+" Expiration "+expiry+" · "+dte+" calendar days. "+(position==="buy"?"Long ":"Short ")+side+" expiration breakeven reference: $"+breakeven.toFixed(2)+". When selling, verify collateral, assignment and defined/unlimited risk separately.";
-}
-
-})();
 </script>
 
 
@@ -1924,6 +1912,21 @@ window.addEventListener("rolyfe:rtic-scan",function(event){
   if(gate&&key!==lastNoticeKey&&alertsEnabled()){lastNoticeKey=key;try{new Notification("RO’Lyfe Scan Alert · "+symbol,{body:direction+" watch · "+score+"/100 RTIC score · "+available+"/10 original directional readings. Review manually before acting."})}catch(e){}}
  });
 })();
+</script>
+
+<script>
+function calculateTacticalOptionLab(){
+ const byId=id=>document.getElementById(id);
+ const position=byId("tacticalOptPosition")?.value||"buy",side=byId("tacticalOptSide").value,strike=Number(byId("tacticalOptStrike").value),prem=Number(byId("tacticalOptPremium").value),iv=Number(byId("tacticalOptIV").value),rankText=byId("tacticalOptIVRank").value,pctText=byId("tacticalOptIVPercentile").value,rank=rankText===""?null:Number(rankText),pct=pctText===""?null:Number(pctText),expiry=byId("tacticalOptExpiry").value,qty=Math.floor(Number(byId("tacticalOptQty").value)||0),out=byId("tacticalOptResult");
+ if(!expiry||!Number.isFinite(strike)||strike<=0||!Number.isFinite(prem)||prem<0||qty<1||!Number.isFinite(iv)||iv<0||rank!==null&&(!Number.isFinite(rank)||rank<0||rank>100)||pct!==null&&(!Number.isFinite(pct)||pct<0||pct>100)){out.textContent="Enter valid chain values for strike, quoted premium, IV, expiration, quantity, and optional IV Rank/Percentile.";return}
+ const now=new Date();now.setHours(0,0,0,0);const exp=new Date(expiry+"T00:00:00"),dte=Math.ceil((exp-now)/86400000);if(dte<0){out.textContent="Expiration date is in the past.";return}
+ const total=prem*100*qty,breakeven=side==="call"?strike+prem:strike-prem,parts=[];
+ if(rank!==null)parts.push("IV Rank "+rank.toFixed(0)+"% ("+(rank>=70?"high":rank<=20?"low":"middle")+" versus its 52-week range)");
+ if(pct!==null)parts.push("IV Percentile "+pct.toFixed(0)+"% ("+(pct>=70?"higher than most observations":pct<=20?"lower than most observations":"middle historical percentile")+")");
+ const ivContext=parts.length?parts.join("; ")+".":"IV "+iv.toFixed(1)+"% entered; IV alone cannot say whether premium is historically expensive or cheap.";
+ const premiumLabel=position==="buy"?"Estimated premium debit: $"+total.toFixed(2):"Estimated gross premium credit: $"+total.toFixed(2)+" before fees, collateral requirements and potential losses";
+ out.textContent=premiumLabel+" for "+qty+" "+(qty===1?"contract":"contracts")+" (100-share multiplier). "+ivContext+" Expiration "+expiry+" · "+dte+" calendar days. "+(position==="buy"?"Long ":"Short ")+side+" expiration breakeven reference: $"+breakeven.toFixed(2)+". When selling, verify collateral, assignment and defined/unlimited risk separately.";
+}
 </script>
 
 </body>
