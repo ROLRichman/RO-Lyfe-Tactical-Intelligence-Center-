@@ -145,8 +145,8 @@
    const ePbAnchor=emaSeries(closes,pbLength).at(-1),ePbBuy=emaSeries(closes,pbBuyEma).at(-1),ePbSell=emaSeries(closes,pbSellEma).at(-1);
    const volChangePct=prev&&prev.volume>0?((last.volume-prev.volume)/prev.volume)*100:NaN;
    const nearPullback=Number.isFinite(atr)&&atr>0&&Number.isFinite(ePbAnchor)&&Math.abs(last.close-ePbAnchor)<=pbMultiplier*atr;
-   const bullPullback=nearPullback&&last.close>=ePbAnchor&&last.close>ePbSell&&last.close>prev.close;
-   const bearPullback=nearPullback&&last.close<=ePbAnchor&&last.close<ePbSell&&last.close<prev.close;
+   const bullPullback=nearPullback&&ePbBuy>=ePbAnchor&&ePbBuy>ePbSell&&ePbBuy>prev.close;
+   const bearPullback=nearPullback&&ePbBuy<=ePbAnchor&&ePbBuy<ePbSell&&ePbBuy<prev.close;
    const bullVolumeOk=Number.isFinite(volChangePct)&&volChangePct>=pbVolUp,bearVolumeOk=Number.isFinite(volChangePct)&&volChangePct<=-pbVolDown;
    const pullbackVote=!Number.isFinite(atr)||!Number.isFinite(ePbAnchor)?null:bullPullback&&bullVolumeOk?1:bearPullback&&bearVolumeOk?-1:0;
    const hmaVote=!Number.isFinite(hma)||!Number.isFinite(prevHma)?null:last.close>hma&&hma>prevHma?1:last.close<hma&&hma<prevHma?-1:0;
