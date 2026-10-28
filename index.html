@@ -716,11 +716,13 @@ body.rtic-chart-focused .rtic-scroll-shortcuts{display:none}
    <div class="rtic-focus-dock-head"><strong>📊 RTIC INDICATORS <span id="rticFocusIndicatorCount">14 dropdowns</span><span>LAST: <b id="rticFocusLastPrice">—</b></span></strong><button type="button" id="rticFocusDockToggle" onclick="toggleFocusIndicatorDock()" aria-expanded="true">⌄ Collapse</button></div>
    <div id="rticFocusIndicatorContent" class="rtic-focus-dock-content"><p class="small-muted">Run Pull Secure Market Data to load the 11 indicator dropdowns here.</p></div>
   </aside>
+  <div id="rticChartActionsDockAnchor" aria-hidden="true"></div>
   <div class="chart-actions">
    <a id="tvOpenLink" href="https://www.tradingview.com/chart/" target="_blank" rel="noopener">↗ Open Current Symbol in TradingView</a>
    <a href="https://www.tradingview.com/chart/" target="_blank" rel="noopener">🔎 Full TradingView Symbol Search</a>
    <a class="rtic-classroom-chart-btn" href="https://rolrichman.github.io/RO-Lyfe-Trading-Intelligence-Classroom/" target="_blank" rel="noopener">🏫 Open RO’Lyfe Trading Classroom</a>
   </div>
+  <div id="rticChartHelpDockAnchor" aria-hidden="true"></div>
   <p class="help">Important: some symbols are not licensed for embedded widgets. TradingView documents that “only available on TradingView” means the symbol cannot be shown in the website widget. The full TradingView link above is the fallback.</p>
  </div>
 </details>
@@ -1055,13 +1057,31 @@ function syncIndicatorPanelsToChart(){
  if(source)source.textContent="Syncing RTIC oscillator panels to "+labels[currentTimeframe]+" chart context using Tickerbot historical candles…";
  if(window.ROLYFEData)window.ROLYFEData.refresh();
 }
+
+const rticVisualPanelsOriginalNode=document.getElementById("rticVisualIndicatorPanels");
+const rticChartActionsOriginalNode=document.querySelector(".chart-actions");
+const rticChartHelpOriginalNode=rticChartActionsOriginalNode&&rticChartActionsOriginalNode.nextElementSibling&&rticChartActionsOriginalNode.nextElementSibling.matches("p.help")?rticChartActionsOriginalNode.nextElementSibling:null;
+function mountRTICExpandedChartExtras(){
+ const dock=document.getElementById("rticFocusIndicatorContent");if(!dock)return;
+ [rticVisualPanelsOriginalNode,rticChartActionsOriginalNode,rticChartHelpOriginalNode].forEach(node=>{if(node&&node.parentElement!==dock)dock.appendChild(node);});
+}
+function restoreRTICExpandedChartExtras(){
+ const items=[
+  [rticVisualPanelsOriginalNode,"rticVisualIndicatorDockAnchor"],
+  [rticChartActionsOriginalNode,"rticChartActionsDockAnchor"],
+  [rticChartHelpOriginalNode,"rticChartHelpDockAnchor"]
+ ];
+ items.forEach(([node,anchorId])=>{const anchor=document.getElementById(anchorId);if(node&&anchor&&node.parentElement!==anchor.parentElement)anchor.insertAdjacentElement("afterend",node);});
+}
+
 function syncFocusIndicatorDock(){
  const dock=document.getElementById("rticFocusIndicatorContent"),out=document.getElementById("rticScanOutput"),source=out&&out.querySelector(".rtic-scan-list"),count=document.getElementById("rticFocusIndicatorCount"),lastPrice=document.getElementById("rticFocusLastPrice");
  if(!dock)return;
- if(!source||!source.querySelector(".rtic-scan-dropdown")){dock.innerHTML='<div class="rtic-dock-empty"><strong>Indicators are waiting for scan data</strong><p>Choose Tickerbot — Historical Bars + RTIC Scan, then tap Pull Secure Market Data. After a successful scan, your indicator cards and mini visuals appear here.</p><button type="button" class="rtic-dock-run" onclick="ROLYFEData.refresh()">↻ Run indicator scan</button></div>';if(count)count.textContent="14 dropdowns";if(lastPrice)lastPrice.textContent="—";return;}
+ if(!source||!source.querySelector(".rtic-scan-dropdown")){dock.innerHTML='<div class="rtic-dock-empty"><strong>RTIC indicators are waiting for scan data</strong><p>Run Pull Secure Market Data with Tickerbot Historical Bars + RTIC Scan. After the scan, all core indicator cards and the added HMA/PPS-style/pullback context appear here. MACD and Stochastic visual panels are docked below as well.</p><button type="button" class="rtic-dock-run" onclick="ROLYFEData.refresh()">↻ Run indicator scan</button></div>';if(count)count.textContent="Waiting for scan";if(lastPrice)lastPrice.textContent="—";mountRTICExpandedChartExtras();return;}
  const clone=source.cloneNode(true);clone.querySelectorAll("details").forEach(d=>d.open=false);dock.replaceChildren(clone);
  const total=clone.querySelectorAll(".rtic-scan-dropdown").length;if(count)count.textContent=total+" dropdowns";
  const price=out.querySelector(".rtic-atr-last-close");if(lastPrice)lastPrice.textContent=price?price.textContent:(out.querySelector(".rtic-data-metric.rtic-scan-score")?"Loaded":"—");
+ mountRTICExpandedChartExtras();
 }
 function toggleFocusIndicatorDock(){
  const dock=document.getElementById("rticFocusIndicatorDock"),button=document.getElementById("rticFocusDockToggle");if(!dock||!button)return;
@@ -1100,7 +1120,7 @@ function toggleChartFocus(force){
  const close=document.getElementById("rticChartFocusClose"),expand=document.getElementById("rticChartExpandBtn");
  if(close)close.style.display=open?"block":"none";
  if(expand)expand.textContent=open?"↙ Return to page":"⛶ Expand chart";
- if(open){syncFocusIndicatorDock();const dock=document.getElementById("rticFocusIndicatorDock");if(dock){dock.classList.remove("collapsed");dock.style.setProperty("--rtic-dock-height",Math.min(window.innerHeight*.42,window.innerHeight*.76)+"px");}const btn=document.getElementById("rticFocusDockToggle");if(btn){btn.textContent="⌄ Collapse";btn.setAttribute("aria-expanded","true");}}
+ if(open){syncFocusIndicatorDock();const dock=document.getElementById("rticFocusIndicatorDock");if(dock){dock.classList.remove("collapsed");dock.style.setProperty("--rtic-dock-height",Math.min(window.innerHeight*.42,window.innerHeight*.76)+"px");}const btn=document.getElementById("rticFocusDockToggle");if(btn){btn.textContent="⌄ Collapse";btn.setAttribute("aria-expanded","true");}mountRTICExpandedChartExtras();}else{restoreRTICExpandedChartExtras();updateRTICScrollShortcuts();}
 }
 function toggleOscillatorPlot(kind){
  const plot=document.getElementById(kind==="macd"?"rticMacdPlot":"rticStochPlot");
