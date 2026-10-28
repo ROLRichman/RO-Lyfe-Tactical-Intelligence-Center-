@@ -355,17 +355,10 @@ body.rtic-chart-focused{overflow:hidden!important}
 </style>
 
 <style id="rtic-scroll-shortcuts-styles">
-.rtic-scroll-shortcuts{position:fixed;right:10px;top:55%;transform:translate(12px,-50%);z-index:1050;display:flex;flex-direction:column;gap:7px;padding:6px;background:rgba(5,12,8,.96);border:1px solid var(--border2);border-radius:13px;box-shadow:0 8px 26px rgba(0,0,0,.55);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s ease,transform .18s ease,visibility .18s ease;backdrop-filter:blur(10px)}
-.rtic-scroll-shortcuts.visible{opacity:1;visibility:visible;pointer-events:auto;transform:translate(0,-50%)}
-.rtic-scroll-shortcuts button{display:flex;align-items:center;gap:7px;width:100%;min-height:40px;margin:0;padding:8px 10px;background:#102219;border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:12px;font-weight:850;white-space:nowrap}
-.rtic-scroll-shortcuts button:first-child{background:#102033;border-color:#31506a}
-.rtic-scroll-shortcuts button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
-body.rtic-chart-focused .rtic-scroll-shortcuts{display:none}
 .rtic-focus-dock-content>#rticVisualIndicatorPanels{display:block!important;margin:10px 0 0;max-height:none;overflow:visible;border:1px solid var(--border2);border-radius:9px;background:#07100c}
 .rtic-focus-dock-content>#rticVisualIndicatorPanels>.drop-body{padding:8px;max-height:none}
 .rtic-focus-dock-content>#rticVisualIndicatorPanels .rtic-osc-panel{margin:8px 0;padding:8px}
 .rtic-focus-dock-content>#rticVisualIndicatorPanels .rtic-osc-plot{min-height:76px}
-@media(max-width:600px){.rtic-scroll-shortcuts{right:5px;top:58%;padding:4px;gap:5px}.rtic-scroll-shortcuts button{min-height:38px;padding:8px;font-size:11px}.rtic-scroll-shortcuts button span{max-width:94px;white-space:normal;line-height:1.15}}
 </style>
 
 </head>
@@ -404,10 +397,6 @@ body.rtic-chart-focused .rtic-scroll-shortcuts{display:none}
  <button class="rtic-nav-link" data-view="resources" onclick="ROLYFEWorkspace.go('resources')"><span class="rtic-nav-icon">🧭</span><span>Market Resources<small>Calendar, sectors, news and tools</small></span></button>
 </aside>
 
-<div id="rticScrollShortcuts" class="rtic-scroll-shortcuts" aria-label="Quick navigation" aria-hidden="true">
- <button type="button" onclick="scrollRTICTop()" aria-label="Scroll to top">↑ <span>Top</span></button>
- <button type="button" onclick="openRTICExpandedChart()" aria-label="Open expanded chart with RTIC indicators">📊 <span>Chart + Indicators</span></button>
-</div>
 
 <div class="status-bar">
  <div class="status-item">🟢 SYSTEM<br><span class="status-green">ONLINE</span></div>
@@ -1109,11 +1098,6 @@ function closeRTICMenuForJump(){const sidebar=document.getElementById("rticSideb
 function scrollRTICTop(){if(document.body.classList.contains("rtic-chart-focused"))toggleChartFocus(false);closeRTICMenuForJump();window.scrollTo({top:0,behavior:"smooth"});}
 function jumpToRTICScan(){if(document.body.classList.contains("rtic-chart-focused"))toggleChartFocus(false);closeRTICMenuForJump();const target=document.getElementById("rticDataControls")||document.getElementById("rticDataProvider")?.closest("details")||document.getElementById("rticScanOutput");if(target){const details=target.closest("details");if(details)details.open=true;target.scrollIntoView({behavior:"smooth",block:"start"});}else window.scrollTo({top:0,behavior:"smooth"});}
 function openRTICExpandedChart(){closeRTICMenuForJump();const provider=document.getElementById("rticDataControls");if(provider){const d=provider.closest("details");if(d)d.open=true;}toggleChartFocus(true);syncFocusIndicatorDock();const dock=document.getElementById("rticFocusIndicatorDock");if(dock){dock.classList.remove("collapsed");dock.style.setProperty("--rtic-dock-height",Math.min(window.innerHeight*.42,window.innerHeight*.76)+"px");}const btn=document.getElementById("rticFocusDockToggle");if(btn){btn.textContent="⌄ Collapse";btn.setAttribute("aria-expanded","true");}}
-function updateRTICScrollShortcuts(){const el=document.getElementById("rticScrollShortcuts");if(!el)return;const visible=window.scrollY>420&&!document.body.classList.contains("rtic-chart-focused");el.classList.toggle("visible",visible);el.setAttribute("aria-hidden",String(!visible));}
-window.addEventListener("scroll",updateRTICScrollShortcuts,{passive:true});
-window.addEventListener("resize",updateRTICScrollShortcuts);
-document.addEventListener("DOMContentLoaded",updateRTICScrollShortcuts);
-updateRTICScrollShortcuts();
 
 function toggleChartFocus(force){
  const chart=document.getElementById("tradingview_chart");if(!chart)return;
@@ -1122,7 +1106,7 @@ function toggleChartFocus(force){
  const close=document.getElementById("rticChartFocusClose"),expand=document.getElementById("rticChartExpandBtn");
  if(close)close.style.display=open?"block":"none";
  if(expand)expand.textContent=open?"↙ Return to page":"⛶ Expand chart";
- if(open){syncFocusIndicatorDock();const dock=document.getElementById("rticFocusIndicatorDock");if(dock){dock.classList.remove("collapsed");dock.style.setProperty("--rtic-dock-height",Math.min(window.innerHeight*.42,window.innerHeight*.76)+"px");}const btn=document.getElementById("rticFocusDockToggle");if(btn){btn.textContent="⌄ Collapse";btn.setAttribute("aria-expanded","true");}mountRTICExpandedChartExtras();}else{restoreRTICExpandedChartExtras();updateRTICScrollShortcuts();}
+ if(open){syncFocusIndicatorDock();const dock=document.getElementById("rticFocusIndicatorDock");if(dock){dock.classList.remove("collapsed");dock.style.setProperty("--rtic-dock-height",Math.min(window.innerHeight*.42,window.innerHeight*.76)+"px");}const btn=document.getElementById("rticFocusDockToggle");if(btn){btn.textContent="⌄ Collapse";btn.setAttribute("aria-expanded","true");}mountRTICExpandedChartExtras();}else{restoreRTICExpandedChartExtras();}
 }
 function toggleOscillatorPlot(kind){
  const plot=document.getElementById(kind==="macd"?"rticMacdPlot":"rticStochPlot");

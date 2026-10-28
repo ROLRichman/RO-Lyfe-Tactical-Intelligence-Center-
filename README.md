@@ -65,9 +65,8 @@ The main dashboard includes a **Secure Market Data & RTIC Scanner** section:
 Before relying on results, verify timestamps, exchange/session coverage, provider plan limits, and quote latency. Average dollar volume is not options-chain liquidity. The embedded TradingView chart remains a separate charting view; scanner data depends on the selected provider and interval.
 
 
-## Expanded-chart indicator dock and scroll shortcuts (2026-10-28)
-- Added a floating quick-navigation rail that appears after scrolling 420px, with **Back to top** and **Expanded chart + RTIC indicators** actions.
-- Added quick-jump controls to the slide-out workspace menu for top, scan and expanded chart.
+## Menu-only navigation and expanded-chart indicator dock (2026-10-28)
+- Removed the floating Back to top / Chart + Indicators rail because it obstructed the page. Both shortcuts are in the existing slide-out workspace menu, alongside the Run / view scan shortcut.
 - The RTIC Indicators dock remains attached to expanded TradingView chart mode, updates after scans, and is draggable/collapsible.
-- The real MACD and Stochastic momentum panel DOM (not a duplicate clone with duplicate element IDs) is moved into the expanded chart dock while focus mode is active, along with chart-open links and the symbol-entitlement note; all of these nodes are restored to their normal page position when leaving focus mode. This preserves their existing settings event handlers and plot ids.
+- The actual MACD/Stochastic momentum panel DOM (not cloned) moves into the expanded chart dock with the TradingView links and symbol-entitlement note. The same DOM nodes return to their original locations when leaving focus mode, preserving settings handlers and plot IDs.
 - Source-level JavaScript syntax checks passed. Live browser interaction, mobile layout and provider scan behavior still need an on-device test.
