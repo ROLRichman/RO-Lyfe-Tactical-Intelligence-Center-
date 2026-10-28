@@ -1113,6 +1113,7 @@ function updateRTICScrollShortcuts(){const el=document.getElementById("rticScrol
 window.addEventListener("scroll",updateRTICScrollShortcuts,{passive:true});
 window.addEventListener("resize",updateRTICScrollShortcuts);
 document.addEventListener("DOMContentLoaded",updateRTICScrollShortcuts);
+updateRTICScrollShortcuts();
 
 function toggleChartFocus(force){
  const chart=document.getElementById("tradingview_chart");if(!chart)return;
