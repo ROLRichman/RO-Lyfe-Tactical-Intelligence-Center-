@@ -604,10 +604,27 @@ body.rtic-chart-focused{overflow:hidden!important}
  <div class="drop-body">
   <p class="chart-description">Added without replacing the existing indicator stack. HMA period defaults to 31. PPS-style markers are a local educational approximation, not the proprietary Thinkorswim PPS study. Use provider candle data for actual calculations; do not treat this worksheet as a live options feed.</p>
   <div class="indicator-grid">
-   <div class="indicator-card"><span class="indicator-name">〰 Hull Moving Average</span><span class="indicator-value">HMA <select id="tacticalHmaPeriod" aria-label="Tactical HMA period"><option selected>31</option><option>32</option></select></span><span class="indicator-status neutral">Trend / slope filter</span><p class="chart-description">Close above a rising HMA supports bullish context; below a falling HMA supports bearish context. Confirm against EMA 50/200.</p></div>
-   <div class="indicator-card"><span class="indicator-name">⬆⬇ PPS-style markers</span><span class="indicator-value">UP / DOWN</span><span class="indicator-status neutral">Local reversal heuristic</span><p class="chart-description">Use only when a confirmed candle reverses across the selected trend reference. Not the licensed PPS indicator.</p></div>
-   <div class="indicator-card"><span class="indicator-name">🎯 Pullback setup</span><span class="indicator-value">TREND → RETRACE → CONFIRM</span><span class="indicator-status neutral">Wait for candle confirmation</span><p class="chart-description">Prefer retracement toward EMA/HMA in the higher-timeframe trend, then a confirmed bounce/rejection and a clear invalidation level.</p></div>
+   <div class="indicator-card"><span class="indicator-name">〰 Hull Moving Average</span><span class="indicator-value">HMA <select id="tacticalHmaPeriod" aria-label="Tactical HMA period" onchange="if(window.ROLYFEData)ROLYFEData.recalculateScan()"><option selected>31</option><option>32</option></select></span><span id="tacticalHmaStatus" class="indicator-status neutral">Waiting for scan data</span><p class="chart-description">Close above a rising HMA supports bullish context; below a falling HMA supports bearish context. Confirm against EMA 50/200.</p></div>
+   <div class="indicator-card"><span class="indicator-name">⬆⬇ PPS-style markers</span><span class="indicator-value">UP / DOWN</span><span id="tacticalPpsStatus" class="indicator-status neutral">Waiting for scan data</span><p class="chart-description">Use only when a confirmed candle reverses across the selected trend reference. Not the licensed PPS indicator.</p></div>
+   <div class="indicator-card"><span class="indicator-name">🎯 Pullback setup</span><span class="indicator-value">TREND → RETRACE → CONFIRM</span><span id="tacticalPullbackStatus" class="indicator-status neutral">Waiting for scan data</span><p class="chart-description">Prefer retracement toward EMA/HMA in the higher-timeframe trend, then a confirmed bounce/rejection and a clear invalidation level.</p></div>
   </div>
+
+  <details class="rtic-mini-details" id="tacticalPullbackSettings">
+   <summary>RL_Pull_Back_V4_5_13 · Study settings</summary>
+   <p class="small-muted">Reference values from your Thinkorswim screenshot. These configure RO’Lyfe's transparent pullback proxy; they do not recreate the original custom study exactly.</p>
+   <div class="form-grid">
+    <div><label>Length</label><input id="tacticalPbLength" type="number" min="2" max="300" value="50" onchange="if(window.ROLYFEData)ROLYFEData.recalculateScan()"></div>
+    <div><label>Multiplier</label><input id="tacticalPbMultiplier" type="number" min="0.1" max="10" step="0.1" value="1.5" onchange="if(window.ROLYFEData)ROLYFEData.recalculateScan()"></div>
+    <div><label>EMA length buy</label><input id="tacticalPbBuyEma" type="number" min="1" max="100" value="1" onchange="if(window.ROLYFEData)ROLYFEData.recalculateScan()"></div>
+    <div><label>EMA length sell</label><input id="tacticalPbSellEma" type="number" min="2" max="300" value="13" onchange="if(window.ROLYFEData)ROLYFEData.recalculateScan()"></div>
+    <div><label>Volume change threshold up (%)</label><input id="tacticalPbVolUp" type="number" min="0" max="1000" value="100" onchange="if(window.ROLYFEData)ROLYFEData.recalculateScan()"></div>
+    <div><label>Volume change threshold down (%)</label><input id="tacticalPbVolDown" type="number" min="0" max="1000" value="100" onchange="if(window.ROLYFEData)ROLYFEData.recalculateScan()"></div>
+    <div><label>Spread limit ($)</label><input id="tacticalPbSpread" type="number" min="0" max="10" step="0.01" value="0.09" onchange="if(window.ROLYFEData)ROLYFEData.recalculateScan()"></div>
+    <div><label>Show label</label><input id="tacticalPbShowLabel" type="checkbox" checked onchange="if(window.ROLYFEData)ROLYFEData.recalculateScan()"></div>
+    <div><label>Move to</label><select id="tacticalPbMoveTo" onchange="if(window.ROLYFEData)ROLYFEData.recalculateScan()"><option selected value="UP">UP</option><option value="DOWN">DOWN</option></select></div>
+   </div>
+   <p class="small-muted">The 0.09 spread guard cannot be verified from OHLCV candles alone; a current bid/ask quote is required.</p>
+  </details>
   <h3>Options IV / Premium / Expiration Worksheet</h3>
   <p class="chart-description">Manually enter quotes from a current options chain. Stock candles alone cannot supply implied volatility, bid/ask, or contract expiration data.</p>
   <div class="form-grid">
@@ -615,6 +632,8 @@ body.rtic-chart-focused{overflow:hidden!important}
    <div><label>Strike ($)</label><input id="tacticalOptStrike" type="number" min="0" step="0.01"></div>
    <div><label>Premium per share ($)</label><input id="tacticalOptPremium" type="number" min="0" step="0.01" placeholder="Ask to buy / bid to sell"></div>
    <div><label>Implied volatility (%)</label><input id="tacticalOptIV" type="number" min="0" max="1000" step="0.1"></div>
+   <div><label>IV Rank (%) — optional</label><input id="tacticalOptIVRank" type="number" min="0" max="100" step="1" placeholder="0–100"></div>
+   <div><label>IV Percentile (%) — optional</label><input id="tacticalOptIVPercentile" type="number" min="0" max="100" step="1" placeholder="0–100"></div>
    <div><label>Expiration</label><input id="tacticalOptExpiry" type="date"></div>
    <div><label>Contracts</label><input id="tacticalOptQty" type="number" min="1" step="1" value="1"></div>
   </div>
@@ -669,7 +688,7 @@ body.rtic-chart-focused{overflow:hidden!important}
   <div id="tradingview_chart" class="tradingview-shell"></div><button id="rticChartFocusClose" type="button" class="rtic-chart-focus-close" onclick="toggleChartFocus(false)">✕ Exit expanded chart</button>
   <aside id="rticFocusIndicatorDock" class="rtic-focus-indicator-dock" aria-label="RTIC indicator selector">
    <div id="rticFocusDockGrab" class="rtic-focus-dock-grab" role="separator" aria-orientation="horizontal" aria-label="Drag up to show more indicators, down to show less" tabindex="0">DRAG TO RESIZE</div>
-   <div class="rtic-focus-dock-head"><strong>📊 RTIC INDICATORS <span id="rticFocusIndicatorCount">11 dropdowns</span><span>LAST: <b id="rticFocusLastPrice">—</b></span></strong><button type="button" id="rticFocusDockToggle" onclick="toggleFocusIndicatorDock()" aria-expanded="true">⌄ Collapse</button></div>
+   <div class="rtic-focus-dock-head"><strong>📊 RTIC INDICATORS <span id="rticFocusIndicatorCount">14 dropdowns</span><span>LAST: <b id="rticFocusLastPrice">—</b></span></strong><button type="button" id="rticFocusDockToggle" onclick="toggleFocusIndicatorDock()" aria-expanded="true">⌄ Collapse</button></div>
    <div id="rticFocusIndicatorContent" class="rtic-focus-dock-content"><p class="small-muted">Run Pull Secure Market Data to load the 11 indicator dropdowns here.</p></div>
   </aside>
   <div class="chart-actions">
@@ -1012,7 +1031,7 @@ function syncIndicatorPanelsToChart(){
 function syncFocusIndicatorDock(){
  const dock=document.getElementById("rticFocusIndicatorContent"),out=document.getElementById("rticScanOutput"),source=out&&out.querySelector(".rtic-scan-list"),count=document.getElementById("rticFocusIndicatorCount"),lastPrice=document.getElementById("rticFocusLastPrice");
  if(!dock)return;
- if(!source||!source.querySelector(".rtic-scan-dropdown")){dock.innerHTML='<div class="rtic-dock-empty"><strong>Indicators are waiting for scan data</strong><p>Choose Tickerbot — Historical Bars + RTIC Scan, then tap Pull Secure Market Data. After a successful scan, your indicator cards and mini visuals appear here.</p><button type="button" class="rtic-dock-run" onclick="ROLYFEData.refresh()">↻ Run indicator scan</button></div>';if(count)count.textContent="11 dropdowns";if(lastPrice)lastPrice.textContent="—";return;}
+ if(!source||!source.querySelector(".rtic-scan-dropdown")){dock.innerHTML='<div class="rtic-dock-empty"><strong>Indicators are waiting for scan data</strong><p>Choose Tickerbot — Historical Bars + RTIC Scan, then tap Pull Secure Market Data. After a successful scan, your indicator cards and mini visuals appear here.</p><button type="button" class="rtic-dock-run" onclick="ROLYFEData.refresh()">↻ Run indicator scan</button></div>';if(count)count.textContent="14 dropdowns";if(lastPrice)lastPrice.textContent="—";return;}
  const clone=source.cloneNode(true);clone.querySelectorAll("details").forEach(d=>d.open=false);dock.replaceChildren(clone);
  const total=clone.querySelectorAll(".rtic-scan-dropdown").length;if(count)count.textContent=total+" dropdowns";
  const price=out.querySelector(".rtic-atr-last-close");if(lastPrice)lastPrice.textContent=price?price.textContent:(out.querySelector(".rtic-data-metric.rtic-scan-score")?"Loaded":"—");
@@ -1601,7 +1620,7 @@ document.addEventListener("DOMContentLoaded",()=>{
  setTimeout(()=>renderVisualChart("trade"),500);
 });
 
-function calculateTacticalOptionLab(){const side=document.getElementById("tacticalOptSide").value,strike=Number(document.getElementById("tacticalOptStrike").value),prem=Number(document.getElementById("tacticalOptPremium").value),iv=Number(document.getElementById("tacticalOptIV").value),expiry=document.getElementById("tacticalOptExpiry").value,qty=Math.floor(Number(document.getElementById("tacticalOptQty").value)||0),out=document.getElementById("tacticalOptResult");if(!expiry||!Number.isFinite(strike)||strike<=0||!Number.isFinite(prem)||prem<0||qty<1||!Number.isFinite(iv)||iv<0){out.textContent="Enter valid current options-chain values for strike, premium, IV, expiration, and quantity.";return}const now=new Date();now.setHours(0,0,0,0);const exp=new Date(expiry+"T00:00:00"),dte=Math.ceil((exp-now)/86400000);if(dte<0){out.textContent="Expiration date is in the past.";return}out.textContent="Estimated premium: $"+(prem*100*qty).toFixed(2)+" total for "+qty+" contract(s), before fees. IV "+iv.toFixed(1)+"%. Expiration "+expiry+" · "+dte+" calendar days. Long "+side+" breakeven at expiration: $"+(side==="call"?strike+prem:strike-prem).toFixed(2)+". For short options, verify bid, collateral, assignment and max-loss exposure separately."}
+function calculateTacticalOptionLab(){const side=document.getElementById("tacticalOptSide").value,strike=Number(document.getElementById("tacticalOptStrike").value),prem=Number(document.getElementById("tacticalOptPremium").value),iv=Number(document.getElementById("tacticalOptIV").value),rankText=document.getElementById("tacticalOptIVRank").value,pctText=document.getElementById("tacticalOptIVPercentile").value,rank=rankText===""?null:Number(rankText),pct=pctText===""?null:Number(pctText),expiry=document.getElementById("tacticalOptExpiry").value,qty=Math.floor(Number(document.getElementById("tacticalOptQty").value)||0),out=document.getElementById("tacticalOptResult");if(!expiry||!Number.isFinite(strike)||strike<=0||!Number.isFinite(prem)||prem<0||qty<1||!Number.isFinite(iv)||iv<0||rank!==null&&(!Number.isFinite(rank)||rank<0||rank>100)||pct!==null&&(!Number.isFinite(pct)||pct<0||pct>100)){out.textContent="Enter valid chain values for strike, quoted premium, IV, expiration, quantity, and optional IV Rank/Percentile.";return}const now=new Date();now.setHours(0,0,0,0);const exp=new Date(expiry+"T00:00:00"),dte=Math.ceil((exp-now)/86400000);if(dte<0){out.textContent="Expiration date is in the past.";return}const parts=[];if(rank!==null)parts.push("IV Rank "+rank.toFixed(0)+"% ("+(rank>=70?"high":rank<=20?"low":"middle")+" versus its 52-week range)");if(pct!==null)parts.push("IV Percentile "+pct.toFixed(0)+"% ("+(pct>=70?"higher than most observations":pct<=20?"lower than most observations":"middle historical percentile")+")");const ivContext=parts.length?parts.join("; ")+".":"IV "+iv.toFixed(1)+"% entered; IV alone cannot say whether premium is historically expensive or cheap.";out.textContent="Estimated premium: $"+(prem*100*qty).toFixed(2)+" total for "+qty+" contract(s), before fees. "+ivContext+" Expiration "+expiry+" · "+dte+" calendar days. Long "+side+" breakeven at expiration: $"+(side==="call"?strike+prem:strike-prem).toFixed(2)+". When selling, use the current bid; verify collateral, assignment and defined/unlimited risk separately."}
 </script>
 <!-- RO'LYFE ATR strategy explainer -->
 <div id="rticAtrGuideModal" class="rtic-guide-overlay" role="dialog" aria-modal="true" aria-labelledby="rticAtrGuideTitle" hidden>
@@ -1939,5 +1958,58 @@ window.addEventListener("rolyfe:rtic-scan",function(event){
  if($("symbol")&&$("rolOptSymbol"))$("rolOptSymbol").value=$("symbol").value||"";
 })();
 </script>
+
+<style id="rticScanAlertStyle">
+#rticScanAlertToast{display:none;position:fixed;z-index:20000;top:calc(env(safe-area-inset-top,0px) + 12px);left:10px;right:10px;width:min(560px,calc(100vw - 20px));max-height:calc(100dvh - env(safe-area-inset-top,0px) - 24px);overflow:auto;overscroll-behavior:contain;box-sizing:border-box;margin-inline:auto;padding:13px 14px;border:1px solid var(--border2,#39704b);border-left:4px solid var(--yellow,#ffd54f);border-radius:13px;background:rgba(5,12,8,.98);color:var(--text,#e8f5ec);box-shadow:0 14px 42px rgba(0,0,0,.65);pointer-events:auto}
+#rticScanAlertToast.show{display:block;animation:rticScanToastIn .22s ease-out}
+#rticScanAlertToast.approved{border-left-color:var(--green,#00e676)}
+#rticScanAlertToast .rtic-scan-alert-head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:900;color:var(--green,#00e676);font-size:12px;line-height:1.4}
+#rticScanAlertToast .rtic-scan-alert-head button{min-height:32px;padding:4px 9px}
+#rticScanAlertToast p{margin:8px 0;color:var(--text,#e8f5ec);font-size:13px;line-height:1.55;overflow-wrap:anywhere}
+#rticScanAlertToast .rtic-scan-alert-foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;border-top:1px solid var(--border,#294234);padding-top:9px;font-size:10px;color:var(--muted,#90a89a)}
+#rticScanAlertToast .rtic-scan-alert-foot span{flex:1;min-width:130px}
+#rticScanAlertToast .rtic-scan-alert-foot button{min-height:34px;padding:6px 9px;font-size:11px}
+@keyframes rticScanToastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+<div id="rticScanAlertToast" role="status" aria-live="polite" aria-atomic="true">
+ <div class="rtic-scan-alert-head"><strong id="rticScanAlertTitle">RO’Lyfe Scan Alert</strong><button type="button" class="secondary-btn" onclick="dismissTacticalScanAlert()" aria-label="Dismiss scan alert">✕</button></div>
+ <p id="rticScanAlertBody">Run a valid Tickerbot historical-bar scan to evaluate the RTIC approval gate.</p>
+ <div class="rtic-scan-alert-foot"><span id="rticScanAlertMeta">Fresh scan results only · no orders sent</span><button type="button" class="secondary-btn" onclick="enableTacticalScanNotifications()">Enable phone alerts</button></div>
+</div>
+<script>
+(function(){
+ "use strict";
+ const PREF="rolyfe-tactical-browser-scan-alerts",byId=id=>document.getElementById(id);
+ let timer=null,lastNoticeKey="";
+ function alertsEnabled(){try{return localStorage.getItem(PREF)==="on"&&"Notification"in window&&Notification.permission==="granted"}catch(e){return false}}
+ window.dismissTacticalScanAlert=function(){const el=byId("rticScanAlertToast");if(el)el.classList.remove("show");if(timer)clearTimeout(timer);timer=null};
+ window.enableTacticalScanNotifications=function(){
+  if(!("Notification"in window)){const meta=byId("rticScanAlertMeta");if(meta)meta.textContent="Browser notifications are not supported here. On-screen scan alerts still work.";return}
+  Notification.requestPermission().then(permission=>{try{localStorage.setItem(PREF,permission==="granted"?"on":"off")}catch(e){}const meta=byId("rticScanAlertMeta");if(meta)meta.textContent=permission==="granted"?"Phone/browser alerts enabled for approved fresh scans.":"Notifications were not enabled; on-screen alerts remain on.";}).catch(()=>{const meta=byId("rticScanAlertMeta");if(meta)meta.textContent="Permission not completed; on-screen scan alerts remain on."});
+ };
+ function styleReading(id,test){const el=byId(id);if(!el||!test)return;el.textContent=test.value||"—";el.className="indicator-status "+(test.vote===1?"bullish":test.vote===-1?"bearish":"neutral");}
+ window.addEventListener("rolyfe:rtic-scan",function(event){
+  const detail=event.detail||{},scan=detail.scan;if(!scan||!Array.isArray(scan.tests)||!Number.isFinite(Number(scan.score)))return;
+  const symbol=String(detail.symbol||byId("rticDataSymbol")?.value||byId("symbol")?.value||"Selected symbol").toUpperCase(),interval=String(detail.interval||"unknown");
+  const tests=scan.tests,find=(needle)=>tests.find(t=>String(t.name||"").toLowerCase().includes(needle));
+  styleReading("tacticalHmaStatus",find("hull moving average"));
+  styleReading("tacticalPpsStatus",find("pps-style"));
+  styleReading("tacticalPullbackStatus",find("pullback setup"));
+  const score=Number(scan.score),available=Number(scan.available)||0,gate=available>=8&&(score>=65||score<=35);
+  const direction=score>=65?"BULLISH":score<=35?"BEARISH":"MIXED / NEUTRAL";
+  const title=byId("rticScanAlertTitle"),body=byId("rticScanAlertBody"),meta=byId("rticScanAlertMeta"),toast=byId("rticScanAlertToast");
+  if(!toast||!body||!title)return;
+  toast.classList.toggle("approved",gate);
+  title.textContent=gate?"✓ RTIC APPROVED WATCH · "+direction+" BIAS":"SCAN COMPLETE · NO APPROVED ALERT";
+  body.textContent=symbol+" · "+interval+" · RTIC score "+score+"/100 · "+available+"/10 original directional categories available. "+(gate?"The configured score gate passed; verify chart, HMA/pullback context, liquidity, contract quotes and invalidation manually. This is a watch alert, not a trade instruction.":"Alert gate requires at least 8/10 original directional readings and a score ≥65 or ≤35. Current results are mixed or incomplete; no setup is approved by this filter.");
+  meta.textContent=(detail.recalculated?"Local settings recalculated":"Provider scan completed")+" · valid returned bars · no order sent";
+  toast.classList.add("show");if(timer)clearTimeout(timer);timer=setTimeout(()=>toast.classList.remove("show"),15000);
+  const bar=scan.last||{},barId=bar.time||bar.timestamp||scan.asOf||scan.timestamp||"";
+  const key=[symbol,interval,barId,score,available].join("|");
+  if(gate&&key!==lastNoticeKey&&alertsEnabled()){lastNoticeKey=key;try{new Notification("RO’Lyfe Scan Alert · "+symbol,{body:direction+" watch · "+score+"/100 RTIC score · "+available+"/10 original directional readings. Review manually before acting."})}catch(e){}}
+ });
+})();
+</script>
+
 </body>
 </html>
