@@ -598,7 +598,31 @@ body.rtic-chart-focused{overflow:hidden!important}
  </div>
 </details>
 
-<!-- INDICATORS -->
+
+<details class="section-drop" id="expandedIndicatorSuite" open>
+ <summary>🧭 EXPANDED INDICATORS · HMA / PPS-STYLE / PULLBACK / OPTIONS IV</summary>
+ <div class="drop-body">
+  <p class="chart-description">Added without replacing the existing indicator stack. HMA period defaults to 31. PPS-style markers are a local educational approximation, not the proprietary Thinkorswim PPS study. Use provider candle data for actual calculations; do not treat this worksheet as a live options feed.</p>
+  <div class="indicator-grid">
+   <div class="indicator-card"><span class="indicator-name">〰 Hull Moving Average</span><span class="indicator-value">HMA <select id="tacticalHmaPeriod" aria-label="Tactical HMA period"><option selected>31</option><option>32</option></select></span><span class="indicator-status neutral">Trend / slope filter</span><p class="chart-description">Close above a rising HMA supports bullish context; below a falling HMA supports bearish context. Confirm against EMA 50/200.</p></div>
+   <div class="indicator-card"><span class="indicator-name">⬆⬇ PPS-style markers</span><span class="indicator-value">UP / DOWN</span><span class="indicator-status neutral">Local reversal heuristic</span><p class="chart-description">Use only when a confirmed candle reverses across the selected trend reference. Not the licensed PPS indicator.</p></div>
+   <div class="indicator-card"><span class="indicator-name">🎯 Pullback setup</span><span class="indicator-value">TREND → RETRACE → CONFIRM</span><span class="indicator-status neutral">Wait for candle confirmation</span><p class="chart-description">Prefer retracement toward EMA/HMA in the higher-timeframe trend, then a confirmed bounce/rejection and a clear invalidation level.</p></div>
+  </div>
+  <h3>Options IV / Premium / Expiration Worksheet</h3>
+  <p class="chart-description">Manually enter quotes from a current options chain. Stock candles alone cannot supply implied volatility, bid/ask, or contract expiration data.</p>
+  <div class="form-grid">
+   <div><label>Call / Put</label><select id="tacticalOptSide"><option value="call">Call</option><option value="put">Put</option></select></div>
+   <div><label>Strike ($)</label><input id="tacticalOptStrike" type="number" min="0" step="0.01"></div>
+   <div><label>Premium per share ($)</label><input id="tacticalOptPremium" type="number" min="0" step="0.01" placeholder="Ask to buy / bid to sell"></div>
+   <div><label>Implied volatility (%)</label><input id="tacticalOptIV" type="number" min="0" max="1000" step="0.1"></div>
+   <div><label>Expiration</label><input id="tacticalOptExpiry" type="date"></div>
+   <div><label>Contracts</label><input id="tacticalOptQty" type="number" min="1" step="1" value="1"></div>
+  </div>
+  <button type="button" class="primary-btn" onclick="calculateTacticalOptionLab()">Calculate premium &amp; DTE</button>
+  <div id="tacticalOptResult" class="ticket-result" role="status">Enter chain values to calculate estimated premium cost and long-option breakeven.</div>
+ </div>
+</details>
+\n<!-- INDICATORS -->
 <details class="section-drop" open>
  <summary>🧠 RO'LYFE GREEN IGNITION™ INDICATOR SYSTEM</summary>
  <div class="drop-body">
@@ -1576,6 +1600,8 @@ document.addEventListener("DOMContentLoaded",()=>{
  setTimeout(loadTradingViewChart,350);
  setTimeout(()=>renderVisualChart("trade"),500);
 });
+
+function calculateTacticalOptionLab(){const side=document.getElementById("tacticalOptSide").value,strike=Number(document.getElementById("tacticalOptStrike").value),prem=Number(document.getElementById("tacticalOptPremium").value),iv=Number(document.getElementById("tacticalOptIV").value),expiry=document.getElementById("tacticalOptExpiry").value,qty=Math.floor(Number(document.getElementById("tacticalOptQty").value)||0),out=document.getElementById("tacticalOptResult");if(!expiry||!Number.isFinite(strike)||strike<=0||!Number.isFinite(prem)||prem<0||qty<1||!Number.isFinite(iv)||iv<0){out.textContent="Enter valid current options-chain values for strike, premium, IV, expiration, and quantity.";return}const now=new Date();now.setHours(0,0,0,0);const exp=new Date(expiry+"T00:00:00"),dte=Math.ceil((exp-now)/86400000);if(dte<0){out.textContent="Expiration date is in the past.";return}out.textContent="Estimated premium: $"+(prem*100*qty).toFixed(2)+" total for "+qty+" contract(s), before fees. IV "+iv.toFixed(1)+"%. Expiration "+expiry+" · "+dte+" calendar days. Long "+side+" breakeven at expiration: $"+(side==="call"?strike+prem:strike-prem).toFixed(2)+". For short options, verify bid, collateral, assignment and max-loss exposure separately."}
 </script>
 <!-- RO'LYFE ATR strategy explainer -->
 <div id="rticAtrGuideModal" class="rtic-guide-overlay" role="dialog" aria-modal="true" aria-labelledby="rticAtrGuideTitle" hidden>
