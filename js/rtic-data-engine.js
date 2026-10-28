@@ -120,7 +120,7 @@
    const pbLength=Math.max(2,Math.min(300,Math.floor(Number(byId("tacticalPbLength")?.value)||50))),pbMultiplier=Math.max(.1,Math.min(10,Number(byId("tacticalPbMultiplier")?.value)||1.5));
    const pbBuyEma=Math.max(1,Math.min(100,Math.floor(Number(byId("tacticalPbBuyEma")?.value)||1))),pbSellEma=Math.max(2,Math.min(300,Math.floor(Number(byId("tacticalPbSellEma")?.value)||13)));
    const pbVolUpRaw=byId("tacticalPbVolUp")?.value,pbVolDownRaw=byId("tacticalPbVolDown")?.value,pbVolUp=Math.max(0,Math.min(1000,Number(pbVolUpRaw===""||pbVolUpRaw===undefined?100:pbVolUpRaw))),pbVolDown=Math.max(0,Math.min(1000,Number(pbVolDownRaw===""||pbVolDownRaw===undefined?100:pbVolDownRaw)));
-   const pbSpreadRaw=byId("tacticalPbSpread")?.value,pbSpreadLimit=Math.max(0,Math.min(10,Number(pbSpreadRaw===""||pbSpreadRaw===undefined?.09:pbSpreadRaw)),pbShowLabel=byId("tacticalPbShowLabel")?.checked!==false,pbMoveTo=byId("tacticalPbMoveTo")?.value||"UP";
+   const pbSpreadRaw=byId("tacticalPbSpread")?.value,pbSpreadLimit=Math.max(0,Math.min(10,Number((pbSpreadRaw===""||pbSpreadRaw===undefined)?0.09:pbSpreadRaw))),pbShowLabel=byId("tacticalPbShowLabel")?.checked!==false,pbMoveTo=byId("tacticalPbMoveTo")?.value||"UP";
    const oscillatorData=calculateOscillatorSeries(bars);
    const macd=oscillatorData.latest.macd,signal=oscillatorData.latest.signal;
    const st={k:oscillatorData.latest.stochK??NaN,d:oscillatorData.latest.stochD??NaN};
