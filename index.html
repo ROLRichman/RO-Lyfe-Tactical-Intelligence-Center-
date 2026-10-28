@@ -628,6 +628,7 @@ body.rtic-chart-focused{overflow:hidden!important}
   <h3>Options IV / Premium / Expiration Worksheet</h3>
   <p class="chart-description">Manually enter quotes from a current options chain. Stock candles alone cannot supply implied volatility, bid/ask, or contract expiration data.</p>
   <div class="form-grid">
+   <div><label>Position</label><select id="tacticalOptPosition"><option value="buy">Buy / pay premium</option><option value="sell">Sell / collect premium</option></select></div>
    <div><label>Call / Put</label><select id="tacticalOptSide"><option value="call">Call</option><option value="put">Put</option></select></div>
    <div><label>Strike ($)</label><input id="tacticalOptStrike" type="number" min="0" step="0.01"></div>
    <div><label>Premium per share ($)</label><input id="tacticalOptPremium" type="number" min="0" step="0.01" placeholder="Ask to buy / bid to sell"></div>
@@ -1620,104 +1621,16 @@ document.addEventListener("DOMContentLoaded",()=>{
  setTimeout(()=>renderVisualChart("trade"),500);
 });
 
-function calculateTacticalOptionLab(){const side=document.getElementById("tacticalOptSide").value,strike=Number(document.getElementById("tacticalOptStrike").value),prem=Number(document.getElementById("tacticalOptPremium").value),iv=Number(document.getElementById("tacticalOptIV").value),rankText=document.getElementById("tacticalOptIVRank").value,pctText=document.getElementById("tacticalOptIVPercentile").value,rank=rankText===""?null:Number(rankText),pct=pctText===""?null:Number(pctText),expiry=document.getElementById("tacticalOptExpiry").value,qty=Math.floor(Number(document.getElementById("tacticalOptQty").value)||0),out=document.getElementById("tacticalOptResult");if(!expiry||!Number.isFinite(strike)||strike<=0||!Number.isFinite(prem)||prem<0||qty<1||!Number.isFinite(iv)||iv<0||rank!==null&&(!Number.isFinite(rank)||rank<0||rank>100)||pct!==null&&(!Number.isFinite(pct)||pct<0||pct>100)){out.textContent="Enter valid chain values for strike, quoted premium, IV, expiration, quantity, and optional IV Rank/Percentile.";return}const now=new Date();now.setHours(0,0,0,0);const exp=new Date(expiry+"T00:00:00"),dte=Math.ceil((exp-now)/86400000);if(dte<0){out.textContent="Expiration date is in the past.";return}const parts=[];if(rank!==null)parts.push("IV Rank "+rank.toFixed(0)+"% ("+(rank>=70?"high":rank<=20?"low":"middle")+" versus its 52-week range)");if(pct!==null)parts.push("IV Percentile "+pct.toFixed(0)+"% ("+(pct>=70?"higher than most observations":pct<=20?"lower than most observations":"middle historical percentile")+")");const ivContext=parts.length?parts.join("; ")+".":"IV "+iv.toFixed(1)+"% entered; IV alone cannot say whether premium is historically expensive or cheap.";out.textContent="Estimated premium: $"+(prem*100*qty).toFixed(2)+" total for "+qty+" contract(s), before fees. "+ivContext+" Expiration "+expiry+" · "+dte+" calendar days. Long "+side+" breakeven at expiration: $"+(side==="call"?strike+prem:strike-prem).toFixed(2)+". When selling, use the current bid; verify collateral, assignment and defined/unlimited risk separately."}
-</script>
-<!-- RO'LYFE ATR strategy explainer -->
-<div id="rticAtrGuideModal" class="rtic-guide-overlay" role="dialog" aria-modal="true" aria-labelledby="rticAtrGuideTitle" hidden>
- <div class="rtic-guide-card">
-  <div class="rtic-guide-head"><h2 id="rticAtrGuideTitle">🛡️ RO’Lyfe ATR Stop Strategy Guide</h2><button type="button" onclick="closeRticAtrGuide()" aria-label="Close ATR strategy guide">✕</button></div>
-  <p>ATR(14) estimates typical price movement over the selected candle timeframe. It is a volatility distance in dollars per share—not the stock price and not a guaranteed stop fill.</p>
-  <div class="rtic-guide-level"><strong>LOW • 1.0× ATR</strong><span>Tighter stop. Normal movement may hit it; use only when chart structure supports the level.</span></div>
-  <div class="rtic-guide-level"><strong>MEDIUM • 1.5× ATR</strong><span>A middle-ground planning reference, provided it fits the setup's structure and risk limit.</span></div>
-  <div class="rtic-guide-level"><strong>HIGH • 2.0× ATR</strong><span>Wider stop. Gives price more room but increases risk per share if position size stays unchanged.</span></div>
-  <p><strong>Formula:</strong> Long stop = latest returned close − (ATR × multiplier). Short stop = latest returned close + (ATR × multiplier).</p>
-  <p><strong>Position sizing:</strong> shares = maximum planned dollar risk ÷ distance from entry to stop. Reduce share count as the stop gets wider.</p>
-  <p class="small-muted">Use completed candles when possible; use 1D bars for a daily swing. Stock ATR stops do not directly determine an options-contract stop because premium also responds to volatility and time decay.</p>
-  <button type="button" class="rtic-guide-done" onclick="closeRticAtrGuide()">Got it</button>
- </div>
-</div>
-<script>
-function showRticAtrGuide(){const m=document.getElementById("rticAtrGuideModal");if(m){m.hidden=false;document.body.classList.add("rtic-guide-open");const b=m.querySelector("button");if(b)b.focus();}}
-function closeRticAtrGuide(){const m=document.getElementById("rticAtrGuideModal");if(m){m.hidden=true;document.body.classList.remove("rtic-guide-open");}}
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeRticAtrGuide();});
-document.addEventListener("click",e=>{const m=document.getElementById("rticAtrGuideModal");if(m&&e.target===m)closeRticAtrGuide();});
-</script>
-<script src="./js/rtic-data-engine.js?v=20261026-rtic18"></script>
+function calculateTacticalOptionLab(){
+ const position=byId("tacticalOptPosition")?.value||"buy",side=byId("tacticalOptSide").value,strike=Number(byId("tacticalOptStrike").value),prem=Number(byId("tacticalOptPremium").value),iv=Number(byId("tacticalOptIV").value),rankText=byId("tacticalOptIVRank").value,pctText=byId("tacticalOptIVPercentile").value,rank=rankText===""?null:Number(rankText),pct=pctText===""?null:Number(pctText),expiry=byId("tacticalOptExpiry").value,qty=Math.floor(Number(byId("tacticalOptQty").value)||0),out=byId("tacticalOptResult");
+ if(!expiry||!Number.isFinite(strike)||strike<=0||!Number.isFinite(prem)||prem<0||qty<1||!Number.isFinite(iv)||iv<0||rank!==null&&(!Number.isFinite(rank)||rank<0||rank>100)||pct!==null&&(!Number.isFinite(pct)||pct<0||pct>100)){out.textContent="Enter valid chain values for strike, quoted premium, IV, expiration, quantity, and optional IV Rank/Percentile.";return}
+ const now=new Date();now.setHours(0,0,0,0);const exp=new Date(expiry+"T00:00:00"),dte=Math.ceil((exp-now)/86400000);if(dte<0){out.textContent="Expiration date is in the past.";return}
+ const total=prem*100*qty,breakeven=side==="call"?strike+prem:strike-prem,parts=[];if(rank!==null)parts.push("IV Rank "+rank.toFixed(0)+"% ("+(rank>=70?"high":rank<=20?"low":"middle")+" versus its 52-week range)");if(pct!==null)parts.push("IV Percentile "+pct.toFixed(0)+"% ("+(pct>=70?"higher than most observations":pct<=20?"lower than most observations":"middle historical percentile")+")");
+ const ivContext=parts.length?parts.join("; ")+".":"IV "+iv.toFixed(1)+"% entered; IV alone cannot say whether premium is historically expensive or cheap.";
+ const premiumLabel=position==="buy"?"Estimated premium debit: $"+total.toFixed(2):"Estimated gross premium credit: $"+total.toFixed(2)+" before fees, collateral requirements and potential losses";
+ out.textContent=premiumLabel+" for "+qty+" "+(qty===1?"contract":"contracts")+" (100-share multiplier). "+ivContext+" Expiration "+expiry+" · "+dte+" calendar days. "+(position==="buy"?"Long ":"Short ")+side+" expiration breakeven reference: $"+breakeven.toFixed(2)+". When selling, verify collateral, assignment and defined/unlimited risk separately.";
+}
 
-<script>
-/* RO'Lyfe workspace navigation: focused views, no lost calculators */
-(function(){
- const views={
-  home:{label:"OVERVIEW",show:["market","scanner","chart","watchlist"],intro:true},
-  market:{label:"MARKET CONTROL",show:["market"]},
-  scanner:{label:"MARKET SCANNER",show:["market","scanner"]},
-  studies:{label:"STUDIES & CHARTS",show:["scanner","indicators","chart","visual"]},
-  execute:{label:"TRADE EXECUTION",show:["plan","visual","export"]},
-  whatif:{label:"WHAT-IF LAB",show:["whatif","plan"]},
-  watchlist:{label:"WATCHLIST",show:["watchlist","market"]},
-  review:{label:"JOURNAL & PERFORMANCE",show:["performance","journal"]},
-  resources:{label:"MARKET RESOURCES",show:["resources","disclosure"]}
- };
- let current="home",previousView="home",nodes=[];
- function category(el){
-  const t=(el.innerText||el.textContent||"").toLowerCase();
-  if(el.id==="rticVisualIndicatorPanels")return "chart";
-  if(el.id==="rticSecureData")return "scanner";
-  if(t.includes("market control center"))return "market";
-  if(t.includes("master trade plan"))return "plan";
-  if(t.includes("what-if psychology engine"))return "whatif";
-  if(t.includes("green ignition"))return "indicators";
-  if(t.includes("live market chart"))return "chart";
-  if(t.includes("visual charts"))return "visual";
-  if(t.includes("download / export center"))return "export";
-  if(t.includes("master watchlist"))return "watchlist";
-  if(t.includes("market intelligence center"))return "resources";
-  if(t.includes("performance dashboard"))return "performance";
-  if(t.includes("trade journal"))return "journal";
-  if(t.includes("disclosure"))return "disclosure";
-  return "other";
- }
- function collect(){nodes=Array.from(document.querySelector("main.container").children).filter(el=>!el.classList.contains("rtic-workspace-intro")&&!el.classList.contains("rtic-quick-actions")).map(el=>({el,cat:category(el)}));}
- function hideWhatIf(){
-  const section=document.getElementById("rticWhatIfSection");
-  if(section){section.classList.remove("rtic-whatif-modal");section.open=false;}
-  document.body.classList.remove("rtic-whatif-open");
-  document.body.style.overflow="";
- }
- function closeWhatIf(){
-  const target=views[previousView]?previousView:"home";
-  hideWhatIf();
-  if(current==="whatif")setView(target,true);
- }
- function setView(view,writeHash){
-  if(!views[view])view="home";
-  if(view==="whatif"&&current!=="whatif")previousView=current;
-  if(view!=="whatif")hideWhatIf();
-  current=view;const cfg=views[view];if(!nodes.length)collect();
-  nodes.forEach(({el,cat})=>{
-   const show=cfg.show.includes(cat)||(view==="home"&&cat==="other");
-   el.classList.toggle("rtic-section-hidden",!show);
-   if(show&&el.tagName==="DETAILS"&&["scanner","plan","whatif","chart","indicators","visual","watchlist","journal","performance","resources"].includes(cat))el.open=true;
-  });
-  if(view==="whatif"){
-   const section=document.getElementById("rticWhatIfSection");
-   if(section){section.open=true;section.classList.add("rtic-whatif-modal");document.body.classList.add("rtic-whatif-open");document.body.style.overflow="hidden";}
-  }
-  const intro=document.getElementById("rticOverviewIntro"),actions=document.getElementById("rticHomeActions");
-  if(intro)intro.classList.toggle("rtic-section-hidden",!cfg.intro);if(actions)actions.classList.toggle("rtic-section-hidden",!cfg.intro);
-  const label=document.getElementById("rticCurrentView");if(label)label.textContent=cfg.label;
-  document.querySelectorAll(".rtic-nav-link").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
-  toggleMenu(false);if(writeHash)history.replaceState(null,"","#"+view);window.scrollTo({top:0,behavior:"smooth"});
- }
- function toggleMenu(force){
-  const side=document.getElementById("rticSidebar"),scrim=document.getElementById("rticNavScrim");
-  const open=typeof force==="boolean"?force:!side.classList.contains("open");
-  side.classList.toggle("open",open);scrim.classList.toggle("open",open);document.body.style.overflow=open?"hidden":"";
- }
- function go(view){setView(view,true)}
- window.ROLYFEWorkspace={go,toggleMenu,closeWhatIf};
- document.addEventListener("keydown",e=>{if(e.key==="Escape"){toggleMenu(false);closeWhatIf()}});
- document.addEventListener("DOMContentLoaded",()=>{collect();const requested=location.hash.replace("#","");setView(views[requested]?requested:"home",false)});
 })();
 </script>
 
