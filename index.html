@@ -353,6 +353,21 @@ body.rtic-chart-focused{overflow:hidden!important}
 }
 @media(max-width:350px){.rtic-osc-settings{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
+
+<style id="rtic-scroll-shortcuts-styles">
+.rtic-scroll-shortcuts{position:fixed;right:10px;top:55%;transform:translate(12px,-50%);z-index:1050;display:flex;flex-direction:column;gap:7px;padding:6px;background:rgba(5,12,8,.96);border:1px solid var(--border2);border-radius:13px;box-shadow:0 8px 26px rgba(0,0,0,.55);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s ease,transform .18s ease,visibility .18s ease;backdrop-filter:blur(10px)}
+.rtic-scroll-shortcuts.visible{opacity:1;visibility:visible;pointer-events:auto;transform:translate(0,-50%)}
+.rtic-scroll-shortcuts button{display:flex;align-items:center;gap:7px;width:100%;min-height:40px;margin:0;padding:8px 10px;background:#102219;border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:12px;font-weight:850;white-space:nowrap}
+.rtic-scroll-shortcuts button:first-child{background:#102033;border-color:#31506a}
+.rtic-scroll-shortcuts button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+body.rtic-chart-focused .rtic-scroll-shortcuts{display:none}
+.rtic-focus-dock-content>#rticVisualIndicatorPanels{display:block!important;margin:10px 0 0;max-height:none;overflow:visible;border:1px solid var(--border2);border-radius:9px;background:#07100c}
+.rtic-focus-dock-content>#rticVisualIndicatorPanels>.drop-body{padding:8px;max-height:none}
+.rtic-focus-dock-content>#rticVisualIndicatorPanels .rtic-osc-panel{margin:8px 0;padding:8px}
+.rtic-focus-dock-content>#rticVisualIndicatorPanels .rtic-osc-plot{min-height:76px}
+@media(max-width:600px){.rtic-scroll-shortcuts{right:5px;top:58%;padding:4px;gap:5px}.rtic-scroll-shortcuts button{min-height:38px;padding:8px;font-size:11px}.rtic-scroll-shortcuts button span{max-width:94px;white-space:normal;line-height:1.15}}
+</style>
+
 </head>
 
 <body>
@@ -371,6 +386,10 @@ body.rtic-chart-focused{overflow:hidden!important}
 <div class="rtic-scrim" id="rticNavScrim" onclick="ROLYFEWorkspace.toggleMenu(false)"></div>
 <aside class="rtic-sidebar" id="rticSidebar" aria-label="Trading workspaces">
  <div class="rtic-sidebar-head"><strong>🎯 RO’LYFE WORKSPACES</strong><button class="secondary-btn" type="button" onclick="ROLYFEWorkspace.toggleMenu(false)">✕</button></div>
+ <div class="rtic-nav-group">QUICK JUMPS</div>
+ <button class="rtic-nav-link" type="button" onclick="scrollRTICTop()"><span class="rtic-nav-icon">↑</span><span>Back to top<small>Return to the start of the page</small></span></button>
+ <button class="rtic-nav-link" type="button" onclick="openRTICExpandedChart()"><span class="rtic-nav-icon">⛶</span><span>Expanded chart + indicators<small>Open chart with RTIC indicator dock and momentum panels</small></span></button>
+ <button class="rtic-nav-link" type="button" onclick="jumpToRTICScan()"><span class="rtic-nav-icon">🔎</span><span>Run / view scan<small>Go to Pull Secure Market Data and scan results</small></span></button>
  <div class="rtic-nav-group">START HERE</div>
  <button class="rtic-nav-link active" data-view="home" onclick="ROLYFEWorkspace.go('home')"><span class="rtic-nav-icon">🏠</span><span>Overview<small>Where to start and what to do next</small></span></button>
  <button class="rtic-nav-link" data-view="market" onclick="ROLYFEWorkspace.go('market')"><span class="rtic-nav-icon">🌎</span><span>Market Control<small>Choose stocks, crypto, futures and sectors</small></span></button>
@@ -384,6 +403,11 @@ body.rtic-chart-focused{overflow:hidden!important}
  <button class="rtic-nav-link" data-view="review" onclick="ROLYFEWorkspace.go('review')"><span class="rtic-nav-icon">📓</span><span>Journal &amp; Performance<small>Review saved plans and results</small></span></button>
  <button class="rtic-nav-link" data-view="resources" onclick="ROLYFEWorkspace.go('resources')"><span class="rtic-nav-icon">🧭</span><span>Market Resources<small>Calendar, sectors, news and tools</small></span></button>
 </aside>
+
+<div id="rticScrollShortcuts" class="rtic-scroll-shortcuts" aria-label="Quick navigation" aria-hidden="true">
+ <button type="button" onclick="scrollRTICTop()" aria-label="Scroll to top">↑ <span>Top</span></button>
+ <button type="button" onclick="openRTICExpandedChart()" aria-label="Open expanded chart with RTIC indicators">📊 <span>Chart + Indicators</span></button>
+</div>
 
 <div class="status-bar">
  <div class="status-item">🟢 SYSTEM<br><span class="status-green">ONLINE</span></div>
@@ -692,16 +716,20 @@ body.rtic-chart-focused{overflow:hidden!important}
    <div class="rtic-focus-dock-head"><strong>📊 RTIC INDICATORS <span id="rticFocusIndicatorCount">14 dropdowns</span><span>LAST: <b id="rticFocusLastPrice">—</b></span></strong><button type="button" id="rticFocusDockToggle" onclick="toggleFocusIndicatorDock()" aria-expanded="true">⌄ Collapse</button></div>
    <div id="rticFocusIndicatorContent" class="rtic-focus-dock-content"><p class="small-muted">Run Pull Secure Market Data to load the 11 indicator dropdowns here.</p></div>
   </aside>
+  <div id="rticChartActionsDockAnchor" aria-hidden="true"></div>
   <div class="chart-actions">
    <a id="tvOpenLink" href="https://www.tradingview.com/chart/" target="_blank" rel="noopener">↗ Open Current Symbol in TradingView</a>
    <a href="https://www.tradingview.com/chart/" target="_blank" rel="noopener">🔎 Full TradingView Symbol Search</a>
    <a class="rtic-classroom-chart-btn" href="https://rolrichman.github.io/RO-Lyfe-Trading-Intelligence-Classroom/" target="_blank" rel="noopener">🏫 Open RO’Lyfe Trading Classroom</a>
   </div>
+  <div id="rticChartHelpDockAnchor" aria-hidden="true"></div>
   <p class="help">Important: some symbols are not licensed for embedded widgets. TradingView documents that “only available on TradingView” means the symbol cannot be shown in the website widget. The full TradingView link above is the fallback.</p>
  </div>
 </details>
 
 
+<!-- Anchor lets the real MACD/Stochastic panels move into the expanded chart dock without cloning duplicate element IDs. -->
+<div id="rticVisualIndicatorDockAnchor" aria-hidden="true"></div>
 <!-- RO'LYFE locally calculated momentum panels: same candle series as the RTIC scanner -->
 <details id="rticVisualIndicatorPanels" class="section-drop" open>
  <summary>📉 MOMENTUM PANELS • MACD + STOCHASTIC</summary>
@@ -1029,13 +1057,32 @@ function syncIndicatorPanelsToChart(){
  if(source)source.textContent="Syncing RTIC oscillator panels to "+labels[currentTimeframe]+" chart context using Tickerbot historical candles…";
  if(window.ROLYFEData)window.ROLYFEData.refresh();
 }
+
+const rticVisualPanelsOriginalNode=document.getElementById("rticVisualIndicatorPanels");
+const rticChartActionsOriginalNode=document.querySelector(".chart-actions");
+const rticChartHelpOriginalNode=rticChartActionsOriginalNode&&rticChartActionsOriginalNode.nextElementSibling&&rticChartActionsOriginalNode.nextElementSibling.matches("p.help")?rticChartActionsOriginalNode.nextElementSibling:null;
+function mountRTICExpandedChartExtras(){
+ if(!document.body.classList.contains("rtic-chart-focused")){restoreRTICExpandedChartExtras();return;}
+ const dock=document.getElementById("rticFocusIndicatorContent");if(!dock)return;
+ [rticVisualPanelsOriginalNode,rticChartActionsOriginalNode,rticChartHelpOriginalNode].forEach(node=>{if(node&&node.parentElement!==dock)dock.appendChild(node);});
+}
+function restoreRTICExpandedChartExtras(){
+ const items=[
+  [rticVisualPanelsOriginalNode,"rticVisualIndicatorDockAnchor"],
+  [rticChartActionsOriginalNode,"rticChartActionsDockAnchor"],
+  [rticChartHelpOriginalNode,"rticChartHelpDockAnchor"]
+ ];
+ items.forEach(([node,anchorId])=>{const anchor=document.getElementById(anchorId);if(node&&anchor&&node.parentElement!==anchor.parentElement)anchor.insertAdjacentElement("afterend",node);});
+}
+
 function syncFocusIndicatorDock(){
  const dock=document.getElementById("rticFocusIndicatorContent"),out=document.getElementById("rticScanOutput"),source=out&&out.querySelector(".rtic-scan-list"),count=document.getElementById("rticFocusIndicatorCount"),lastPrice=document.getElementById("rticFocusLastPrice");
  if(!dock)return;
- if(!source||!source.querySelector(".rtic-scan-dropdown")){dock.innerHTML='<div class="rtic-dock-empty"><strong>Indicators are waiting for scan data</strong><p>Choose Tickerbot — Historical Bars + RTIC Scan, then tap Pull Secure Market Data. After a successful scan, your indicator cards and mini visuals appear here.</p><button type="button" class="rtic-dock-run" onclick="ROLYFEData.refresh()">↻ Run indicator scan</button></div>';if(count)count.textContent="14 dropdowns";if(lastPrice)lastPrice.textContent="—";return;}
+ if(!source||!source.querySelector(".rtic-scan-dropdown")){dock.innerHTML='<div class="rtic-dock-empty"><strong>RTIC indicators are waiting for scan data</strong><p>Run Pull Secure Market Data with Tickerbot Historical Bars + RTIC Scan. After the scan, all core indicator cards and the added HMA/PPS-style/pullback context appear here. MACD and Stochastic visual panels are docked below as well.</p><button type="button" class="rtic-dock-run" onclick="ROLYFEData.refresh()">↻ Run indicator scan</button></div>';if(count)count.textContent="Waiting for scan";if(lastPrice)lastPrice.textContent="—";mountRTICExpandedChartExtras();return;}
  const clone=source.cloneNode(true);clone.querySelectorAll("details").forEach(d=>d.open=false);dock.replaceChildren(clone);
  const total=clone.querySelectorAll(".rtic-scan-dropdown").length;if(count)count.textContent=total+" dropdowns";
  const price=out.querySelector(".rtic-atr-last-close");if(lastPrice)lastPrice.textContent=price?price.textContent:(out.querySelector(".rtic-data-metric.rtic-scan-score")?"Loaded":"—");
+ mountRTICExpandedChartExtras();
 }
 function toggleFocusIndicatorDock(){
  const dock=document.getElementById("rticFocusIndicatorDock"),button=document.getElementById("rticFocusDockToggle");if(!dock||!button)return;
@@ -1057,6 +1104,17 @@ window.addEventListener("rolyfe:rtic-scan",syncFocusIndicatorDock);
 const rticScanOutputNode=document.getElementById("rticScanOutput");if(rticScanOutputNode&&"MutationObserver" in window){new MutationObserver(()=>{if(document.body.classList.contains("rtic-chart-focused"))syncFocusIndicatorDock();}).observe(rticScanOutputNode,{childList:true,subtree:true});}
 document.addEventListener("DOMContentLoaded",initFocusDockDrag);
 initFocusDockDrag();
+
+function closeRTICMenuForJump(){const sidebar=document.getElementById("rticSidebar"),scrim=document.getElementById("rticNavScrim");sidebar?.classList.remove("open");scrim?.classList.remove("open");document.body.classList.remove("rtic-menu-open");}
+function scrollRTICTop(){if(document.body.classList.contains("rtic-chart-focused"))toggleChartFocus(false);closeRTICMenuForJump();window.scrollTo({top:0,behavior:"smooth"});}
+function jumpToRTICScan(){if(document.body.classList.contains("rtic-chart-focused"))toggleChartFocus(false);closeRTICMenuForJump();const target=document.getElementById("rticDataControls")||document.getElementById("rticDataProvider")?.closest("details")||document.getElementById("rticScanOutput");if(target){const details=target.closest("details");if(details)details.open=true;target.scrollIntoView({behavior:"smooth",block:"start"});}else window.scrollTo({top:0,behavior:"smooth"});}
+function openRTICExpandedChart(){closeRTICMenuForJump();const provider=document.getElementById("rticDataControls");if(provider){const d=provider.closest("details");if(d)d.open=true;}toggleChartFocus(true);syncFocusIndicatorDock();const dock=document.getElementById("rticFocusIndicatorDock");if(dock){dock.classList.remove("collapsed");dock.style.setProperty("--rtic-dock-height",Math.min(window.innerHeight*.42,window.innerHeight*.76)+"px");}const btn=document.getElementById("rticFocusDockToggle");if(btn){btn.textContent="⌄ Collapse";btn.setAttribute("aria-expanded","true");}}
+function updateRTICScrollShortcuts(){const el=document.getElementById("rticScrollShortcuts");if(!el)return;const visible=window.scrollY>420&&!document.body.classList.contains("rtic-chart-focused");el.classList.toggle("visible",visible);el.setAttribute("aria-hidden",String(!visible));}
+window.addEventListener("scroll",updateRTICScrollShortcuts,{passive:true});
+window.addEventListener("resize",updateRTICScrollShortcuts);
+document.addEventListener("DOMContentLoaded",updateRTICScrollShortcuts);
+updateRTICScrollShortcuts();
+
 function toggleChartFocus(force){
  const chart=document.getElementById("tradingview_chart");if(!chart)return;
  const open=typeof force==="boolean"?force:!chart.classList.contains("chart-focus-mode");
@@ -1064,7 +1122,7 @@ function toggleChartFocus(force){
  const close=document.getElementById("rticChartFocusClose"),expand=document.getElementById("rticChartExpandBtn");
  if(close)close.style.display=open?"block":"none";
  if(expand)expand.textContent=open?"↙ Return to page":"⛶ Expand chart";
- if(open){syncFocusIndicatorDock();const dock=document.getElementById("rticFocusIndicatorDock");if(dock){dock.classList.remove("collapsed");dock.style.setProperty("--rtic-dock-height",Math.min(window.innerHeight*.42,window.innerHeight*.76)+"px");}const btn=document.getElementById("rticFocusDockToggle");if(btn){btn.textContent="⌄ Collapse";btn.setAttribute("aria-expanded","true");}}
+ if(open){syncFocusIndicatorDock();const dock=document.getElementById("rticFocusIndicatorDock");if(dock){dock.classList.remove("collapsed");dock.style.setProperty("--rtic-dock-height",Math.min(window.innerHeight*.42,window.innerHeight*.76)+"px");}const btn=document.getElementById("rticFocusDockToggle");if(btn){btn.textContent="⌄ Collapse";btn.setAttribute("aria-expanded","true");}mountRTICExpandedChartExtras();}else{restoreRTICExpandedChartExtras();updateRTICScrollShortcuts();}
 }
 function toggleOscillatorPlot(kind){
  const plot=document.getElementById(kind==="macd"?"rticMacdPlot":"rticStochPlot");
