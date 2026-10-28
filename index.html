@@ -1062,6 +1062,7 @@ const rticVisualPanelsOriginalNode=document.getElementById("rticVisualIndicatorP
 const rticChartActionsOriginalNode=document.querySelector(".chart-actions");
 const rticChartHelpOriginalNode=rticChartActionsOriginalNode&&rticChartActionsOriginalNode.nextElementSibling&&rticChartActionsOriginalNode.nextElementSibling.matches("p.help")?rticChartActionsOriginalNode.nextElementSibling:null;
 function mountRTICExpandedChartExtras(){
+ if(!document.body.classList.contains("rtic-chart-focused")){restoreRTICExpandedChartExtras();return;}
  const dock=document.getElementById("rticFocusIndicatorContent");if(!dock)return;
  [rticVisualPanelsOriginalNode,rticChartActionsOriginalNode,rticChartHelpOriginalNode].forEach(node=>{if(node&&node.parentElement!==dock)dock.appendChild(node);});
 }
