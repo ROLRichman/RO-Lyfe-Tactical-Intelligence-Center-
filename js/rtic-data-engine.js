@@ -156,7 +156,7 @@
    const ppsValue=ppsVote===null?"Need more valid bars for HMA crossing":ppsUp?"⬆ UP ARROW · local HMA-cross heuristic":ppsDown?"⬇ DOWN ARROW · local HMA-cross heuristic":"No fresh crossover · WAIT";
    const pbValue=bullPullback?"Bullish pullback zone"+(bullVolumeOk?" · volume +"+fmt(volChangePct,1)+"% confirms":" · volume gate not met"):(bearPullback?"Bearish pullback zone"+(bearVolumeOk?" · volume "+fmt(volChangePct,1)+"% confirms":" · volume gate not met"):"No aligned pullback setup · WAIT");
    const pbDisplay=pbShowLabel?pbValue:((pullbackVote===1||pullbackVote===-1)?"PULLBACK WATCH":"WAIT");
-   const spreadNote="Spread limit "+pbSpreadLimit.toFixed(2)+" • quote spread unavailable from OHLCV";
+   const spreadNote="Spread limit "+pbSpreadLimit.toFixed(2)+" • arrow placement "+pbMoveTo+" • quote spread unavailable from OHLCV";
 
    const atrSetup={lastClose:last.close,atr,period:atrPeriod,multiplier:1.5,
     lowLong:lowStop.long,lowShort:lowStop.short,mediumLong:mediumStop.long,mediumShort:mediumStop.short,highLong:highStop.long,highShort:highStop.short,
@@ -329,6 +329,13 @@
    }catch(e){if(id!==requestId)return;byId("rticScanOutput").innerHTML="";status(e?.message||"Market-data request failed. Check provider configuration and data entitlement.","bad");}
    finally{if(id===requestId&&button){button.disabled=false;button.textContent="📡 PULL SECURE MARKET DATA";}}
  }
+ function recalculateScan(){
+   if(!lastScannedBars.length||!lastScanSymbol){status("Change the HMA/pullback settings, then run Pull Secure Market Data once. The scanner needs valid historical candles before it can recalculate.","warn");return;}
+   const scan=scanBars(lastScannedBars);
+   renderScan(scan,lastScannedBars,lastScanInterval);
+   window.dispatchEvent(new CustomEvent("rolyfe:rtic-scan",{detail:{symbol:lastScanSymbol,interval:lastScanInterval,scan,recalculated:true,asOf:lastScanAsOf}}));
+   status("HMA / pullback settings recalculated locally from "+lastScannedBars.length+" previously returned "+lastScanInterval+" bars for "+lastScanSymbol+". No new provider request was made.","good");
+ }
  function setSymbol(value){
    const b=byId("rticDataSymbol");if(!b)return;
    const next=String(value||"").trim().toUpperCase();if(!next)return;
@@ -359,6 +366,6 @@
    window.dispatchEvent(new CustomEvent("rolyfe:oscillators",{detail:{symbol:lastScanSymbol,interval:lastScanInterval,asOf:lastScanAsOf,...result,customSettings:true}}));
  }
  Object.entries(activeOscillatorSettings).forEach(([key,value])=>{const map={macdFast:"rticMacdFast",macdSlow:"rticMacdSlow",macdSignal:"rticMacdSignal",stochPeriod:"rticStochPeriod",stochSmooth:"rticStochSmooth"};const el=byId(map[key]);if(el)el.value=value;});
- window.ROLYFEData={refresh:refresh,usePlannerSymbol:usePlannerSymbol,setSymbol:setSymbol,checkConfig:checkConfig,setOscillatorSettings:setOscillatorSettings};
+ window.ROLYFEData={refresh:refresh,recalculateScan:recalculateScan,usePlannerSymbol:usePlannerSymbol,setSymbol:setSymbol,checkConfig:checkConfig,setOscillatorSettings:setOscillatorSettings};
  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){usePlannerSymbol();checkConfig();});}else{usePlannerSymbol();checkConfig();}
 })();
