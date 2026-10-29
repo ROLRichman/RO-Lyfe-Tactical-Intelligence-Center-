@@ -4,6 +4,7 @@
  "use strict";
  const SUPABASE_URL="https://ykmdyfbklvuoseqdjnxy.supabase.co";
  const SUPABASE_PUBLISHABLE_KEY="sb_publishable_FaJPNdtRsZTemxpbp98F2g_U9ngkFaG";
+ const SUPABASE_ANON_JWT="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlrbWR5ZmJrbHZ1b3NlcWRqbnh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3ODk5OTQsImV4cCI6MjEwODM2NTk5NH0._YEZj2GSnPcLGXmwgj98V_JzXdJIhTmOFoAH9BSia2I";
  const FUNCTION_ROOT=SUPABASE_URL+"/functions/v1/";
  const byId=id=>document.getElementById(id);
  const n=v=>Number.isFinite(Number(v))?Number(v):NaN;
@@ -18,7 +19,7 @@
  async function callData(path,params={}) {
    const url=new URL(FUNCTION_ROOT+path);
    Object.keys(params).forEach(k=>url.searchParams.set(k,String(params[k])));
-   const response=await fetch(url.toString(),{method:"GET",headers:{"apikey":SUPABASE_PUBLISHABLE_KEY,"Accept":"application/json"}});
+   const response=await fetch(url.toString(),{method:"GET",headers:{"apikey":SUPABASE_PUBLISHABLE_KEY,"Authorization":"Bearer "+SUPABASE_ANON_JWT,"Accept":"application/json"}});
    let body={};try{body=await response.json();}catch(e){}
    if(!response.ok)throw new Error(body.error||("Market-data service returned HTTP "+response.status+"."));
    return body;
