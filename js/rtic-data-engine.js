@@ -366,6 +366,18 @@
    window.dispatchEvent(new CustomEvent("rolyfe:oscillators",{detail:{symbol:lastScanSymbol,interval:lastScanInterval,asOf:lastScanAsOf,...result,customSettings:true}}));
  }
  Object.entries(activeOscillatorSettings).forEach(([key,value])=>{const map={macdFast:"rticMacdFast",macdSlow:"rticMacdSlow",macdSignal:"rticMacdSignal",stochPeriod:"rticStochPeriod",stochSmooth:"rticStochSmooth"};const el=byId(map[key]);if(el)el.value=value;});
- window.ROLYFEData={refresh:refresh,recalculateScan:recalculateScan,usePlannerSymbol:usePlannerSymbol,setSymbol:setSymbol,checkConfig:checkConfig,setOscillatorSettings:setOscillatorSettings};
+ async function fetchAndScan(symbol,interval="1d",limit=300){
+   const clean=String(symbol||"").trim().toUpperCase();
+   const allowed=new Set(["1m","5m","15m","30m","1h","2h","4h","1d","1w","1mo"]);
+   if(!/^(X:)?[A-Z0-9.^_-]{1,20}$/.test(clean))throw new Error("Enter a valid stock symbol.");
+   if(!allowed.has(String(interval).toLowerCase()))throw new Error("Unsupported RTIC interval: "+interval);
+   const nLimit=Math.max(25,Math.min(500,Math.round(Number(limit)||300)));
+   const data=await callData("market-data",{provider:"tickerbot",symbol:clean,interval:String(interval).toLowerCase(),limit:nLimit});
+   const bars=toBars(data.bars);
+   if(bars.length<25)throw new Error("Only "+bars.length+" usable historical bars returned for "+clean+"; at least 25 are required.");
+   const scan=scanBars(bars),oscillators=calculateOscillatorSeries(bars,activeOscillatorSettings);
+   return {symbol:String(data.symbol||clean).toUpperCase(),interval:String(data.interval||interval).toLowerCase(),asOf:data.asOf||null,coverage:data.coverage||"unknown",adjusted:data.adjusted??null,session:data.session||null,dataStatus:data.dataStatus||"provider_response",barsCount:bars.length,lastBar:bars[bars.length-1],scan,oscillators};
+ }
+ window.ROLYFEData={refresh:refresh,recalculateScan:recalculateScan,usePlannerSymbol:usePlannerSymbol,setSymbol:setSymbol,checkConfig:checkConfig,setOscillatorSettings:setOscillatorSettings,fetchAndScan:fetchAndScan};
  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){usePlannerSymbol();checkConfig();});}else{usePlannerSymbol();checkConfig();}
 })();
