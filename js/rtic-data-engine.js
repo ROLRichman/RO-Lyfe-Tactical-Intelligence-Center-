@@ -376,8 +376,24 @@
    const bars=toBars(data.bars);
    if(bars.length<25)throw new Error("Only "+bars.length+" usable historical bars returned for "+clean+"; at least 25 are required.");
    const scan=scanBars(bars),oscillators=calculateOscillatorSeries(bars,activeOscillatorSettings);
-   return {symbol:String(data.symbol||clean).toUpperCase(),interval:String(data.interval||interval).toLowerCase(),asOf:data.asOf||null,coverage:data.coverage||"unknown",adjusted:data.adjusted??null,session:data.session||null,dataStatus:data.dataStatus||"provider_response",barsCount:bars.length,lastBar:bars[bars.length-1],scan,oscillators};
+   return {symbol:String(data.symbol||clean).toUpperCase(),interval:String(data.interval||interval).toLowerCase(),asOf:data.asOf||null,coverage:data.coverage||"unknown",adjusted:data.adjusted??null,session:data.session||null,dataStatus:data.dataStatus||"provider_response",barsCount:bars.length,lastBar:bars[bars.length-1],bars,scan,oscillators};
  }
- window.ROLYFEData={refresh:refresh,recalculateScan:recalculateScan,usePlannerSymbol:usePlannerSymbol,setSymbol:setSymbol,checkConfig:checkConfig,setOscillatorSettings:setOscillatorSettings,fetchAndScan:fetchAndScan};
+ function renderCachedScan(result){
+   if(!result||!Array.isArray(result.bars)||!result.scan)throw new Error("No cached RTIC scan is available to render.");
+   const bars=toBars(result.bars);
+   if(bars.length<25)throw new Error("Cached RTIC scan has too few usable bars.");
+   lastScannedBars=bars;lastScanSymbol=result.symbol;lastScanInterval=result.interval;lastScanAsOf=result.asOf||new Date((bars[bars.length-1].time||0)*1000).toLocaleString();
+   const symbolEl=byId("rticDataSymbol");if(symbolEl)symbolEl.value=result.symbol;
+   const intervalEl=byId("rticDataInterval");if(intervalEl)intervalEl.value=result.interval;
+   const limitEl=byId("rticDataLimit");if(limitEl)limitEl.value=String(Math.min(500,Math.max(200,Math.ceil(bars.length/100)*100)));
+   const price=bars[bars.length-1].close;
+   renderQuote([["SYMBOL",result.symbol],["LAST PRICE",fmt(price,price<1?6:2)],["PROVIDER","Tickerbot"],["DATA TIMESTAMP",lastScanAsOf],["BAR COVERAGE",bars.length+" bars"],["STATUS","Provider response"]]);
+   renderScan(result.scan,bars,result.interval);
+   const osc=result.oscillators||calculateOscillatorSeries(bars,activeOscillatorSettings);
+   window.dispatchEvent(new CustomEvent("rolyfe:oscillators",{detail:{symbol:result.symbol,interval:result.interval,asOf:lastScanAsOf,...osc}}));
+   status("Tickerbot historical bars received for "+result.symbol+" · "+bars.length+" usable "+result.interval+" bars · "+lastScanAsOf+". Provider timing and entitlement may vary; confirm freshness before use.","good");
+   return {symbol:result.symbol,interval:result.interval,bars:bars.length,scan:result.scan};
+ }
+ window.ROLYFEData={refresh:refresh,recalculateScan:recalculateScan,usePlannerSymbol:usePlannerSymbol,setSymbol:setSymbol,checkConfig:checkConfig,setOscillatorSettings:setOscillatorSettings,fetchAndScan:fetchAndScan,renderCachedScan:renderCachedScan};
  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){usePlannerSymbol();checkConfig();});}else{usePlannerSymbol();checkConfig();}
 })();
