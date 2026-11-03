@@ -380,12 +380,22 @@ html.rtic-embedded-desk .card{min-width:0}
       const s=symbol.toLowerCase()+'usdt'; const interval=({5:'5m',15:'15m',60:'1h',240:'4h',D:'1d'})[state.timeframe]||'1m'; state.ws=new WebSocket(cfg.wsBase+'/'+s+'@kline_'+interval); state.ws.onmessage=(ev)=>{ try{const j=JSON.parse(ev.data), k=j.k; if(!k||!state.candle) return; const b={time:+k.t,o:+k.o,h:+k.h,l:+k.l,c:+k.c,v:+k.v}; state.candle.update({time:Math.floor(b.time/1000),open:b.o,high:b.h,low:b.l,close:b.c}); $('mPrice').textContent='$'+fmt(b.c,b.c<1?4:2); }catch{} };
     } else if(state.apiKey){ state.ws=new WebSocket('wss://ws.finnhub.io?token='+encodeURIComponent(state.apiKey)); state.ws.onopen=()=>state.ws.send(JSON.stringify({type:'subscribe',symbol})); state.ws.onmessage=(ev)=>{ try{const j=JSON.parse(ev.data); if(j.type!=='trade')return; const last=j.data?.at(-1); if(last){$('mPrice').textContent='$'+fmt(last.p,last.p<1?4:2);}}catch{} }; }
   }
+  let scanInProgress=false;
   async function runScan(){
-    const universe=$('universe').value; setStatus('SCANNING…','warn'); $('scanMeta').textContent='Fetching market data and calculating RTIC scores…'; const all=[]; try{
-      if(universe==='crypto'||universe==='all'){ const c=await scanCrypto(); all.push(...c); }
-      if(universe==='stocks'||universe==='all-stocks'||universe==='all'){ const syms=$('stockUniverse').value.split(',').map(s=>s.trim().toUpperCase()).filter(Boolean).slice(0,50); const s=await scanStocks(syms); all.push(...s); }
-      renderResults(all); state.lastScanAt=new Date(); $('scanMeta').textContent='Last scan '+state.lastScanAt.toLocaleString()+' · '+all.length+' symbols processed'; $('marketState').textContent=universe==='crypto'?'CRYPTO 24/7':'STOCKS: '+(isWeekend()?'CLOSED / LAST SESSION':'OPEN / LIVE CAPABLE'); setStatus('SYSTEM ONLINE','ok'); if(all.length){ const q=all.find(x=>x.status==='QUALIFIED')||all[0]; await selectResult(q); }
-    }catch(e){ setStatus('SCAN BLOCKED','bad'); $('scanMeta').textContent=e.message; }
+    if(scanInProgress)return;scanInProgress=true;
+    const universe=$('universe').value,wantsCrypto=universe==='crypto'||universe==='all',wantsStocks=universe==='stocks'||universe==='all-stocks'||universe==='all';
+    setStatus('SCANNING…','warn');$('scanMeta').textContent='Fetching market data and calculating RTIC scores…';
+    const all=[],notes=[];
+    try{
+      if(wantsCrypto){const c=await scanCrypto();all.push(...c);}
+      if(wantsStocks){if(!state.apiKey)notes.push('Stocks skipped — add a Finnhub API key in Data Settings; crypto remains available without a key.');else{const syms=$('stockUniverse').value.split(',').map(s=>s.trim().toUpperCase()).filter(Boolean).slice(0,50);const s=await scanStocks(syms);all.push(...s);}}
+      renderResults(all);state.lastScanAt=new Date();
+      $('scanMeta').textContent='Last scan '+state.lastScanAt.toLocaleString()+' · '+all.length+' symbols processed'+(notes.length?' · '+notes.join(' · '):'');
+      $('marketState').textContent=wantsCrypto&&!wantsStocks?'CRYPTO 24/7':wantsStocks&&!state.apiKey?'STOCK DATA KEY NEEDED':(isWeekend()?'STOCKS CLOSED / LAST SESSION':'STOCKS LIVE CAPABLE');
+      if(!all.length&&notes.length){setStatus('STOCK DATA KEY REQUIRED','warn');return;}
+      setStatus('SYSTEM ONLINE','ok');if(all.length){const q=all.find(x=>x.status==='QUALIFIED')||all[0];await selectResult(q);}
+    }catch(e){setStatus('SCAN BLOCKED','bad');$('scanMeta').textContent=e.message;}
+    finally{scanInProgress=false;}
   }
   function isWeekend(){ const d=new Date().getDay(); return d===0||d===6; }
   document.querySelectorAll('#timebar button').forEach(b=>b.addEventListener('click',async()=>{document.querySelectorAll('#timebar button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); state.timeframe=b.dataset.tf; if(state.selected&&state.selectedMeta){ try{ const kind=state.selectedMeta?.kind||'crypto'; const bars=await loadBars(state.selected,kind,state.timeframe); drawChart(bars); renderMeta(state.selected,state.selectedMeta,kind,bars); connectStream(state.selected,kind);}catch(e){$('chartSub').textContent=e.message;} }}));
@@ -393,14 +403,24 @@ html.rtic-embedded-desk .card{min-width:0}
   $('scanBtn').addEventListener('click',runScan);
   $('settingsBtn').addEventListener('click',()=> $('settings').classList.add('open'));
   $('closeSettings').addEventListener('click',()=> $('settings').classList.remove('open'));
-  $('saveSettings').addEventListener('click',()=>{ state.apiKey=$('apiKey').value.trim(); state.refreshSec=Math.max(15,Number($('refreshSec').value)||60); state.cryptoRefreshSec=Math.max(5,Number($('cryptoRefreshSec').value)||10); localStorage.setItem(cfg.storage+'-key',state.apiKey); localStorage.setItem(cfg.storage+'-refresh',state.refreshSec); localStorage.setItem(cfg.storage+'-crypto-refresh',state.cryptoRefreshSec); $('settingsMsg').textContent='Saved in this browser.'; setTimeout(()=>{$('settingsMsg').textContent=''},2500); });
+  $('saveSettings').addEventListener('click',()=>{ state.apiKey=$('apiKey').value.trim(); state.refreshSec=Math.max(15,Number($('refreshSec').value)||60); state.cryptoRefreshSec=Math.max(5,Number($('cryptoRefreshSec').value)||10); localStorage.setItem(cfg.storage+'-key',state.apiKey); localStorage.setItem(cfg.storage+'-refresh',state.refreshSec); localStorage.setItem(cfg.storage+'-crypto-refresh',state.cryptoRefreshSec); scheduleAutoRefresh(); $('settingsMsg').textContent='Saved in this browser.'; setTimeout(()=>{$('settingsMsg').textContent=''},2500); });
   $('clearKey').addEventListener('click',()=>{state.apiKey='';localStorage.removeItem(cfg.storage+'-key');$('apiKey').value='';$('settingsMsg').textContent='Key cleared.'});
   $('universe').addEventListener('change',()=>{ const u=$('universe').value; const stockMode=u!=='crypto'; $('stockUniverse').disabled=!stockMode; });
   initChart();
   $('marketState').textContent=isWeekend()?'WEEKEND · STOCKS CLOSED':'CHECKING…';
   setStatus('SYSTEM READY','ok');
   // Auto refresh: crypto when page is used; stock scan requires saved key.
-  setInterval(()=>{ if(document.visibilityState==='visible' && $('universe').value!=='crypto') runScan(); }, state.refreshSec*1000);
+  let autoRefreshTimer=null;
+  function scheduleAutoRefresh(){
+    if(autoRefreshTimer)clearInterval(autoRefreshTimer);
+    const seconds=Math.max(15,Math.min(300,Number(state.refreshSec)||60));
+    autoRefreshTimer=setInterval(()=>{
+      if(document.visibilityState!=='visible')return;
+      const universe=$('universe').value,stockOnly=universe==='stocks'||universe==='all-stocks';
+      if(stockOnly&&!state.apiKey){setStatus('STOCK DATA KEY REQUIRED','warn');$('scanMeta').textContent='Automatic stock scans paused until a Finnhub key is saved. Select Crypto to scan public crypto data without a key.';return;}
+      runScan();
+    },seconds*1000);
+  }
   // Load a first crypto view so the page has a working live chart without credentials.
   (async()=>{ try{ const bars=await cryptoCandles('BTC','1d',300); state.selected='BTC'; state.selectedMeta={symbol:'BTC',kind:'crypto'}; drawChart(bars); renderMeta('BTC',state.selectedMeta,'crypto',bars); connectStream('BTC','crypto'); setStatus('LIVE / BTC','ok'); }catch(e){ setStatus('READY — ADD STOCK KEY','warn'); } })();
 })();
@@ -418,5 +438,6 @@ html.rtic-embedded-desk .card{min-width:0}
  setTimeout(sendHeight,250);
 })();
 </script>
+  <script src="../rol-translator.js"></script>
 </body>
 </html>
