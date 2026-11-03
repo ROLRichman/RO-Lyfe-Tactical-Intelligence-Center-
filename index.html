@@ -380,6 +380,7 @@ body.rtic-chart-focused{overflow:hidden!important}
 <aside class="rtic-sidebar" id="rticSidebar" aria-label="Trading workspaces">
  <div class="rtic-sidebar-head"><strong>🎯 RO’LYFE WORKSPACES</strong><button class="secondary-btn" type="button" onclick="ROLYFEWorkspace.toggleMenu(false)">✕</button></div>
  <div class="rtic-nav-group">QUICK JUMPS</div>
+ <details class="rtic-nav-directory" id="rticScannerDirectory"><summary><span class="rtic-nav-icon">🔎</span><span>SCANNER DIRECTORY<small>Switch to another RO’Lyfe scanner</small></span></summary><div class="rtic-nav-directory-links"><a href="https://rolrichman.github.io/RO-Lyfe-Tactical-Intelligence-Center-/rtic-scanner.js/" target="_blank" rel="noopener">Tactical RTIC Live Scanner ↗</a><a href="https://rolrichman.github.io/RO-Lyfe-Trading-Intelligence-Classroom/live-chart-desk/#symbol-scanner" target="_blank" rel="noopener">Live Desk Watchlist Scanner ↗</a><a href="https://rolrichman.github.io/RO-Lyfe-Live-Sports-Center/?embed=market-lab" target="_blank" rel="noopener">Sector Scanner + Chart Lab ↗</a><a href="https://rolrichman.github.io/rolyfe-market-terminal/" target="_blank" rel="noopener">Market Terminal Scanner ↗</a><a href="https://rolrichman.github.io/ROlyfe-Trading-Calculator-Pro/" target="_blank" rel="noopener">Trading Calculator Pro · module status ↗</a><a href="https://rolrichman.github.io/RO-Lyfe-Trading-Intelligence-Classroom/#market-room" target="_blank" rel="noopener">Classroom Market Room · practice ↗</a></div></details>
  <button class="rtic-nav-link" type="button" onclick="scrollRTICTop()"><span class="rtic-nav-icon">↑</span><span>Back to top<small>Return to the start of the page</small></span></button>
  <button class="rtic-nav-link" type="button" onclick="openRTICExpandedChart()"><span class="rtic-nav-icon">⛶</span><span>Expanded chart + indicators<small>Open chart with RTIC indicator dock and momentum panels</small></span></button>
  <button class="rtic-nav-link" type="button" onclick="jumpToRTICScan()"><span class="rtic-nav-icon">🔎</span><span>Run / view scan<small>Go to Pull Secure Market Data and scan results</small></span></button>
@@ -1973,3 +1974,17 @@ function calculateTacticalOptionLab(){
 
 </body>
 </html>
+
+<style>
+/* Scanner directory lives inside the existing workspace sidebar — no floating obstruction. */
+.rtic-nav-directory{margin:6px 0 12px;border:1px solid rgba(0,230,118,.34);border-radius:11px;background:rgba(0,230,118,.055);overflow:hidden}
+.rtic-nav-directory>summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none;padding:11px;color:var(--green);font-size:12px;font-weight:900}
+.rtic-nav-directory>summary::-webkit-details-marker{display:none}
+.rtic-nav-directory>summary:after{content:"⌄";margin-left:auto;color:var(--yellow);font-size:16px}
+.rtic-nav-directory[open]>summary:after{content:"⌃"}
+.rtic-nav-directory>summary .rtic-nav-icon{font-size:17px}
+.rtic-nav-directory>summary small{display:block;color:var(--muted);font-size:10px;font-weight:500;margin-top:3px}
+.rtic-nav-directory-links{display:grid;gap:5px;padding:0 8px 8px}
+.rtic-nav-directory-links a{display:block;padding:8px 9px;border:1px solid rgba(0,230,118,.12);border-radius:8px;color:var(--text);font-size:11px;text-decoration:none}
+.rtic-nav-directory-links a:hover{border-color:var(--green2);background:var(--greenSoft)}
+</style>

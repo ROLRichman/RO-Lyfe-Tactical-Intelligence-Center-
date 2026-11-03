@@ -63,7 +63,25 @@
     .spark{font-size:11px}.up{color:var(--green)}.down{color:var(--red)}
     .loading{animation:pulse 1.2s infinite}@keyframes pulse{50%{opacity:.45}}
     .error{color:var(--red);font-size:11px}.ok{color:var(--green);font-size:11px}
-  </style>
+  
+/* Optional Live Desk embed mode retains all controls while fitting its host frame. */
+html.rtic-embedded-desk,html.rtic-embedded-desk body{margin:0;width:100%;max-width:100%;overflow-x:hidden}
+html.rtic-embedded-desk .wrap{max-width:none;padding:10px}
+html.rtic-embedded-desk .topbar{position:sticky;top:0;z-index:30;padding:10px;background:rgba(5,11,9,.96);backdrop-filter:blur(10px)}
+html.rtic-embedded-desk .card{min-width:0}
+
+
+    .scanner-directory{margin:0 0 14px;border:1px solid rgba(25,213,139,.42);border-radius:13px;background:linear-gradient(100deg,rgba(25,213,139,.10),rgba(8,18,15,.96));overflow:visible}
+    .scanner-directory>summary{cursor:pointer;list-style:none;padding:12px 14px;color:#b5ffe1;font-size:12px;font-weight:900}
+    .scanner-directory>summary::-webkit-details-marker{display:none}
+    .scanner-directory>summary:after{content:"⌄";float:right;color:#f3c969;font-size:16px}
+    .scanner-directory[open]>summary:after{content:"⌃"}
+    .scanner-directory-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:7px;padding:0 10px 10px}
+    .scanner-directory-links a{padding:9px 10px;border:1px solid #1d4636;border-radius:8px;background:#07110e;color:#edf7f1;text-decoration:none;font-size:11px}
+    .scanner-directory-links a:hover{border-color:#19d58b}
+    html.rtic-embedded-desk .scanner-directory-links{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -79,6 +97,17 @@
       <button class="btn small primary" id="scanBtn">⚡ LIVE SCAN</button>
     </div>
   </header>
+  <details class="scanner-directory" id="rticScannerDirectory">
+    <summary>🔎 SCANNER DIRECTORY · switch workspaces</summary>
+    <div class="scanner-directory-links">
+      <a href="https://rolrichman.github.io/RO-Lyfe-Tactical-Intelligence-Center-/" target="_blank" rel="noopener">Tactical Intelligence Center ↗</a>
+      <a href="https://rolrichman.github.io/RO-Lyfe-Trading-Intelligence-Classroom/live-chart-desk/#symbol-scanner" target="_blank" rel="noopener">Live Desk Watchlist Scanner ↗</a>
+      <a href="https://rolrichman.github.io/RO-Lyfe-Live-Sports-Center/?embed=market-lab" target="_blank" rel="noopener">Sector Scanner + Chart Lab ↗</a>
+      <a href="https://rolrichman.github.io/rolyfe-market-terminal/" target="_blank" rel="noopener">Market Terminal Scanner ↗</a>
+      <a href="https://rolrichman.github.io/ROlyfe-Trading-Calculator-Pro/" target="_blank" rel="noopener">Trading Calculator Pro · module status ↗</a>
+      <a href="https://rolrichman.github.io/RO-Lyfe-Trading-Intelligence-Classroom/#market-room" target="_blank" rel="noopener">Classroom Market Room · practice ↗</a>
+    </div>
+  </details>
 
   <section class="card" style="margin-bottom:14px">
     <div class="hd"><div><h2>RTIC SCAN CONTROL</h2><div class="sub">Build the candidate list first. The engine scores the chart, then you decide the trade map.</div></div><div class="chips"><span class="chip">6M / 1D</span><span class="chip">4H</span><span class="chip">1H</span><span class="chip">15M</span><span class="chip">5M</span><span class="chip">0.8–2.0% risk band</span></div></div>
@@ -381,5 +410,19 @@
   (async()=>{ try{ const bars=await cryptoCandles('BTC','1d',300); state.selected='BTC'; state.selectedMeta={symbol:'BTC',kind:'crypto'}; drawChart(bars); renderMeta('BTC',state.selectedMeta,'crypto',bars); connectStream('BTC','crypto'); setStatus('LIVE / BTC','ok'); }catch(e){ setStatus('READY — ADD STOCK KEY','warn'); } })();
 })();
 </script>
+
+<script>
+(function(){
+ const params=new URLSearchParams(location.search);
+ if(params.get('embed')!=='desk')return;
+ document.documentElement.classList.add('rtic-embedded-desk');
+ const sendHeight=()=>{try{parent.postMessage({type:'rol-tactical-scanner-height',height:Math.ceil(document.documentElement.scrollHeight)},location.origin);}catch(_){}};
+ window.addEventListener('load',sendHeight,{once:true});
+ window.addEventListener('resize',sendHeight);
+ if(typeof ResizeObserver!=='undefined'){const observer=new ResizeObserver(sendHeight);observer.observe(document.body);}
+ setTimeout(sendHeight,250);
+})();
+</script>
+
 </body>
 </html>
