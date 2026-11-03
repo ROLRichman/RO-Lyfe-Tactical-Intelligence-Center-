@@ -24,12 +24,14 @@
 | Trading Calculator Pro | Scanner directory and module status | https://rolrichman.github.io/ROlyfe-Trading-Calculator-Pro/ |
 | Classroom Market Room | Educational practice chart and risk worksheet | https://rolrichman.github.io/RO-Lyfe-Trading-Intelligence-Classroom/#market-room |
 
-## Shared language access
+## Shared page-language system
 
-- Root Tactical workspace and standalone RTIC scanner include the common RO’Lyfe five-language translator: English, Spanish, French, Haitian Creole and Portuguese.
-- It supports typed text and selected page text, using the same translation service as the Trading Intelligence Classroom.
-- The selected language is saved under `rolyfe-translate-language` and can be reused across RO’Lyfe GitHub Pages apps on the same origin.
-- Translation availability depends on the shared AI service configuration. It does not modify market data, scan scores, indicators or calculations.
+- Root Tactical workspace and standalone RTIC scanner include the global RO’Lyfe page-language selector: English, Spanish, French, Haitian Creole and Portuguese.
+- The selector translates eligible interface copy across the entire page, including headings, navigation, buttons, form labels, placeholders, instructions, statuses and accessible labels.
+- A visitor's selection is saved as `rolyfe-translate-language`; all RO’Lyfe GitHub Pages projects on `rolrichman.github.io` share the same browser origin and preference.
+- Dynamic UI text is observed and translated as new controls or statuses appear.
+- Live quotes, prices, tickers, numeric values, calculated results, chart canvases and embedded TradingView/chart content are excluded. The translation service is not allowed to change market data or calculations.
+- The page translator uses the `rol-page-translate` Supabase Edge Function in the active Trading Intelligence Classroom project. It requires the server-side `OPENAI_API_KEY`; the key is never placed in page code.
 
 ## Data integrity and refresh behavior
 
