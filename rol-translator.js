@@ -4,7 +4,7 @@
   if (window.__ROL_PAGE_LANGUAGE__) return;
   window.__ROL_PAGE_LANGUAGE__ = true;
   const API = "https://ykmdyfbklvuoseqdjnxy.supabase.co/functions/v1/rol-page-translate";
-  const ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ5a21keWZia2x2b3NlcWRqbnh5Iiwicm9sZSI6ImFub24iLCJpYXQiMTc5Mjc4OTk5NCwiZXhwIjoyMTA4MzY1OTk0fQ._YEZj2GSnPcLGXmwgj98V_JzXdJIhTmOFoAH9BSia2I";
+  const ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ5a21keWZia2x2b3NlcWRqbnh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3ODk5OTQsImV4cCI6MjEwODM2NTk5NH0._YEZj2GSnPcLGXmwgj98V_JzXdJIhTmOFoAH9BSia2I";
   const PREF = "rolyfe-translate-language";
   const CACHE_KEY = "rolyfe-page-language-cache-v1";
   const LANGS = [["English","English","en"],["Spanish","Español","es"],["French","Français","fr"],["Haitian Creole","Kreyòl Ayisyen","ht"],["Portuguese","Português","pt"]];
