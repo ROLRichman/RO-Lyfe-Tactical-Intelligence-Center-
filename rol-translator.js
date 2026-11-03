@@ -1,0 +1,34 @@
+/* Shared RO'Lyfe five-language text translator. */
+(() => {
+  "use strict";
+  if (document.getElementById("rol-network-translator")) return;
+  const API="https://ykmdyfbklvuoseqdjnxy.supabase.co/functions/v1/rol-trading-ai";
+  const ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlrbWR5ZmJrbHZ1b3NlcWRqbnh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3ODk5OTQsImV4cCI6MjEwODM2NTk5NH0._YEZj2GSnPcLGXmwgj98V_JzXdJIhTmOFoAH9BSia2I";
+  const KEY="rolyfe-translate-language";
+  const langs=[["English","English"],["Spanish","Español"],["French","Français"],["Haitian Creole","Kreyòl Ayisyen"],["Portuguese","Português"]];
+  const el=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
+  const style=el("style");style.id="rol-network-translator-style";
+  style.textContent=".rol-network-translator{width:min(1450px,calc(100% - 20px));margin:8px auto 14px;border:1px solid rgba(25,213,139,.4);border-radius:13px;background:linear-gradient(105deg,rgba(25,213,139,.09),rgba(6,16,12,.97));color:inherit;overflow:hidden}.rol-network-translator>summary{cursor:pointer;list-style:none;padding:11px 13px;color:#aaffd5;font:800 12px/1.4 system-ui,Arial}.rol-network-translator>summary::-webkit-details-marker{display:none}.rol-network-translator>summary:after{content:'＋';float:right;color:#f3c969}.rol-network-translator[open]>summary:after{content:'−'}.rol-network-translator .rol-tx-panel{display:grid;gap:9px;padding:0 12px 12px;font:12px/1.5 system-ui,Arial}.rol-network-translator .rol-tx-row{display:flex;align-items:end;gap:8px;flex-wrap:wrap}.rol-network-translator label{display:grid;gap:5px;flex:1;min-width:180px;font-size:11px;font-weight:800}.rol-network-translator select,.rol-network-translator textarea{width:100%;min-width:0;box-sizing:border-box;border:1px solid #315342;border-radius:9px;background:#07120d;color:#f0fff6;padding:9px;font:inherit}.rol-network-translator textarea{min-height:74px;resize:vertical}.rol-network-translator button{min-height:38px;border:1px solid #26734d;border-radius:9px;background:#0b3826;color:#dffff0;padding:8px 11px;font:800 11px system-ui;cursor:pointer}.rol-network-translator button.primary{background:#176744;border-color:#32b77a;color:#fff}.rol-network-translator button:disabled{opacity:.55;cursor:wait}.rol-network-translator .rol-tx-status{margin:0;color:#b6c9bd;font-size:11px}.rol-network-translator .rol-tx-result{min-height:38px;max-height:220px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid #284637;border-radius:9px;background:rgba(2,9,6,.62);padding:10px;color:#ecfff4}@media(max-width:560px){.rol-network-translator{width:calc(100% - 16px)}.rol-network-translator .rol-tx-row{display:grid;grid-template-columns:1fr 1fr}.rol-network-translator .rol-tx-row label{grid-column:1/-1}.rol-network-translator .rol-tx-row button{width:100%}}";
+  document.head.appendChild(style);
+  const panel=el("details","rol-network-translator");panel.id="rol-network-translator";
+  const summary=el("summary");summary.append("🌐 RO’Lyfe Translator · ");
+  const current=el("span","","English");summary.appendChild(current);
+  const body=el("div","rol-tx-panel"),row=el("div","rol-tx-row"),label=el("label","","Translate into"),select=el("select");
+  select.id="rolTranslateNetworkLanguage";
+  langs.forEach(([v,t])=>{const o=el("option","",t);o.value=v;select.appendChild(o);});
+  try{const saved=localStorage.getItem(KEY);if(langs.some(x=>x[0]===saved))select.value=saved;}catch(_){}
+  const updateLabel=()=>{current.textContent=langs.find(x=>x[0]===select.value)?.[1]||"English";};
+  label.appendChild(select);const use=el("button","","Use selected text");use.type="button";row.append(label,use);
+  const inputLabel=el("label","","Text to translate"),input=el("textarea");input.id="rolTranslateNetworkInput";input.maxLength=4000;input.rows=3;input.placeholder="Paste text or select text on this page, then use the button above.";inputLabel.appendChild(input);
+  const actions=el("div","rol-tx-row"),go=el("button","primary","Translate"),copy=el("button","","Copy translation");go.type=copy.type="button";actions.append(go,copy);
+  const status=el("p","rol-tx-status","Translate text or a page selection into one of five languages.");status.setAttribute("role","status");status.setAttribute("aria-live","polite");
+  const output=el("div","rol-tx-result","Your translation will appear here.");output.setAttribute("aria-live","polite");
+  body.append(row,inputLabel,actions,status,output);panel.append(summary,body);
+  const anchor=document.querySelector("header.app-header,header.topbar,.topbar,header")||document.body.firstElementChild;
+  if(anchor?.parentNode)anchor.insertAdjacentElement("afterend",panel);else document.body.insertBefore(panel,document.body.firstChild);
+  updateLabel();
+  select.addEventListener("change",()=>{updateLabel();try{localStorage.setItem(KEY,select.value);}catch(_){}});
+  use.addEventListener("click",()=>{const selected=String(window.getSelection?.()?.toString()||"").trim();if(!selected){status.textContent="Select text on this page first, or paste text below.";input.focus();return;}input.value=selected.slice(0,4000);status.textContent="Selected page text loaded. Press Translate when ready.";panel.open=true;});
+  go.addEventListener("click",async()=>{const text=input.value.trim();if(!text){status.textContent="Enter or select text to translate first.";input.focus();return;}go.disabled=copy.disabled=true;status.textContent="Translating into "+select.value+"…";try{const response=await fetch(API,{method:"POST",headers:{apikey:ANON,Authorization:"Bearer "+ANON,"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({action:"translate",language:select.value,text}),cache:"no-store"});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||data.message||("Translation service returned HTTP "+response.status+"."));const answer=String(data.answer||data.translation||"").trim();if(!answer)throw new Error("The translation service returned no translated text.");output.textContent=answer;status.textContent="Translated into "+select.value+". Review financial and trading terminology before acting.";}catch(error){status.textContent=error.message||"Translation service unavailable. Try again later.";}finally{go.disabled=copy.disabled=false;}});
+  copy.addEventListener("click",async()=>{const text=output.textContent.trim();if(!text||text==="Your translation will appear here."){status.textContent="There is no translation to copy yet.";return;}try{await navigator.clipboard.writeText(text);status.textContent="Translation copied.";}catch(_){status.textContent="Clipboard unavailable. Select the translation to copy it manually."; }});
+})();
