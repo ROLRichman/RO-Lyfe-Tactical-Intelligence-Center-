@@ -405,7 +405,7 @@ html.rtic-embedded-desk .card{min-width:0}
   $('closeSettings').addEventListener('click',()=> $('settings').classList.remove('open'));
   $('saveSettings').addEventListener('click',()=>{ state.apiKey=$('apiKey').value.trim(); state.refreshSec=Math.max(15,Number($('refreshSec').value)||60); state.cryptoRefreshSec=Math.max(5,Number($('cryptoRefreshSec').value)||10); localStorage.setItem(cfg.storage+'-key',state.apiKey); localStorage.setItem(cfg.storage+'-refresh',state.refreshSec); localStorage.setItem(cfg.storage+'-crypto-refresh',state.cryptoRefreshSec); scheduleAutoRefresh(); $('settingsMsg').textContent='Saved in this browser.'; setTimeout(()=>{$('settingsMsg').textContent=''},2500); });
   $('clearKey').addEventListener('click',()=>{state.apiKey='';localStorage.removeItem(cfg.storage+'-key');$('apiKey').value='';$('settingsMsg').textContent='Key cleared.'});
-  $('universe').addEventListener('change',()=>{ const u=$('universe').value; const stockMode=u!=='crypto'; $('stockUniverse').disabled=!stockMode; });
+  $('universe').addEventListener('change',()=>{ const u=$('universe').value; const stockMode=u!=='crypto'; $('stockUniverse').disabled=!stockMode; scheduleAutoRefresh(); });
   initChart();
   $('marketState').textContent=isWeekend()?'WEEKEND · STOCKS CLOSED':'CHECKING…';
   setStatus('SYSTEM READY','ok');
@@ -413,7 +413,7 @@ html.rtic-embedded-desk .card{min-width:0}
   let autoRefreshTimer=null;
   function scheduleAutoRefresh(){
     if(autoRefreshTimer)clearInterval(autoRefreshTimer);
-    const seconds=Math.max(15,Math.min(300,Number(state.refreshSec)||60));
+    const universeNow=$('universe').value;const seconds=universeNow==='crypto'?Math.max(5,Math.min(60,Number(state.cryptoRefreshSec)||10)):Math.max(15,Math.min(300,Number(state.refreshSec)||60));
     autoRefreshTimer=setInterval(()=>{
       if(document.visibilityState!=='visible')return;
       const universe=$('universe').value,stockOnly=universe==='stocks'||universe==='all-stocks';
@@ -421,6 +421,7 @@ html.rtic-embedded-desk .card{min-width:0}
       runScan();
     },seconds*1000);
   }
+  scheduleAutoRefresh();
   // Load a first crypto view so the page has a working live chart without credentials.
   (async()=>{ try{ const bars=await cryptoCandles('BTC','1d',300); state.selected='BTC'; state.selectedMeta={symbol:'BTC',kind:'crypto'}; drawChart(bars); renderMeta('BTC',state.selectedMeta,'crypto',bars); connectStream('BTC','crypto'); setStatus('LIVE / BTC','ok'); }catch(e){ setStatus('READY — ADD STOCK KEY','warn'); } })();
 })();
