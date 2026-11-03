@@ -294,6 +294,17 @@ html,body{max-width:100%;overflow-x:hidden}.tradingview-shell{width:100%;max-wid
 .rtic-dock-run{width:auto;min-height:34px;margin:6px 0 0;padding:6px 10px;font-size:11px}
 .rtic-focus-dock-content .rtic-scan-list{display:grid}
 .rtic-atr-guide-btn{width:100%;min-height:36px;margin:8px 0;padding:7px 10px;background:#102119;border:1px solid var(--border2);border-radius:8px;color:var(--green);font-size:12px;font-weight:800}
+/* Scanner directory lives inside the existing workspace sidebar — no floating obstruction. */
+.rtic-nav-directory{margin:6px 0 12px;border:1px solid rgba(0,230,118,.34);border-radius:11px;background:rgba(0,230,118,.055);overflow:hidden}
+.rtic-nav-directory>summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none;padding:11px;color:var(--green);font-size:12px;font-weight:900}
+.rtic-nav-directory>summary::-webkit-details-marker{display:none}
+.rtic-nav-directory>summary:after{content:"⌄";margin-left:auto;color:var(--yellow);font-size:16px}
+.rtic-nav-directory[open]>summary:after{content:"⌃"}
+.rtic-nav-directory>summary .rtic-nav-icon{font-size:17px}
+.rtic-nav-directory>summary small{display:block;color:var(--muted);font-size:10px;font-weight:500;margin-top:3px}
+.rtic-nav-directory-links{display:grid;gap:5px;padding:0 8px 8px}
+.rtic-nav-directory-links a{display:block;padding:8px 9px;border:1px solid rgba(0,230,118,.12);border-radius:8px;color:var(--text);font-size:11px;text-decoration:none}
+.rtic-nav-directory-links a:hover{border-color:var(--green2);background:var(--greenSoft)}
 </style>
 <style>
 /* Mobile-safe, expandable chart and independently calculated oscillator panes */
@@ -1974,17 +1985,3 @@ function calculateTacticalOptionLab(){
 
 </body>
 </html>
-
-<style>
-/* Scanner directory lives inside the existing workspace sidebar — no floating obstruction. */
-.rtic-nav-directory{margin:6px 0 12px;border:1px solid rgba(0,230,118,.34);border-radius:11px;background:rgba(0,230,118,.055);overflow:hidden}
-.rtic-nav-directory>summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none;padding:11px;color:var(--green);font-size:12px;font-weight:900}
-.rtic-nav-directory>summary::-webkit-details-marker{display:none}
-.rtic-nav-directory>summary:after{content:"⌄";margin-left:auto;color:var(--yellow);font-size:16px}
-.rtic-nav-directory[open]>summary:after{content:"⌃"}
-.rtic-nav-directory>summary .rtic-nav-icon{font-size:17px}
-.rtic-nav-directory>summary small{display:block;color:var(--muted);font-size:10px;font-weight:500;margin-top:3px}
-.rtic-nav-directory-links{display:grid;gap:5px;padding:0 8px 8px}
-.rtic-nav-directory-links a{display:block;padding:8px 9px;border:1px solid rgba(0,230,118,.12);border-radius:8px;color:var(--text);font-size:11px;text-decoration:none}
-.rtic-nav-directory-links a:hover{border-color:var(--green2);background:var(--greenSoft)}
-</style>
