@@ -137,8 +137,7 @@
     const status=document.createElement("span");status.id="rolPageLanguageStatus";status.className="rol-page-language-status";status.setAttribute("role","status");status.setAttribute("aria-live","polite");status.textContent="English · Original interface";
     wrap.append(label,status);
     const header=document.querySelector("header.app-header,header.topbar,header,.app-header,.topbar,[role='banner']");
-    const nav=header && header.querySelector("nav");const mount=nav || header;
-    if(mount)mount.appendChild(wrap);else(document.body || document.documentElement).insertBefore(wrap,(document.body || document.documentElement).firstChild);
+    if(header && header.parentNode)header.insertAdjacentElement("afterend",wrap);else(document.body || document.documentElement).insertBefore(wrap,(document.body || document.documentElement).firstChild);
   }
   async function setLanguage(language,status){
     if(!LANGS.some(x=>x[0]===language))language="English";
