@@ -30,12 +30,16 @@ test('Tactical main stylesheet is validly placed inside the HTML head', () => {
   assert.ok(styleEnd > 0 && styleEnd < htmlEnd, 'style block must close before the actual document close');
 });
 
-test("translator exposes all five shared RO'Lyfe languages", () => {
-  assert.match(root, /src="rol-translator\.js"/);
-  assert.match(scanner, /src="\.\.\/rol-translator\.js"/);
+test("global language switcher translates the whole page in five languages", () => {
+  assert.match(root, /src="rol-translator\\.js"/);
+  assert.match(scanner, /src="\\.\\.\\/rol-translator\\.js"/);
   for (const language of ["English", "Spanish", "French", "Haitian Creole", "Portuguese"]) {
     assert.ok(translator.includes(language), "missing " + language);
   }
-  assert.match(translator, /action:"translate"/);
+  assert.match(translator, /rolPageLanguageSelect/);
+  assert.match(translator, /rol-page-translate/);
   assert.match(translator, /rolyfe-translate-language/);
+  assert.match(translator, /MutationObserver/);
+  assert.match(translator, /data-price/);
+  assert.doesNotMatch(translator, /rolTranslateNetworkInput|Use selected text|Paste text to translate/);
 });
