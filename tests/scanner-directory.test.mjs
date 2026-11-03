@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 
 const root = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const scanner = readFileSync(new URL('../rtic-scanner.js/index.html', import.meta.url), 'utf8');
+const translator = readFileSync(new URL('../rol-translator.js', import.meta.url), 'utf8');
 
 test('main Tactical Center exposes the scanner directory in the existing sidebar', () => {
   assert.match(root, /id="rticScannerDirectory"/);
@@ -27,4 +28,14 @@ test('Tactical main stylesheet is validly placed inside the HTML head', () => {
   const styleEnd = root.lastIndexOf('</style>');
   assert.ok(htmlEnd > 0);
   assert.ok(styleEnd > 0 && styleEnd < htmlEnd, 'style block must close before the actual document close');
+});
+
+test("translator exposes all five shared RO'Lyfe languages", () => {
+  assert.match(root, /src="rol-translator\.js"/);
+  assert.match(scanner, /src="\.\.\/rol-translator\.js"/);
+  for (const language of ["English", "Spanish", "French", "Haitian Creole", "Portuguese"]) {
+    assert.ok(translator.includes(language), "missing " + language);
+  }
+  assert.match(translator, /action:"translate"/);
+  assert.match(translator, /rolyfe-translate-language/);
 });
