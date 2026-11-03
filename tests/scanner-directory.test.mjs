@@ -26,5 +26,5 @@ test('Tactical main stylesheet is validly placed inside the HTML head', () => {
   const htmlEnd = root.lastIndexOf('</html>');
   const styleEnd = root.lastIndexOf('</style>');
   assert.ok(htmlEnd > 0);
-  assert.ok(styleEnd > 0 && styleEnd < htmlEnd, 'style block must close before </html>');
+  assert.ok(styleEnd > 0 && styleEnd < htmlEnd, 'style block must close before the actual document close');
 });
