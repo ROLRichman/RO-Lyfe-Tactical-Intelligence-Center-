@@ -31,8 +31,8 @@ test('Tactical main stylesheet is validly placed inside the HTML head', () => {
 });
 
 test("global language switcher translates the whole page in five languages", () => {
-  assert.match(root, /src="rol-translator\\.js"/);
-  assert.match(scanner, /src="\\.\\.\\/rol-translator\\.js"/);
+  assert.ok(root.includes('src="rol-translator.js"'));
+  assert.ok(scanner.includes('src="../rol-translator.js"'));
   for (const language of ["English", "Spanish", "French", "Haitian Creole", "Portuguese"]) {
     assert.ok(translator.includes(language), "missing " + language);
   }
