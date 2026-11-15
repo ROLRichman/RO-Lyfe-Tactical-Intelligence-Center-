@@ -1229,13 +1229,15 @@ window.addEventListener("rolyfe:oscillators",function(e){renderRticOscillators(e
 window.addEventListener("rol-global-symbol-change",function(event){
  const raw=String(event.detail&&event.detail.symbol||"").trim().toUpperCase();
  if(!raw)return;
- const clean=raw.split(":").pop().replace(/-USD$/,"").replace(/USDT$/,"").replace(/USD$/,"");
+ const rawTicker=raw.split(":").pop();
+ const isCrypto=/-USD$|USDT$/.test(rawTicker);
+ const clean=rawTicker.replace(/-USD$/,"").replace(/USDT$/,"").replace(/USD$/,"");
  const field=document.getElementById("symbol");
  if(!field)return;
  field.value=clean;
  if(window.ROLYFEData)ROLYFEData.setSymbol(clean);
  if(typeof syncSymbolHeader==="function")syncSymbolHeader();
- currentChartSymbol=raw.includes(":")?raw:formatTradingViewSymbol(clean);
+ currentChartSymbol=raw.includes(":")?raw:(isCrypto?"BINANCE:"+clean+"USDT":formatTradingViewSymbol(clean));
  if(typeof updateChartFromPlanner==="function")updateChartFromPlanner();
 });
 
