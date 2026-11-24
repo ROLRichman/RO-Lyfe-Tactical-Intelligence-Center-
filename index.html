@@ -1327,7 +1327,8 @@ function onInstrumentChange(){
 }
 function updateFuturesPointValueHint(){
  const help=document.getElementById("futuresPointValueHelp");if(!help)return;
- const symbol=getSymbol(),spec=window.ROLYFE_FUTURES_POINT_VALUES?.specForSymbol(symbol);
+ const symbol=getSymbol(),instrument=document.getElementById("instrument")?.value,spec=window.ROLYFE_FUTURES_POINT_VALUES?.specForSymbol(symbol);
+ if(instrument!=="Future"){help.textContent="Used only when Instrument is Future. Supported E-mini and Micro contracts are mapped automatically.";return;}
  if(spec)help.textContent=symbol+" · auto point value $"+spec.pointValue+" per point · tick size "+spec.tickSize+" · $"+spec.tickValue+" per tick. Verified CME mapping; auto value overrides manual input.";
  else help.textContent="No verified mapping for "+symbol+". Enter its correct dollar-per-point value manually before calculating a futures position.";
 }
