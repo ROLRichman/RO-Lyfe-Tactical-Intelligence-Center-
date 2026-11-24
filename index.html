@@ -1472,7 +1472,15 @@ function createTradePlan(){
 function renderTradePlan(p){
  const setupIcon=p.setupGrade==="GREEN"?"🟢":p.setupGrade==="YELLOW"?"🟡":"🔴";
  const s=p.positionSizing||positionGuard(p),d=p.derivative;
- let derivativeHtml="";
+ let derivativeHtml="",futuresHtml="";
+ if(p.instrument==="Future"){
+  futuresHtml='<div class="plan-section"><h3>📐 FUTURES CONTRACT MATH</h3>'+
+   '<div class="data-row"><span>Dollar per point</span><strong>'+money(p.futuresPointValue)+'</strong></div>'+
+   '<div class="data-row"><span>Tick size / value</span><strong>'+(p.futuresTickSize||"Manual")+\" / \"+(p.futuresTickValue?money(p.futuresTickValue):"Manual")+\"</strong></div>\"+
+   '<div class="data-row"><span>Risk per contract</span><strong>'+money(p.riskPerUnit)+'</strong></div>'+
+   '<div class="data-row"><span>Broker margin / contract</span><strong>'+(p.capitalPerUnit>0?money(p.capitalPerUnit):"NOT ENTERED")+'</strong></div>'+
+   '<div class="system-rule">Whole-contract sizing uses the selected contract point value. Broker margin must be verified separately; fees, slippage and gaps are excluded.</div></div>';
+ }
  if(p.instrument==="Option"&&d){
   const stopProxy=p.baseUnitRisk,defined=d.defined,selected=p.riskBasis==="DEFINED"?defined:p.riskBasis==="CONSERVATIVE"?Math.max(stopProxy,defined):stopProxy;
   const maxContracts=selected>0?Math.floor(p.dollarRisk/selected):0;
@@ -1518,6 +1526,7 @@ function renderTradePlan(p){
    <div class="data-row"><span>Position Value / Capital</span><strong>${money(p.positionValue)}</strong></div>
    <div class="data-row"><span>RO'LYFE Recommended Position</span><strong>${number(s.recommended,2)} ${p.unitLabel}</strong></div>
   </div>
+  ${futuresHtml}
   ${derivativeHtml}
   <div class="plan-section"><h3>🎯 TARGET SYSTEM</h3>
    <div class="ladder-grid"><div class="ladder-box"><strong>T1</strong><span>${money(p.target1)} • 1R</span></div><div class="ladder-box"><strong>T2</strong><span>${money(p.target2)} • 2R</span></div><div class="ladder-box"><strong>T3</strong><span>${money(p.target3)} • 3R</span></div></div>
