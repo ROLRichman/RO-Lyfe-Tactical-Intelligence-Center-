@@ -1476,7 +1476,7 @@ function renderTradePlan(p){
  if(p.instrument==="Future"){
   futuresHtml='<div class="plan-section"><h3>📐 FUTURES CONTRACT MATH</h3>'+
    '<div class="data-row"><span>Dollar per point</span><strong>'+money(p.futuresPointValue)+'</strong></div>'+
-   '<div class="data-row"><span>Tick size / value</span><strong>'+(p.futuresTickSize||"Manual")+\" / \"+(p.futuresTickValue?money(p.futuresTickValue):"Manual")+\"</strong></div>\"+
+   '<div class="data-row"><span>Tick size / value</span><strong>'+(p.futuresTickSize||"Manual")+' / '+(p.futuresTickValue?money(p.futuresTickValue):"Manual")+'</strong></div>'+
    '<div class="data-row"><span>Risk per contract</span><strong>'+money(p.riskPerUnit)+'</strong></div>'+
    '<div class="data-row"><span>Broker margin / contract</span><strong>'+(p.capitalPerUnit>0?money(p.capitalPerUnit):"NOT ENTERED")+'</strong></div>'+
    '<div class="system-rule">Whole-contract sizing uses the selected contract point value. Broker margin must be verified separately; fees, slippage and gaps are excluded.</div></div>';
