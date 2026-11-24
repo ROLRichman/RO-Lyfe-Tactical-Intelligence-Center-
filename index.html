@@ -418,6 +418,7 @@ body.rtic-chart-focused{overflow:hidden!important}
 .tv-news-attribution a{color:#80c7ff}
 @media(max-width:640px){.tv-news-widget,.tv-news-widget .tradingview-widget-container__widget{min-height:480px}}
 </style>
+  <script src="futures-point-values.js"></script>
 </head>
 
 <body>
@@ -637,8 +638,8 @@ body.rtic-chart-focused{overflow:hidden!important}
    <div class="help">Optional guardrail — it does not choose your trade. It checks affordability, capital allocation, risk budget, and your personal maximum. Leave Personal Max at 0 for no personal cap.</div>
    <div><label>Capital Allocation %</label><input id="capitalAllocationPercent" type="number" min="1" max="100" value="25"></div>
    <div><label>Personal Max Position</label><input id="personalMaxPosition" type="number" min="0" step="1" value="0" placeholder="0 = none"></div>
-   <div><label>Futures Point Value</label><input id="futuresPointValue" type="number" min="0.01" step="0.01" value="50"></div>
-   <div><label>Futures Margin / Contract</label><input id="futuresMargin" type="number" min="0" step="1" value="15000"></div>
+   <div><label>Futures Point Value</label><input id="futuresPointValue" type="number" min="0.01" step="0.01" value="" placeholder="Auto for supported contracts"><small id="futuresPointValueHelp">Auto mapping for ES/NQ/YM/RTY/CL and Micro contracts; enter manually for unsupported products.</small></div>
+   <div><label>Futures Margin / Contract</label><input id="futuresMargin" type="number" min="0" step="1" value="" placeholder="Enter broker-specific margin"><small>Broker margin varies by account, product, and session. Leave blank to show affordability as unverified.</small></div>
   </div>
 
   <div id="positionSizingOutput"></div>
@@ -1324,6 +1325,16 @@ function onInstrumentChange(){
  document.getElementById("riskBasis").disabled=!["Option"].includes(inst);
  if(inst==="Option")updateStrategyUI();else refreshCalculations();
 }
+function updateFuturesPointValueHint(){
+ const help=document.getElementById("futuresPointValueHelp");if(!help)return;
+ const symbol=getSymbol(),spec=window.ROLYFE_FUTURES_POINT_VALUES?.specForSymbol(symbol);
+ if(spec)help.textContent=symbol+" · auto point value $"+spec.pointValue+" per point · tick size "+spec.tickSize+" · $"+spec.tickValue+" per tick. Verified CME mapping; auto value overrides manual input.";
+ else help.textContent="No verified mapping for "+symbol+". Enter its correct dollar-per-point value manually before calculating a futures position.";
+}
+document.getElementById("symbol")?.addEventListener("input",updateFuturesPointValueHint);
+document.getElementById("instrument")?.addEventListener("change",updateFuturesPointValueHint);
+document.getElementById("futuresPointValue")?.addEventListener("input",updateFuturesPointValueHint);
+updateFuturesPointValueHint();
 function riskBudget(){return Math.max(0,num("accountSize")*num("riskPercent")/100)}
 function underlyingTargets(entry,stop,direction){
  const r=Math.abs(entry-stop);
@@ -1361,7 +1372,7 @@ function calculateTrade(){
  if(!(entry>0&&stop>0)||entry===stop)return null;
  const targets=underlyingTargets(entry,stop,direction),dollarRisk=riskBudget();
  let riskPerUnit=targets.r, baseUnitRisk=targets.r, maxUnits=0, unitLabel="Shares",capitalPerUnit=entry;
- let derivative=null;
+ let derivative=null,futuresSpec=null,futuresPointValue=null;
  if(instrument==="Option"){
   derivative=strategyCalc();
   baseUnitRisk=Math.max(0,Math.abs(entry-stop)*Math.max(derivative.stopDelta,0.01)*100);
@@ -1374,8 +1385,10 @@ function calculateTrade(){
   unitLabel="Contracts";
   capitalPerUnit=derivative.capital||derivative.net*100||0;
  }else if(instrument==="Future"){
-  const pv=Math.max(.01,num("futuresPointValue")||50);
-  riskPerUnit=targets.r*pv;maxUnits=riskPerUnit>0?Math.floor(dollarRisk/riskPerUnit):0;unitLabel="Contracts";
+  futuresSpec=window.ROLYFE_FUTURES_POINT_VALUES?.specForSymbol(symbol)||null;
+  futuresPointValue=futuresSpec?.pointValue||num("futuresPointValue");
+  if(!(futuresPointValue>0)){const help=document.getElementById("futuresPointValueHelp");if(help)help.textContent="No verified point value for "+symbol+". Enter the correct contract point value manually before sizing.";return null;}
+  riskPerUnit=targets.r*futuresPointValue;maxUnits=riskPerUnit>0?Math.floor(dollarRisk/riskPerUnit):0;unitLabel="Contracts";
   capitalPerUnit=Math.max(0,num("futuresMargin"));
  }else if(instrument==="Crypto"){
   riskPerUnit=targets.r;maxUnits=riskPerUnit>0?dollarRisk/riskPerUnit:0;unitLabel="Units";capitalPerUnit=entry;
@@ -1388,6 +1401,7 @@ function calculateTrade(){
   symbol,instrument,direction,setupGrade:currentSetupGrade,accountSize,riskPercent,probability,impliedVolatility,
   entry,stop,riskPerUnit,baseUnitRisk,dollarRisk,maxUnits,unitLabel,capitalPerUnit,
   positionValue:maxUnits*capitalPerUnit,target1:targets.t1,target2:targets.t2,target3:targets.t3,
+  futuresPointValue,futuresTickSize:futuresSpec?.tickSize||null,futuresTickValue:futuresSpec?.tickValue||null,
   strategy:document.getElementById("strategy").value,strategyName:strategyMeta[document.getElementById("strategy").value]?.name||"—",
   riskBasis:document.getElementById("riskBasis").value,derivative,
   expiration:document.getElementById("expiration").value,
