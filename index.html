@@ -1420,6 +1420,7 @@ function positionGuard(p){
  const personalLimit=personal>0?personal:Infinity;
  const recommended=Math.max(0,Math.min(affordable,allocLimit,riskLimit,personalLimit));
  const warnings=[];
+ if(p.instrument==="Future"&&!(p.capitalPerUnit>0))warnings.push("⚠️ Broker margin not entered; affordability and capital allocation are not verified. Confirm current broker margin before any order.");
  if(desired>affordable)warnings.push(`🚨 Affordability: ${desired} ${p.unitLabel} requested; account supports ${number(affordable,2)}.`);
  if(desired>allocLimit)warnings.push(`⚠️ Capital allocation: ${allocPct}% allows about ${number(allocLimit,2)} ${p.unitLabel}.`);
  if(desired>riskLimit)warnings.push(`🛡️ Risk budget: supports about ${number(riskLimit,2)} ${p.unitLabel}.`);
