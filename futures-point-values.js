@@ -1,3 +1,6 @@
+// Contract point/tick values checked against CME Group equity-index and Micro WTI specifications.
+// https://www.cmegroup.com/articles/faqs/frequently-asked-questions-micro-e-mini-equity-index-futures.html
+// https://www.cmegroup.com/education/articles-and-reports/micro-wti-crude-oil-futures-faq
 (function(global){
   const specs={
     ES:{product:"ES",pointValue:50,tickSize:.25,tickValue:12.5},
