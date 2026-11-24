@@ -1,0 +1,27 @@
+name: Futures Risk Math Checks
+on:
+  pull_request:
+    paths:
+      - "index.html"
+      - "futures-point-values.js"
+      - "tests/futures-point-values.test.mjs"
+      - ".github/workflows/futures-risk-check.yml"
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "futures-point-values.js"
+      - "tests/futures-point-values.test.mjs"
+      - ".github/workflows/futures-risk-check.yml"
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check futures specification script syntax
+        run: node --check futures-point-values.js
+      - name: Test futures point values
+        run: node --test tests/futures-point-values.test.mjs
