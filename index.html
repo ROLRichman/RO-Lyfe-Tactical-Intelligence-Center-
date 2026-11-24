@@ -406,6 +406,18 @@ body.rtic-chart-focused{overflow:hidden!important}
 <script src="https://rolrichman.github.io/rolyfe-personal-trading-desk/shared/rolyfe-global-tools.js?v=20261115-5" defer></script>
 <script src="https://rolrichman.github.io/rolyfe-personal-trading-desk/shared/atlas-local.js?v=20261115-3" defer></script>
 <script src="https://rolrichman.github.io/rolyfe-personal-trading-desk/shared/atlas-universal.js?v=20261115-2" defer></script>
+<style>
+.tv-news-panel{margin:14px 0;padding:12px;border:1px solid #294235;border-radius:12px;background:#0b1711;overflow:hidden}
+.tv-news-panel>summary{cursor:pointer;list-style:none;font-weight:800;color:#8ce5b4;display:flex;justify-content:space-between;gap:12px;align-items:center}
+.tv-news-panel>summary::-webkit-details-marker{display:none}
+.tv-news-panel>summary:after{content:"＋";color:#72e6a5}
+.tv-news-panel[open]>summary:after{content:"−"}
+.tv-news-widget{width:100%;min-height:520px;margin-top:12px}
+.tv-news-widget .tradingview-widget-container__widget{width:100%;min-height:520px}
+.tv-news-attribution{padding-top:8px;font-size:11px;color:#9bb7a5}
+.tv-news-attribution a{color:#80c7ff}
+@media(max-width:640px){.tv-news-widget,.tv-news-widget .tradingview-widget-container__widget{min-height:480px}}
+</style>
 </head>
 
 <body>
@@ -763,7 +775,12 @@ body.rtic-chart-focused{overflow:hidden!important}
 </details>
 
 
-<!-- Anchor lets the real MACD/Stochastic panels move into the expanded chart dock without cloning duplicate element IDs. -->
+<!-- Anchor lets the real MACD/Stochastic panels
+<details class="tv-news-panel" id="tradingViewNewsPanel" open>
+ <summary>📰 TradingView Top Stories <small>Market-wide headlines</small></summary>
+ <div class="tradingview-widget-container tv-news-widget"><div class="tradingview-widget-container__widget"></div><div class="tv-news-attribution"><a href="https://www.tradingview.com/news/" target="_blank" rel="noopener">TradingView News</a></div>
+ <script type="application/json" class="tv-news-widget-config">{"feedMode":"all_symbols","isTransparent":true,"displayMode":"regular","width":"100%","height":520,"colorTheme":"dark","locale":"en"}</script></div>
+</details> move into the expanded chart dock without cloning duplicate element IDs. -->
 <div id="rticVisualIndicatorDockAnchor" aria-hidden="true"></div>
 <!-- RO'LYFE locally calculated momentum panels: same candle series as the RTIC scanner -->
 <details id="rticVisualIndicatorPanels" class="section-drop" open>
@@ -1648,6 +1665,9 @@ function downloadTradePlanHTML(){
 
 
 
+<script>
+(()=>{const p=document.getElementById("tradingViewNewsPanel");if(!p)return;let loaded=false;const load=()=>{if(loaded)return;const c=p.querySelector(".tv-news-widget-config"),host=p.querySelector(".tv-news-widget");if(!c||!host)return;let cfg;try{cfg=JSON.parse(c.textContent||"{}")}catch(_){return}const s=document.createElement("script");s.src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js";s.async=true;s.textContent=JSON.stringify(cfg);host.appendChild(s);loaded=true};if(p.open)load();p.addEventListener("toggle",()=>{if(p.open)load()})})();
+</script>
 </body></html>`;
  downloadBlob(`ROLYFE_${p.symbol}_Master_Trade_Plan.html`,report,"text/html;charset=utf-8");
 }
