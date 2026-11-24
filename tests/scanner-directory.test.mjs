@@ -28,3 +28,11 @@ test('Tactical main stylesheet is validly placed inside the HTML head', () => {
   assert.ok(htmlEnd > 0);
   assert.ok(styleEnd > 0 && styleEnd < htmlEnd, 'style block must close before the actual document close');
 });
+
+test('RTIC auto-scan skips stock requests without a Finnhub key and prevents overlapping scans', () => {
+  assert.match(scanner, /let scanInProgress\s*=\s*false/);
+  assert.match(scanner, /if\s*\(scanInProgress\)\s*return/);
+  assert.match(scanner, /if\s*\(!state\.apiKey\)[\s\S]*?Stocks skipped/);
+  assert.match(scanner, /finally\s*\{\s*scanInProgress\s*=\s*false/);
+  assert.match(scanner, /STOCK DATA KEY NEEDED/);
+});
