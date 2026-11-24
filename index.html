@@ -1690,9 +1690,7 @@ function downloadTradePlanHTML(){
 
 
 
-<script>
-(()=>{const p=document.getElementById("tradingViewNewsPanel");if(!p)return;let loaded=false;const load=()=>{if(loaded)return;const c=p.querySelector(".tv-news-widget-config"),host=p.querySelector(".tv-news-widget");if(!c||!host)return;let cfg;try{cfg=JSON.parse(c.textContent||"{}")}catch(_){return}const s=document.createElement("script");s.src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js";s.async=true;s.textContent=JSON.stringify(cfg);host.appendChild(s);loaded=true};if(p.open)load();p.addEventListener("toggle",()=>{if(p.open)load()})})();
-</script>
+
 </body></html>`;
  downloadBlob(`ROLYFE_${p.symbol}_Master_Trade_Plan.html`,report,"text/html;charset=utf-8");
 }
@@ -2078,5 +2076,8 @@ function calculateTacticalOptionLab(){
 }
 </script>
 
+<script>
+(()=>{const p=document.getElementById("tradingViewNewsPanel");if(!p)return;let loaded=false;const load=()=>{if(loaded)return;const c=p.querySelector(".tv-news-widget-config"),host=p.querySelector(".tv-news-widget");if(!c||!host)return;let cfg;try{cfg=JSON.parse(c.textContent||"{}")}catch(_){return}const script=document.createElement("script");script.src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js";script.async=true;script.textContent=JSON.stringify(cfg);host.appendChild(script);loaded=true};if(p.open)load();p.addEventListener("toggle",()=>{if(p.open)load()})})();
+</script>
 </body>
 </html>
