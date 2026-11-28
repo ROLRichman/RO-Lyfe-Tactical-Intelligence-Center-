@@ -419,13 +419,13 @@ body.rtic-chart-focused{overflow:hidden!important}
 @media(max-width:640px){.tv-news-widget,.tv-news-widget .tradingview-widget-container__widget{min-height:480px}}
 </style>
   <script src="futures-point-values.js"></script>
-</head>
+<style id="rtic-phone-edge-to-edge">@media(max-width:760px){html,body{width:100%!important;max-width:100%!important;margin:0!important;padding-inline:0!important}body{padding-top:0!important}body>.app-header,body>.rtic-topbar,body>.status-bar,body>.container{width:100%!important;max-width:none!important;margin-inline:0!important;box-sizing:border-box!important}.app-header{padding:14px 8px 12px!important}.logo-title{font-size:clamp(23px,7vw,38px)!important}.logo-subtitle{margin-top:8px!important;font-size:clamp(11px,3.3vw,16px)!important}.container{padding:6px!important}.rtic-topbar{padding:7px 8px!important}.rtic-top-title{min-width:0;flex:1}.status-bar{padding:6px!important}#rol-global-tools{max-width:100%!important;margin-inline:0!important;box-sizing:border-box!important}}#rticFitControls{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:6px 8px}#rticFitControls button{width:auto!important;margin:0!important;min-height:40px;background:#123522;color:#a9eac2;border:1px solid #37694d;font-size:13px}#rticFitStatus{font-size:12px;color:var(--muted);align-self:center}</style></head>
 
 <body>
 <header class="app-header">
  <h1 class="logo-title">🎯 RO'LYFE TACTICAL INTELLIGENCE CENTER™</h1><p class="logo-subtitle">TRADING SCANNER &amp; TRADE MAP</p>
  <p class="logo-subtitle">PLAN → SIZE → LADDER → EXECUTE → JOURNAL → REVIEW</p>
-</header>
+</header><div id="rticFitControls"><button id="rticFitWidth" type="button">↔ Fit screen · 100%</button><button id="rticFullScreen" type="button">⛶ Full screen</button><span id="rticFitStatus" role="status"></span></div>
 
 
 <!-- ROLYFE WORKSPACE NAVIGATION -->
@@ -2081,5 +2081,5 @@ function calculateTacticalOptionLab(){
 <script>
 (()=>{const p=document.getElementById("tradingViewNewsPanel");if(!p)return;let loaded=false;const load=()=>{if(loaded)return;const c=p.querySelector(".tv-news-widget-config"),host=p.querySelector(".tv-news-widget");if(!c||!host)return;let cfg;try{cfg=JSON.parse(c.textContent||"{}")}catch(_){return}const script=document.createElement("script");script.src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js";script.async=true;script.textContent=JSON.stringify(cfg);host.appendChild(script);loaded=true};if(p.open)load();p.addEventListener("toggle",()=>{if(p.open)load()})})();
 </script>
-</body>
+<script>(()=>{const fit=document.getElementById('rticFitWidth'),full=document.getElementById('rticFullScreen'),status=document.getElementById('rticFitStatus');if(!fit||!full)return;fit.onclick=()=>{const reset=document.getElementById('rol-global-zoom-reset');if(reset)reset.click();else{try{localStorage.setItem('rolyfe-ui-zoom','1')}catch{}document.documentElement.style.zoom='1'}status.textContent='Page zoom reset to 100%.'};full.onclick=async()=>{try{if(document.fullscreenElement){await document.exitFullscreen();return}if(!document.documentElement.requestFullscreen)throw Error('unsupported');await document.documentElement.requestFullscreen()}catch{status.textContent='Browser does not allow full screen here. Open in Chrome or use Fit screen.'}};document.addEventListener('fullscreenchange',()=>{full.textContent=document.fullscreenElement?'⛶ Exit full screen':'⛶ Full screen'})})();</script></body>
 </html>
